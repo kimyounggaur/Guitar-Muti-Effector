@@ -3,11 +3,11 @@ import {
   CabinetIREffect,
   CompressorEffect,
   DelayEffect,
-  DriveEffect,
   ModulationEffect,
   PassthroughEffect,
   ReverbEffect,
 } from './nodes/BaseEffect';
+import { DriveEffect } from './nodes/DriveEffect';
 import { MeterNode, MeterReading, emptyMeterReading } from './nodes/MeterNode';
 import { EffectNodeWrapper, Pedal, PedalParamValue, PedalType } from './types';
 

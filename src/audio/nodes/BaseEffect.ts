@@ -136,45 +136,6 @@ export class CompressorEffect extends BaseEffect {
   }
 }
 
-export class DriveEffect extends BaseEffect {
-  private readonly shaper: WaveShaperNode;
-  private readonly tone: BiquadFilterNode;
-  private readonly level: GainNode;
-  private gain = 5;
-
-  constructor(context: AudioContext, id: string) {
-    super(context, id, 'drive');
-    this.shaper = context.createWaveShaper();
-    this.tone = context.createBiquadFilter();
-    this.level = context.createGain();
-    this.tone.type = 'lowpass';
-    this.tone.frequency.value = 4200;
-    this.shaper.oversample = '4x';
-    this.connectWet(this.shaper, this.tone, this.level);
-    this.setMix(1);
-    this.updateCurve();
-
-    this.paramHandlers.set('gain', (value) => {
-      this.gain = clamp(asNumber(value, 5), 0.5, 30);
-      this.updateCurve();
-    });
-    this.paramHandlers.set('tone', (value) =>
-      smoothParam(context, this.tone.frequency, 900 + clamp(asNumber(value, 0.55), 0, 1) * 6200),
-    );
-    this.paramHandlers.set('level', (value) => smoothParam(context, this.level.gain, clamp(asNumber(value, 0.8), 0, 1.5)));
-  }
-
-  private updateCurve() {
-    const samples = 2048;
-    const curve = new Float32Array(samples);
-    for (let index = 0; index < samples; index += 1) {
-      const x = (index / (samples - 1)) * 2 - 1;
-      curve[index] = Math.tanh(x * this.gain) / Math.tanh(this.gain);
-    }
-    this.shaper.curve = curve;
-  }
-}
-
 export class AmpEQEffect extends BaseEffect {
   constructor(context: AudioContext, id: string) {
     super(context, id, 'ampEQ');

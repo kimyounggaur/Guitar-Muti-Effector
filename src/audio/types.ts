@@ -62,10 +62,10 @@ export const createDefaultPedals = (): Pedal[] => [
   {
     id: 'drive',
     type: 'drive',
-    name: 'Drive',
+    name: 'DRIVE',
     enabled: true,
     bypassed: false,
-    params: { gain: 5, tone: 0.55, level: 0.8 },
+    params: { mode: 'overdrive', drive: 48, tone: 58, level: 72, mix: 100, bias: 0 },
   },
   {
     id: 'amp-eq',

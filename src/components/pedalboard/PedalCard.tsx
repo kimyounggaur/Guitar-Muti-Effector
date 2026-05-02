@@ -1,4 +1,5 @@
 import { Pedal, PedalParamValue } from '../../audio/types';
+import DrivePedal from '../effects/DrivePedal';
 
 type PedalCardProps = {
   pedal: Pedal;
@@ -23,6 +24,22 @@ function PedalCard({
   onBypass,
   onParamChange,
 }: PedalCardProps) {
+  if (pedal.type === 'drive') {
+    return (
+      <DrivePedal
+        pedal={pedal}
+        selected={selected}
+        dragAttributes={dragAttributes}
+        dragListeners={dragListeners}
+        isDragging={isDragging}
+        onSelect={onSelect}
+        onToggle={onToggle}
+        onBypass={onBypass}
+        onParamChange={onParamChange}
+      />
+    );
+  }
+
   return (
     <article
       className={`pedal-card ${selected ? 'is-selected' : ''} ${pedal.enabled ? 'is-on' : 'is-off'} ${
