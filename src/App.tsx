@@ -7,8 +7,11 @@ import AppShell from './components/layout/AppShell';
 import FooterStatusBar from './components/layout/FooterStatusBar';
 import HeaderBar from './components/layout/HeaderBar';
 import PedalBoard from './components/pedalboard/PedalBoard';
+import PresetPanel from './components/preset/PresetPanel';
 import { useAudioStore } from './store/audioStore';
 import { usePedalStore } from './store/pedalStore';
+import { PedalboardPreset, usePresetStore } from './store/presetStore';
+import { useTempoStore } from './store/tempoStore';
 
 function App() {
   const audioEngineRef = useRef(new AudioEngine());
@@ -22,6 +25,7 @@ function App() {
   const masterVolume = useAudioStore((state) => state.masterVolume);
   const inputMeter = useAudioStore((state) => state.inputMeter);
   const outputMeter = useAudioStore((state) => state.outputMeter);
+  const currentPresetName = usePresetStore((state) => state.currentPresetName);
   const setIsConnecting = useAudioStore((state) => state.setIsConnecting);
   const setAudioReady = useAudioStore((state) => state.setAudioReady);
   const setSelectedDeviceId = useAudioStore((state) => state.setSelectedDeviceId);
@@ -160,6 +164,21 @@ function App() {
     audioEngineRef.current.setPedalParam(pedalId, paramName, value);
   }, []);
 
+  const handleLoadPreset = useCallback(
+    (preset: PedalboardPreset) => {
+      usePedalStore.getState().setPedals(preset.pedals);
+      useTempoStore.getState().setBpm(preset.tempoBpm);
+      setMasterVolume(preset.masterVolume);
+      audioEngineRef.current.setMasterVolume(preset.masterVolume);
+
+      window.requestAnimationFrame(() => {
+        const nextPedals = usePedalStore.getState().pedals;
+        handleChainRebuild(nextPedals);
+      });
+    },
+    [handleChainRebuild, setMasterVolume],
+  );
+
   const handleStop = useCallback(async () => {
     setIsConnecting(true);
     setErrorMessage('');
@@ -180,7 +199,7 @@ function App() {
         <HeaderBar
           appName="Pedalboard Lab"
           connectionStatus={isAudioReady ? 'Connected' : isConnecting ? 'Connecting' : 'Not connected'}
-          presetName="Init Patch"
+          presetName={currentPresetName}
         />
       }
       footer={<FooterStatusBar sampleRate={sampleRate} latencyHint={latencyHint} />}
@@ -201,6 +220,7 @@ function App() {
         onPedalBypassChanged={handlePedalBypass}
         onPedalParamChanged={handlePedalParam}
       />
+      <PresetPanel onLoadPreset={handleLoadPreset} />
       <MasterSection
         masterVolume={masterVolume}
         isAudioReady={isAudioReady}

@@ -1220,6 +1220,172 @@ input {
   transform: translate(-50%, 0);
 }
 
+.preset-section {
+  min-width: 0;
+}
+
+.preset-summary {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.preset-save-panel,
+.preset-card,
+.preset-import-export {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
+    var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.preset-save-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 14px;
+  padding: 14px;
+}
+
+.preset-save-panel label,
+.preset-import-export {
+  display: grid;
+  gap: 8px;
+}
+
+.preset-save-panel span,
+.preset-card span,
+.preset-import-export span {
+  color: var(--dim);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.preset-save-panel input,
+.preset-card input,
+.preset-import-export textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111514;
+  color: var(--text);
+}
+
+.preset-save-panel input,
+.preset-card input {
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+.preset-save-panel button,
+.preset-actions button,
+.preset-io-actions button,
+.preset-io-footer button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-strong);
+  color: var(--text);
+  font-weight: 900;
+}
+
+.preset-save-panel button:first-of-type {
+  border-color: rgba(53, 208, 163, 0.55);
+  background: rgba(53, 208, 163, 0.13);
+}
+
+.preset-save-panel button:disabled,
+.preset-io-footer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.preset-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.preset-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.preset-card.is-active {
+  border-color: rgba(53, 208, 163, 0.72);
+  box-shadow: 0 0 0 1px rgba(53, 208, 163, 0.2), var(--shadow);
+}
+
+.preset-card-main {
+  display: grid;
+  gap: 8px;
+}
+
+.preset-title-button {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 0;
+  text-align: left;
+}
+
+.preset-title-button strong {
+  font-size: 1.18rem;
+  line-height: 1.15;
+}
+
+.preset-card-main small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.preset-actions,
+.preset-io-actions,
+.preset-io-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preset-actions button {
+  flex: 1 1 92px;
+}
+
+.preset-actions button.is-danger {
+  border-color: rgba(255, 111, 97, 0.48);
+  color: #ffd9d4;
+}
+
+.preset-import-export {
+  margin-top: 14px;
+  padding: 14px;
+}
+
+.preset-import-export textarea {
+  min-height: 116px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.preset-io-footer {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preset-io-footer span {
+  color: var(--muted);
+  text-transform: none;
+}
+
 .pedal-placeholder strong {
   align-self: end;
   font-size: 1.7rem;
@@ -1377,6 +1543,7 @@ input {
 @media (max-width: 900px) {
   .app-header,
   .connect-grid,
+  .preset-save-panel,
   .master-grid {
     grid-template-columns: 1fr;
   }

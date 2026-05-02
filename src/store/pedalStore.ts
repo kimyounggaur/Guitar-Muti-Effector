@@ -11,6 +11,7 @@ type PedalStore = {
   togglePedal: (id: string) => void;
   setPedalBypass: (id: string, bypassed: boolean) => void;
   updatePedalParam: (id: string, paramName: string, value: PedalParamValue) => void;
+  setPedals: (pedals: Pedal[]) => void;
   setSelectedPedal: (id: string | null) => void;
   setDraggingPedal: (id: string | null) => void;
   reorderPedals: (oldIndex: number, newIndex: number) => void;
@@ -67,9 +68,19 @@ export const usePedalStore = create<PedalStore>((set, get) => ({
                 [paramName]: value,
               },
             }
-          : pedal,
+            : pedal,
       ),
     })),
+  setPedals: (pedals) => {
+    const nextPedals = clonePedals(pedals);
+    writeStoredPedals(nextPedals);
+    set({
+      pedals: nextPedals,
+      activePedalId: null,
+      selectedPedalId: nextPedals[0]?.id ?? null,
+      draggingPedalId: null,
+    });
+  },
   setSelectedPedal: (selectedPedalId) => set({ selectedPedalId }),
   setDraggingPedal: (draggingPedalId) => set({ draggingPedalId }),
   reorderPedals: (oldIndex, newIndex) =>
