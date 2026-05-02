@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { DriveMode, driveModeLabel, isDriveMode, processDriveSample } from '../../audio/utils/curves';
+import KnobControl from '../controls/KnobControl';
 
 type DrivePreset = {
   id: string;
@@ -168,18 +169,7 @@ type DriveSliderProps = {
 
 function DriveSlider({ label, value, min, max, step = 1, onChange }: DriveSliderProps) {
   return (
-    <label className="drive-control">
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>{formatValue(value, step)}</strong>
-    </label>
+    <KnobControl className="drive-control" label={label} value={value} min={min} max={max} step={step} onChange={onChange} />
   );
 }
 
@@ -209,8 +199,6 @@ const isPresetMatch = (params: ReturnType<typeof readDriveParams>, preset: Drive
   params.level === preset.params.level &&
   params.mix === preset.params.mix &&
   Math.abs(params.bias - preset.params.bias) < 0.001;
-
-const formatValue = (value: number, step: number) => (step < 1 ? value.toFixed(2) : Math.round(value).toString());
 
 const drawWaveform = (canvas: HTMLCanvasElement, params: ReturnType<typeof readDriveParams>) => {
   const context = canvas.getContext('2d');

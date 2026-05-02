@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CabinetMic, CabinetType, registerCustomCabinetIR } from '../../audio/nodes/CabinetIREffect';
 import { Pedal, PedalParamValue } from '../../audio/types';
+import KnobControl from '../controls/KnobControl';
 
 type CabinetIRParams = {
   cabinetType: CabinetType;
@@ -169,21 +170,16 @@ type CabSliderProps = {
 
 function CabSlider({ label, value, min, max, step = 1, suffix = '', onChange }: CabSliderProps) {
   return (
-    <label className="cabinet-control">
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>
-        {Math.round(value)}
-        {suffix}
-      </strong>
-    </label>
+    <KnobControl
+      className="cabinet-control"
+      label={label}
+      value={value}
+      min={min}
+      max={max}
+      step={step}
+      suffix={suffix}
+      onChange={onChange}
+    />
   );
 }
 

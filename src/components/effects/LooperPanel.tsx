@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { emptyLooperReading, LooperReading, subscribeLooper } from '../../audio/nodes/LooperNode';
 import { Pedal, PedalParamValue } from '../../audio/types';
+import KnobControl from '../controls/KnobControl';
 
 type LooperParams = {
   level: number;
@@ -184,18 +185,7 @@ type LooperSliderProps = {
 
 function LooperSlider({ label, value, min, max, onChange }: LooperSliderProps) {
   return (
-    <label className="looper-control">
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={1}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>{Math.round(value)}</strong>
-    </label>
+    <KnobControl className="looper-control" label={label} value={value} min={min} max={max} step={1} onChange={onChange} />
   );
 }
 

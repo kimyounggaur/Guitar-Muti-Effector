@@ -1,4 +1,5 @@
 import { MeterReading } from '../../audio/nodes/MeterNode';
+import KnobControl from '../controls/KnobControl';
 import InputMeter from './InputMeter';
 import OutputMeter from './OutputMeter';
 
@@ -31,17 +32,16 @@ function MasterSection({
         <InputMeter meter={inputMeter} />
         <OutputMeter meter={outputMeter} />
         <div className="volume-shell">
-          <span>Master Volume</span>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
+          <KnobControl
+            className="master-volume-knob"
+            label="Master Volume"
             value={masterVolume}
-            onChange={(event) => onMasterVolumeChange(Number(event.target.value))}
-            aria-label="Master volume"
+            min={0}
+            max={1}
+            step={0.01}
+            formatValue={(nextValue) => `${Math.round(nextValue * 100)}%`}
+            onChange={onMasterVolumeChange}
           />
-          <strong>{Math.round(masterVolume * 100)}%</strong>
         </div>
         <button type="button" className="panic-button" onClick={onPanic}>
           Panic

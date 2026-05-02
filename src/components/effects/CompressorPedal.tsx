@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { subscribeCompressorReduction } from '../../audio/nodes/CompressorEffect';
 import { Pedal, PedalParamValue } from '../../audio/types';
+import KnobControl from '../controls/KnobControl';
 
 type CompressorPedalProps = {
   pedal: Pedal;
@@ -164,21 +165,16 @@ type CompressorSliderProps = {
 
 function CompressorSlider({ label, value, min, max, step = 1, suffix = '', onChange }: CompressorSliderProps) {
   return (
-    <label className="compressor-control">
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>
-        {formatValue(value, step)}
-        {suffix}
-      </strong>
-    </label>
+    <KnobControl
+      className="compressor-control"
+      label={label}
+      value={value}
+      min={min}
+      max={max}
+      step={step}
+      suffix={suffix}
+      onChange={onChange}
+    />
   );
 }
 
@@ -204,18 +200,6 @@ const readLegacyLevel = (value: PedalParamValue | undefined) => {
 const readNumber = (value: PedalParamValue | undefined, fallback: number, min: number, max: number) => {
   const numberValue = typeof value === 'number' ? value : fallback;
   return Math.min(max, Math.max(min, numberValue));
-};
-
-const formatValue = (value: number, step: number) => {
-  if (step < 0.01) {
-    return value.toFixed(3);
-  }
-
-  if (step < 1) {
-    return value.toFixed(2);
-  }
-
-  return Math.round(value).toString();
 };
 
 export default CompressorPedal;

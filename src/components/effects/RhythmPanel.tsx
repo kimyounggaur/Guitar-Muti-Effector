@@ -8,6 +8,7 @@ import {
 } from '../../audio/nodes/RhythmNode';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { useTempoStore } from '../../store/tempoStore';
+import KnobControl from '../controls/KnobControl';
 
 type RhythmParams = {
   bpm: number;
@@ -179,18 +180,7 @@ type RhythmSliderProps = {
 
 function RhythmSlider({ label, value, min, max, onChange }: RhythmSliderProps) {
   return (
-    <label className="rhythm-control">
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={1}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>{Math.round(value)}</strong>
-    </label>
+    <KnobControl className="rhythm-control" label={label} value={value} min={min} max={max} step={1} onChange={onChange} />
   );
 }
 

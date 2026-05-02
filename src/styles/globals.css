@@ -375,29 +375,101 @@ input {
 }
 
 .pedal-switches {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  padding-top: 4px;
 }
 
 .pedal-switches button {
-  min-height: 48px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel-strong);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 76px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 28%, rgba(255, 255, 255, 0.2), transparent 20%),
+    radial-gradient(circle at 50% 58%, #242c28 0 44%, #121716 46% 100%);
   color: var(--muted);
+  box-shadow:
+    inset 0 8px 16px rgba(255, 255, 255, 0.06),
+    inset 0 -12px 22px rgba(0, 0, 0, 0.44),
+    0 10px 22px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font-size: 0.72rem;
   font-weight: 900;
+  text-transform: uppercase;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    transform 120ms ease;
+}
+
+.pedal-switches button::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
+}
+
+.pedal-switches button::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  width: 9px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #3f4944;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.pedal-switches button:hover {
+  transform: translateY(-1px);
+}
+
+.pedal-switches button:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow:
+    inset 0 6px 18px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.28);
 }
 
 .pedal-switches button.is-active {
   border-color: rgba(53, 208, 163, 0.58);
-  background: rgba(53, 208, 163, 0.14);
   color: var(--text);
+  box-shadow:
+    inset 0 8px 16px rgba(255, 255, 255, 0.08),
+    inset 0 -12px 22px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(53, 208, 163, 0.22),
+    0 0 22px rgba(53, 208, 163, 0.22);
+}
+
+.pedal-switches button.is-active::before {
+  border-color: rgba(53, 208, 163, 0.5);
+}
+
+.pedal-switches button.is-active::after {
+  background: var(--accent);
+  box-shadow: 0 0 16px rgba(53, 208, 163, 0.76);
 }
 
 .pedal-switches button.is-bypassed {
   border-color: rgba(246, 200, 95, 0.6);
   color: #ffe1a1;
+}
+
+.pedal-switches button.is-bypassed::before {
+  border-color: rgba(246, 200, 95, 0.52);
+}
+
+.pedal-switches button.is-bypassed::after {
+  background: #f6c85f;
+  box-shadow: 0 0 16px rgba(246, 200, 95, 0.72);
 }
 
 .pedal-params {
@@ -589,12 +661,6 @@ input {
   padding: 0 10px;
 }
 
-.looper-control input[type="range"] {
-  width: 100%;
-  min-width: 0;
-  accent-color: #ffcf6d;
-}
-
 .looper-control strong {
   color: var(--text);
   font-size: 0.82rem;
@@ -764,12 +830,6 @@ input {
   padding: 0 10px;
 }
 
-.tuner-control input[type="range"] {
-  width: 100%;
-  min-width: 0;
-  accent-color: var(--accent);
-}
-
 .tuner-control strong {
   color: var(--text);
   font-size: 0.82rem;
@@ -869,12 +929,6 @@ input {
   padding: 0 10px;
 }
 
-.reverb-control input[type="range"] {
-  width: 100%;
-  min-width: 0;
-  accent-color: #8abaff;
-}
-
 .reverb-control strong {
   color: var(--text);
   font-size: 0.82rem;
@@ -963,12 +1017,6 @@ input {
   background: #111514;
   color: var(--text);
   padding: 0 10px;
-}
-
-.delay-control input[type="range"] {
-  width: 100%;
-  min-width: 0;
-  accent-color: #8abaff;
 }
 
 .delay-control strong {
@@ -1073,12 +1121,6 @@ input {
   padding: 0 10px;
 }
 
-.cabinet-control input[type="range"] {
-  width: 100%;
-  min-width: 0;
-  accent-color: #ffcf6d;
-}
-
 .cabinet-control strong {
   color: var(--text);
   font-size: 0.82rem;
@@ -1175,12 +1217,6 @@ input {
   background: #111514;
   color: var(--text);
   padding: 0 10px;
-}
-
-.amp-eq-control input[type="range"] {
-  width: 100%;
-  min-width: 0;
-  accent-color: #f6c85f;
 }
 
 .amp-eq-control strong {
@@ -1285,12 +1321,6 @@ input {
   align-items: center;
 }
 
-.compressor-control input[type="range"] {
-  width: 100%;
-  min-width: 0;
-  accent-color: var(--accent);
-}
-
 .compressor-control strong {
   color: var(--text);
   font-size: 0.84rem;
@@ -1362,8 +1392,7 @@ input {
   gap: 7px;
 }
 
-.drive-control select,
-.drive-control input[type="range"] {
+.drive-control select {
   min-width: 0;
 }
 
@@ -1375,11 +1404,6 @@ input {
   background: #111514;
   color: var(--text);
   padding: 0 10px;
-}
-
-.drive-control input[type="range"] {
-  width: 100%;
-  accent-color: #ffcf6d;
 }
 
 .drive-control strong {
@@ -1690,10 +1714,6 @@ input {
   width: 100%;
 }
 
-.rhythm-control input[type="range"] {
-  accent-color: #f6c85f;
-}
-
 .rhythm-control strong {
   color: #ffe0a4;
 }
@@ -1799,10 +1819,6 @@ input {
 .modulation-control select {
   min-width: 0;
   width: 100%;
-}
-
-.modulation-control input[type="range"] {
-  accent-color: #7cd6ff;
 }
 
 .modulation-control strong {
@@ -2171,24 +2187,48 @@ input {
 .pedal-led-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 9px;
+  justify-items: center;
+  gap: 12px;
 }
 
 .touch-led {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 46px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.035);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 68px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 40% 26%, rgba(255, 255, 255, 0.18), transparent 20%),
+    radial-gradient(circle at 50% 58%, #232a27 0 45%, #111615 47% 100%);
   color: var(--muted);
+  box-shadow:
+    inset 0 7px 14px rgba(255, 255, 255, 0.06),
+    inset 0 -11px 20px rgba(0, 0, 0, 0.42),
+    0 9px 20px rgba(0, 0, 0, 0.28);
+  font-size: 0.68rem;
   font-weight: 900;
+  text-transform: uppercase;
   cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    transform 120ms ease;
+}
+
+.touch-led::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
 }
 
 .touch-led i {
+  position: absolute;
+  top: 10px;
   width: 10px;
   aspect-ratio: 1;
   border-radius: 50%;
@@ -2196,9 +2236,36 @@ input {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
+.touch-led span {
+  color: currentColor;
+  font-size: inherit;
+  line-height: 1;
+  padding-top: 12px;
+  text-align: center;
+}
+
+.touch-led:hover {
+  transform: translateY(-1px);
+}
+
+.touch-led:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow:
+    inset 0 6px 16px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.28);
+}
+
 .touch-led.is-lit {
   border-color: rgba(53, 208, 163, 0.42);
   color: var(--text);
+  box-shadow:
+    inset 0 7px 14px rgba(255, 255, 255, 0.07),
+    inset 0 -11px 20px rgba(0, 0, 0, 0.42),
+    0 0 20px rgba(53, 208, 163, 0.18);
+}
+
+.touch-led.is-lit::before {
+  border-color: rgba(53, 208, 163, 0.5);
 }
 
 .touch-led.is-lit i {
@@ -2209,6 +2276,10 @@ input {
 .touch-led.is-warn {
   border-color: rgba(246, 200, 95, 0.56);
   color: #ffe1a1;
+}
+
+.touch-led.is-warn::before {
+  border-color: rgba(246, 200, 95, 0.55);
 }
 
 .touch-led.is-warn i {
@@ -2278,6 +2349,11 @@ input {
   gap: 8px;
 }
 
+.detail-status {
+  gap: 18px;
+  justify-content: flex-end;
+}
+
 .detail-status button,
 .detail-actions button {
   min-width: 112px;
@@ -2288,16 +2364,71 @@ input {
   font-weight: 900;
 }
 
+.detail-status button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  width: 78px;
+  aspect-ratio: 1;
+  border-color: rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 28%, rgba(255, 255, 255, 0.2), transparent 20%),
+    radial-gradient(circle at 50% 58%, #242c28 0 44%, #121716 46% 100%);
+  box-shadow:
+    inset 0 8px 16px rgba(255, 255, 255, 0.06),
+    inset 0 -12px 22px rgba(0, 0, 0, 0.44),
+    0 10px 22px rgba(0, 0, 0, 0.3);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.detail-status button::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+.detail-status button::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  width: 9px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #3f4944;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
 .detail-status button.is-active {
   border-color: rgba(53, 208, 163, 0.56);
-  background: rgba(53, 208, 163, 0.14);
   color: var(--text);
+}
+
+.detail-status button.is-active::before {
+  border-color: rgba(53, 208, 163, 0.5);
+}
+
+.detail-status button.is-active::after {
+  background: var(--accent);
+  box-shadow: 0 0 16px rgba(53, 208, 163, 0.76);
 }
 
 .detail-status button.is-bypassed {
   border-color: rgba(246, 200, 95, 0.58);
-  background: rgba(246, 200, 95, 0.12);
   color: #ffe1a1;
+}
+
+.detail-status button.is-bypassed::before {
+  border-color: rgba(246, 200, 95, 0.52);
+}
+
+.detail-status button.is-bypassed::after {
+  background: #f6c85f;
+  box-shadow: 0 0 16px rgba(246, 200, 95, 0.72);
 }
 
 .detail-body {
@@ -2375,11 +2506,6 @@ input {
   border-radius: 8px;
   background: #0d1110;
   padding: 12px;
-}
-
-.detail-control input[type="range"] {
-  width: 100%;
-  accent-color: #7cd6ff;
 }
 
 .detail-control strong {
@@ -2502,4 +2628,142 @@ input {
     align-items: stretch;
     flex-direction: column;
   }
+}
+
+.knob-control {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 148px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0)),
+    #0d1110;
+  padding: 12px;
+  touch-action: none;
+}
+
+.knob-control > span {
+  justify-self: start;
+  color: var(--dim);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.knob-face {
+  --knob-angle: -135deg;
+  --knob-fill: 0%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(74px, 9vw, 110px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(124, 214, 255, 0.24);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 28%, rgba(255, 255, 255, 0.18), transparent 22%),
+    radial-gradient(circle at 50% 55%, #222c28 0 48%, #111715 49% 100%);
+  box-shadow:
+    inset 0 7px 18px rgba(255, 255, 255, 0.06),
+    inset 0 -12px 20px rgba(0, 0, 0, 0.38),
+    0 10px 24px rgba(0, 0, 0, 0.26);
+  cursor: grab;
+}
+
+.knob-face::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 225deg, #7cd6ff 0 var(--knob-fill), rgba(53, 208, 163, 0.18) var(--knob-fill) 75%, transparent 75% 100%);
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%);
+  mask: radial-gradient(circle, transparent 58%, #000 60%);
+}
+
+.knob-face::after {
+  content: "";
+  position: absolute;
+  inset: 16%;
+  border-radius: 50%;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)),
+    #171f1c;
+  box-shadow: inset 0 -10px 18px rgba(0, 0, 0, 0.36);
+}
+
+.knob-face i {
+  position: absolute;
+  z-index: 1;
+  inset: 18%;
+  border-radius: 50%;
+  transform: rotate(var(--knob-angle));
+}
+
+.knob-face i::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 4px;
+  height: 22%;
+  border-radius: 999px;
+  background: #f4f7f2;
+  box-shadow: 0 0 12px rgba(124, 214, 255, 0.55);
+  transform: translateX(-50%);
+}
+
+.knob-face.is-dragging {
+  cursor: grabbing;
+  transform: scale(1.03);
+}
+
+.knob-face:focus-visible {
+  outline: 3px solid rgba(124, 214, 255, 0.52);
+  outline-offset: 6px;
+}
+
+.knob-control strong {
+  color: var(--text);
+  font-size: 0.98rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 950;
+  text-align: center;
+}
+
+.knob-control.is-disabled {
+  opacity: 0.48;
+}
+
+.knob-control.is-disabled .knob-face {
+  cursor: not-allowed;
+}
+
+.volume-shell .knob-control {
+  min-height: 0;
+  border-color: rgba(124, 214, 255, 0.18);
+  background: rgba(13, 17, 16, 0.72);
+}
+
+.master-volume-knob .knob-face {
+  width: clamp(92px, 12vw, 132px);
+}
+
+.drive-control.knob-control,
+.compressor-control.knob-control,
+.amp-eq-control.knob-control,
+.cabinet-control.knob-control,
+.delay-control.knob-control,
+.reverb-control.knob-control,
+.modulation-control.knob-control,
+.looper-control.knob-control,
+.rhythm-control.knob-control,
+.tuner-control.knob-control {
+  grid-template-columns: 1fr;
+  align-items: center;
 }

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { bpmToDelayTimeMs } from '../../audio/nodes/DelayEffect';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { useTempoStore } from '../../store/tempoStore';
+import KnobControl from '../controls/KnobControl';
 
 type DelayMode = 'digital' | 'analog' | 'tape' | 'slapback' | 'pingpong';
 type DelayDivision = '1/4' | '1/8' | 'dotted1/8' | '1/16';
@@ -184,22 +185,17 @@ type DelaySliderProps = {
 
 function DelaySlider({ label, value, min, max, step = 1, suffix = '', disabled = false, onChange }: DelaySliderProps) {
   return (
-    <label className={`delay-control ${disabled ? 'is-disabled' : ''}`}>
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>
-        {formatValue(value, step)}
-        {suffix}
-      </strong>
-    </label>
+    <KnobControl
+      className="delay-control"
+      label={label}
+      value={value}
+      min={min}
+      max={max}
+      step={step}
+      suffix={suffix}
+      disabled={disabled}
+      onChange={onChange}
+    />
   );
 }
 
@@ -255,14 +251,6 @@ const formatMode = (mode: DelayMode) => {
   }
 
   return mode.charAt(0).toUpperCase() + mode.slice(1);
-};
-
-const formatValue = (value: number, step: number) => {
-  if (step < 0.1) {
-    return value.toFixed(2);
-  }
-
-  return Math.round(value).toString();
 };
 
 export default DelayPedal;

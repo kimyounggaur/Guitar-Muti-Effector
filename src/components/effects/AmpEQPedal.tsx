@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Pedal, PedalParamValue } from '../../audio/types';
+import KnobControl from '../controls/KnobControl';
 
 type AmpEQParams = {
   lowCut: number;
@@ -210,21 +211,16 @@ type EQSliderProps = {
 
 function EQSlider({ label, value, min, max, step = 1, suffix = '', onChange }: EQSliderProps) {
   return (
-    <label className="amp-eq-control">
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>
-        {formatValue(value, step)}
-        {suffix}
-      </strong>
-    </label>
+    <KnobControl
+      className="amp-eq-control"
+      label={label}
+      value={value}
+      min={min}
+      max={max}
+      step={step}
+      suffix={suffix}
+      onChange={onChange}
+    />
   );
 }
 
@@ -246,14 +242,6 @@ const readNumber = (value: PedalParamValue | undefined, fallback: number, min: n
 
 const isPresetMatch = (params: AmpEQParams, preset: AmpEQPreset) =>
   Object.entries(preset.params).every(([key, value]) => Math.abs(params[key as keyof AmpEQParams] - value) < 0.001);
-
-const formatValue = (value: number, step: number) => {
-  if (step < 1) {
-    return value.toFixed(1);
-  }
-
-  return Math.round(value).toString();
-};
 
 const formatToneLabel = (params: AmpEQParams) => {
   if (params.mid <= -4 && params.bass >= 3) {

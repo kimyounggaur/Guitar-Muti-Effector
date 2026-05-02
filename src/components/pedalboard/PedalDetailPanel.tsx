@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Pedal, PedalParamValue, PedalType } from '../../audio/types';
 import { usePedalStore } from '../../store/pedalStore';
 import { useTempoStore } from '../../store/tempoStore';
+import KnobControl from '../controls/KnobControl';
 
 type PedalDetailPanelProps = {
   onPedalToggled?: (pedals: Pedal[]) => void;
@@ -246,21 +247,16 @@ function DetailControl({ pedal, paramName, value, onChange }: DetailControlProps
   if (typeof value === 'number') {
     const range = getNumberRange(pedal.type, paramName, value);
     return (
-      <label className="detail-control">
-        <span>{formatParamName(paramName)}</span>
-        <input
-          type="range"
-          min={range.min}
-          max={range.max}
-          step={range.step}
-          value={value}
-          onChange={(event) => onChange(Number(event.target.value))}
-        />
-        <strong>
-          {formatNumber(value, range.step)}
-          {range.suffix ?? ''}
-        </strong>
-      </label>
+      <KnobControl
+        className="detail-control"
+        label={formatParamName(paramName)}
+        value={value}
+        min={range.min}
+        max={range.max}
+        step={range.step}
+        suffix={range.suffix ?? ''}
+        onChange={onChange}
+      />
     );
   }
 
@@ -419,17 +415,5 @@ const formatParamName = (name: string) =>
     .replace('Ms', 'ms')
     .replace('A4', 'A4')
     .replace('IR', 'IR');
-
-const formatNumber = (value: number, step: number) => {
-  if (step < 0.01) {
-    return value.toFixed(3);
-  }
-
-  if (step < 1) {
-    return value.toFixed(2).replace(/0$/, '').replace(/\.0$/, '');
-  }
-
-  return Math.round(value).toString();
-};
 
 export default PedalDetailPanel;

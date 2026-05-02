@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { emptyTunerReading, subscribeTuner, TunerReading } from '../../audio/nodes/TunerNode';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { isTunerMode, midiToFrequency, STANDARD_TUNINGS, TunerMode } from '../../audio/utils/pitch';
+import KnobControl from '../controls/KnobControl';
 
 type TunerPanelProps = {
   pedal: Pedal;
@@ -152,21 +153,16 @@ type TunerSliderProps = {
 
 function TunerSlider({ label, value, min, max, suffix = '', onChange }: TunerSliderProps) {
   return (
-    <label className="tuner-control">
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={1}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>
-        {Math.round(value)}
-        {suffix}
-      </strong>
-    </label>
+    <KnobControl
+      className="tuner-control"
+      label={label}
+      value={value}
+      min={min}
+      max={max}
+      step={1}
+      suffix={suffix}
+      onChange={onChange}
+    />
   );
 }
 

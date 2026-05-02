@@ -7,6 +7,7 @@ import {
 } from '../../audio/nodes/ModulationEffect';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { useTempoStore } from '../../store/tempoStore';
+import KnobControl from '../controls/KnobControl';
 
 type ModulationParams = {
   mode: ModulationMode;
@@ -191,22 +192,17 @@ type ModSliderProps = {
 
 function ModSlider({ label, value, min, max, step = 1, suffix = '', disabled = false, onChange }: ModSliderProps) {
   return (
-    <label className={`modulation-control ${disabled ? 'is-disabled' : ''}`}>
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>
-        {formatValue(value, step)}
-        {suffix}
-      </strong>
-    </label>
+    <KnobControl
+      className="modulation-control"
+      label={label}
+      value={value}
+      min={min}
+      max={max}
+      step={step}
+      suffix={suffix}
+      disabled={disabled}
+      onChange={onChange}
+    />
   );
 }
 
@@ -250,13 +246,5 @@ const readPercent = (value: PedalParamValue | undefined, fallback: number) => {
 };
 
 const formatRate = (rate: number) => `${rate < 10 ? rate.toFixed(2) : rate.toFixed(1)}Hz`;
-
-const formatValue = (value: number, step: number) => {
-  if (step < 0.1) {
-    return value.toFixed(2);
-  }
-
-  return Math.round(value).toString();
-};
 
 export default ModulationPedal;

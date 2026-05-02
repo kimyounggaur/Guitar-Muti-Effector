@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { ReverbMode, defaultDecayForMode, readReverbMode, reverbModeLabel } from '../../audio/utils/impulse';
+import KnobControl from '../controls/KnobControl';
 
 type ReverbParams = {
   mode: ReverbMode;
@@ -161,21 +162,16 @@ type ReverbSliderProps = {
 
 function ReverbSlider({ label, value, min, max, step = 1, suffix = '', onChange }: ReverbSliderProps) {
   return (
-    <label className="reverb-control">
-      <span>{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-      <strong>
-        {formatValue(value, step)}
-        {suffix}
-      </strong>
-    </label>
+    <KnobControl
+      className="reverb-control"
+      label={label}
+      value={value}
+      min={min}
+      max={max}
+      step={step}
+      suffix={suffix}
+      onChange={onChange}
+    />
   );
 }
 
@@ -204,14 +200,6 @@ const readNumber = (value: PedalParamValue | undefined, fallback: number, min: n
 const readPercent = (value: PedalParamValue | undefined, fallback: number) => {
   const numberValue = typeof value === 'number' ? value : fallback;
   return Math.min(100, Math.max(0, numberValue > 0 && numberValue <= 1 ? numberValue * 100 : numberValue));
-};
-
-const formatValue = (value: number, step: number) => {
-  if (step < 1) {
-    return value.toFixed(1);
-  }
-
-  return Math.round(value).toString();
 };
 
 const drawReverbTail = (canvas: HTMLCanvasElement, params: ReverbParams) => {
