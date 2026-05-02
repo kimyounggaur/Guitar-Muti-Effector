@@ -1,35 +1,30 @@
-import SliderControl from '../controls/SliderControl';
-import InputMeter from './InputMeter';
-import OutputMeter from './OutputMeter';
-import { MeterReading } from '../../audio/types';
-
-type MasterSectionProps = {
-  inputMeter: MeterReading;
-  outputMeter: MeterReading;
-  masterVolume: number;
-  onMasterVolumeChange: (volume: number) => void;
-};
-
-function MasterSection({ inputMeter, outputMeter, masterVolume, onMasterVolumeChange }: MasterSectionProps) {
+function MasterSection() {
   return (
-    <div className="meter-panel tool-panel">
+    <section className="master-section" aria-label="Master controls">
       <div className="panel-heading">
-        <span>Meters</span>
-        <strong>Input and output</strong>
+        <span>Master</span>
+        <strong>Control positions</strong>
       </div>
-      <InputMeter meter={inputMeter} />
-      <OutputMeter meter={outputMeter} />
-      <SliderControl
-        label="Master"
-        min={0}
-        max={1.25}
-        step={0.01}
-        value={masterVolume}
-        output={`${Math.round(masterVolume * 100)}%`}
-        className="master-row"
-        onChange={onMasterVolumeChange}
-      />
-    </div>
+      <div className="master-grid">
+        <div className="meter-shell">
+          <span>Input</span>
+          <i />
+        </div>
+        <div className="meter-shell">
+          <span>Output</span>
+          <i />
+        </div>
+        <div className="volume-shell">
+          <span>Master Volume</span>
+          <div className="fake-slider">
+            <i />
+          </div>
+        </div>
+        <button type="button" className="panic-button">
+          Panic
+        </button>
+      </div>
+    </section>
   );
 }
 

@@ -1,14 +1,9 @@
-type FooterStatusBarProps = {
-  sampleRate: number;
-  connected: boolean;
-};
-
-function FooterStatusBar({ sampleRate, connected }: FooterStatusBarProps) {
+function FooterStatusBar() {
   return (
     <footer className="footer-status">
-      <span>{connected ? 'Audio engine active' : 'Audio engine idle'}</span>
-      <span>{Math.round(sampleRate).toLocaleString()} Hz</span>
-      <span>AudioWorklet DSP</span>
+      <span>Stage 1 Layout Skeleton</span>
+      <span>No Audio Engine</span>
+      <span>No DSP</span>
     </footer>
   );
 }

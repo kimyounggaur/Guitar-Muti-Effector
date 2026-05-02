@@ -10,7 +10,7 @@ function AppShell({ header, footer, children }: AppShellProps) {
   return (
     <div className="app-shell">
       {header}
-      <main>{children}</main>
+      <main className="app-main">{children}</main>
       {footer}
     </div>
   );
