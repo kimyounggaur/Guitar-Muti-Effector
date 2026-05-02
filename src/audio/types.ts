@@ -86,10 +86,20 @@ export const createDefaultPedals = (): Pedal[] => [
   {
     id: 'delay',
     type: 'delay',
-    name: 'Delay',
+    name: 'DELAY',
     enabled: true,
     bypassed: false,
-    params: { timeMs: 320, feedback: 0.28, mix: 0.22 },
+    params: {
+      mode: 'digital',
+      timeMs: 420,
+      feedback: 0.32,
+      mix: 28,
+      tone: 62,
+      sync: false,
+      bpm: 120,
+      division: '1/4',
+      flutter: 0,
+    },
   },
   {
     id: 'reverb',

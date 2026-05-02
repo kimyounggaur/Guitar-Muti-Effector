@@ -112,37 +112,6 @@ export class PassthroughEffect extends BaseEffect {
   }
 }
 
-export class DelayEffect extends BaseEffect {
-  private readonly delay: DelayNode;
-  private readonly feedback: GainNode;
-
-  constructor(context: AudioContext, id: string) {
-    super(context, id, 'delay');
-    this.delay = context.createDelay(1.2);
-    this.feedback = context.createGain();
-    const tone = context.createBiquadFilter();
-    tone.type = 'lowpass';
-    tone.frequency.value = 4200;
-    this.delay.delayTime.value = 0.32;
-    this.feedback.gain.value = 0.28;
-    this.delay.connect(tone);
-    tone.connect(this.feedback);
-    this.feedback.connect(this.delay);
-    this.wetInput.connect(this.delay);
-    tone.connect(this.wetOutput);
-    this.nodes.push(this.delay, this.feedback, tone);
-    this.setMix(0.22);
-
-    this.paramHandlers.set('timeMs', (value) =>
-      smoothParam(context, this.delay.delayTime, clamp(asNumber(value, 320), 20, 1200) / 1000, 0.025),
-    );
-    this.paramHandlers.set('feedback', (value) =>
-      smoothParam(context, this.feedback.gain, clamp(asNumber(value, 0.28), 0, 0.88)),
-    );
-    this.paramHandlers.set('mix', (value) => this.setMix(asNumber(value, 0.22)));
-  }
-}
-
 export class ReverbEffect extends BaseEffect {
   constructor(context: AudioContext, id: string) {
     super(context, id, 'reverb');

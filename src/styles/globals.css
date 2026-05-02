@@ -429,6 +429,132 @@ input {
   accent-color: var(--accent);
 }
 
+.delay-pedal {
+  min-height: 620px;
+  background:
+    linear-gradient(135deg, rgba(53, 208, 163, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(95, 157, 246, 0.1), transparent),
+    var(--card);
+}
+
+.delay-display {
+  align-content: center;
+}
+
+.delay-display em {
+  color: #8abaff;
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.delay-time-display {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px solid #303a35;
+  border-radius: 8px;
+  background: #0a0d0c;
+  padding: 12px;
+}
+
+.delay-time-display strong {
+  color: var(--text);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.delay-time-display i {
+  grid-column: 1 / -1;
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #8abaff, var(--accent));
+}
+
+.delay-row,
+.delay-controls,
+.tempo-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.delay-row {
+  grid-template-columns: 1fr minmax(86px, auto);
+}
+
+.delay-control {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.74fr) minmax(0, 1fr) minmax(62px, auto);
+  gap: 8px;
+  align-items: center;
+}
+
+.delay-control.is-wide {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.delay-control.is-disabled {
+  opacity: 0.58;
+}
+
+.delay-control select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111514;
+  color: var(--text);
+  padding: 0 10px;
+}
+
+.delay-control input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: #8abaff;
+}
+
+.delay-control strong {
+  color: var(--text);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.delay-sync-toggle {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  border: 1px solid #303a35;
+  border-radius: 8px;
+  background: #0a0d0c;
+  padding: 9px;
+}
+
+.delay-sync-toggle input {
+  width: 24px;
+  height: 24px;
+  accent-color: #8abaff;
+}
+
+.tempo-panel {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+}
+
+.tap-tempo-button {
+  min-height: 46px;
+  border: 1px solid rgba(138, 186, 255, 0.55);
+  border-radius: 8px;
+  background: rgba(138, 186, 255, 0.12);
+  color: var(--text);
+  font-weight: 900;
+}
+
 .cabinet-ir-pedal {
   min-height: 570px;
   background:

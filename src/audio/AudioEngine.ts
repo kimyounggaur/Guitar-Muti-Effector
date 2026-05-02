@@ -1,5 +1,4 @@
 import {
-  DelayEffect,
   ModulationEffect,
   PassthroughEffect,
   ReverbEffect,
@@ -7,6 +6,7 @@ import {
 import { AmpEQEffect } from './nodes/AmpEQEffect';
 import { CabinetIREffect } from './nodes/CabinetIREffect';
 import { CompressorEffect } from './nodes/CompressorEffect';
+import { DelayEffect } from './nodes/DelayEffect';
 import { DriveEffect } from './nodes/DriveEffect';
 import { MeterNode, MeterReading, emptyMeterReading } from './nodes/MeterNode';
 import { EffectNodeWrapper, Pedal, PedalParamValue, PedalType } from './types';
