@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { AudioEngine } from './audio/AudioEngine';
+import { Pedal, PedalParamValue } from './audio/types';
 import ConnectGuitarPanel from './components/audio/ConnectGuitarPanel';
 import MasterSection from './components/audio/MasterSection';
 import AppShell from './components/layout/AppShell';
@@ -7,6 +8,7 @@ import FooterStatusBar from './components/layout/FooterStatusBar';
 import HeaderBar from './components/layout/HeaderBar';
 import PedalBoard from './components/pedalboard/PedalBoard';
 import { useAudioStore } from './store/audioStore';
+import { usePedalStore } from './store/pedalStore';
 
 function App() {
   const audioEngineRef = useRef(new AudioEngine());
@@ -30,6 +32,11 @@ function App() {
   const setMasterVolume = useAudioStore((state) => state.setMasterVolume);
   const setMeters = useAudioStore((state) => state.setMeters);
   const resetAudioState = useAudioStore((state) => state.resetAudioState);
+
+  useEffect(() => {
+    audioEngineRef.current.setErrorHandler(setErrorMessage);
+    return () => audioEngineRef.current.setErrorHandler(null);
+  }, [setErrorMessage]);
 
   useEffect(() => {
     if (!isAudioReady) {
@@ -66,6 +73,7 @@ function App() {
       setSampleRate(state.sampleRate);
       setLatencyHint(state.latencyHint);
       setAudioReady(true);
+      audioEngineRef.current.rebuildChain(usePedalStore.getState().pedals);
       await refreshInputDevices();
     } catch (error) {
       setAudioReady(false);
@@ -100,6 +108,7 @@ function App() {
         const state = await audioEngineRef.current.switchDevice(deviceId, currentVolume);
         setSampleRate(state.sampleRate);
         setLatencyHint(state.latencyHint);
+        audioEngineRef.current.rebuildChain(usePedalStore.getState().pedals);
         await refreshInputDevices();
       } catch (error) {
         setAudioReady(false);
@@ -129,8 +138,27 @@ function App() {
 
   const handlePanic = useCallback(() => {
     setMasterVolume(0);
-    audioEngineRef.current.setMasterVolume(0);
+    audioEngineRef.current.panicDisconnect();
   }, [setMasterVolume]);
+
+  const handleChainRebuild = useCallback(
+    (pedals: Pedal[]) => {
+      try {
+        audioEngineRef.current.rebuildChain(pedals);
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : 'Could not rebuild audio chain.');
+      }
+    },
+    [setErrorMessage],
+  );
+
+  const handlePedalBypass = useCallback((pedalId: string, bypassed: boolean) => {
+    audioEngineRef.current.setPedalBypass(pedalId, bypassed);
+  }, []);
+
+  const handlePedalParam = useCallback((pedalId: string, paramName: string, value: PedalParamValue) => {
+    audioEngineRef.current.setPedalParam(pedalId, paramName, value);
+  }, []);
 
   const handleStop = useCallback(async () => {
     setIsConnecting(true);
@@ -167,7 +195,12 @@ function App() {
         onStop={handleStop}
         onDeviceChange={handleDeviceChange}
       />
-      <PedalBoard onChainReordered={(pedals) => audioEngineRef.current.rebuildChain(pedals)} />
+      <PedalBoard
+        onChainReordered={handleChainRebuild}
+        onPedalToggled={handleChainRebuild}
+        onPedalBypassChanged={handlePedalBypass}
+        onPedalParamChanged={handlePedalParam}
+      />
       <MasterSection
         masterVolume={masterVolume}
         isAudioReady={isAudioReady}

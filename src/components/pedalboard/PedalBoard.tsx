@@ -14,16 +14,24 @@ import {
   horizontalListSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { Pedal } from '../../audio/types';
+import { Pedal, PedalParamValue } from '../../audio/types';
 import { usePedalStore } from '../../store/pedalStore';
 import ChainText from './ChainText';
 import SortablePedal from './SortablePedal';
 
 type PedalBoardProps = {
   onChainReordered?: (pedals: Pedal[]) => void;
+  onPedalToggled?: (pedals: Pedal[]) => void;
+  onPedalBypassChanged?: (pedalId: string, bypassed: boolean) => void;
+  onPedalParamChanged?: (pedalId: string, paramName: string, value: PedalParamValue) => void;
 };
 
-function PedalBoard({ onChainReordered }: PedalBoardProps) {
+function PedalBoard({
+  onChainReordered,
+  onPedalToggled,
+  onPedalBypassChanged,
+  onPedalParamChanged,
+}: PedalBoardProps) {
   const pedals = usePedalStore((state) => state.pedals);
   const selectedPedalId = usePedalStore((state) => state.selectedPedalId);
   const draggingPedalId = usePedalStore((state) => state.draggingPedalId);
@@ -94,6 +102,26 @@ function PedalBoard({ onChainReordered }: PedalBoardProps) {
     setDraggingPedal(null);
   };
 
+  const handleToggle = (id: string) => {
+    togglePedal(id);
+    window.requestAnimationFrame(() => onPedalToggled?.(usePedalStore.getState().pedals));
+  };
+
+  const handleBypass = (id: string, bypassed: boolean) => {
+    setPedalBypass(id, bypassed);
+    onPedalBypassChanged?.(id, bypassed);
+  };
+
+  const handleParamChange = (id: string, paramName: string, value: PedalParamValue) => {
+    updatePedalParam(id, paramName, value);
+    onPedalParamChanged?.(id, paramName, value);
+  };
+
+  const handleReset = () => {
+    resetPedals();
+    window.requestAnimationFrame(() => onPedalToggled?.(usePedalStore.getState().pedals));
+  };
+
   return (
     <section className="board-section" aria-label="Pedalboard">
       <div className="section-heading">
@@ -106,7 +134,7 @@ function PedalBoard({ onChainReordered }: PedalBoardProps) {
           <button type="button" onClick={savePedalsToStorage}>
             Save Chain
           </button>
-          <button type="button" onClick={resetPedals}>
+          <button type="button" onClick={handleReset}>
             Reset
           </button>
         </div>
@@ -127,9 +155,9 @@ function PedalBoard({ onChainReordered }: PedalBoardProps) {
                 pedal={pedal}
                 selected={pedal.id === selectedPedalId}
                 onSelect={setSelectedPedal}
-                onToggle={togglePedal}
-                onBypass={setPedalBypass}
-                onParamChange={updatePedalParam}
+                onToggle={handleToggle}
+                onBypass={handleBypass}
+                onParamChange={handleParamChange}
               />
             ))}
           </div>

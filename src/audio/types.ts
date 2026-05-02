@@ -22,6 +22,18 @@ export type Pedal = {
   params: Record<string, PedalParamValue>;
 };
 
+export interface EffectNodeWrapper {
+  id: string;
+  type: PedalType;
+  input: AudioNode;
+  output: AudioNode;
+  connect(destination: AudioNode): void;
+  disconnect(): void;
+  setParam(name: string, value: PedalParamValue): void;
+  setBypass(bypassed: boolean): void;
+  dispose(): void;
+}
+
 export const createDefaultPedals = (): Pedal[] => [
   {
     id: 'tuner',
