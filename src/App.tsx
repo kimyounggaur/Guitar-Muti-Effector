@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { AudioEngine } from './audio/AudioEngine';
 import { Pedal, PedalParamValue } from './audio/types';
 import ConnectGuitarPanel from './components/audio/ConnectGuitarPanel';
@@ -7,6 +7,7 @@ import AppShell from './components/layout/AppShell';
 import FooterStatusBar from './components/layout/FooterStatusBar';
 import HeaderBar from './components/layout/HeaderBar';
 import PedalBoard from './components/pedalboard/PedalBoard';
+import PedalDetailPanel from './components/pedalboard/PedalDetailPanel';
 import PresetPanel from './components/preset/PresetPanel';
 import { useAudioStore } from './store/audioStore';
 import { usePedalStore } from './store/pedalStore';
@@ -26,6 +27,7 @@ function App() {
   const inputMeter = useAudioStore((state) => state.inputMeter);
   const outputMeter = useAudioStore((state) => state.outputMeter);
   const currentPresetName = usePresetStore((state) => state.currentPresetName);
+  const tempoBpm = useTempoStore((state) => state.bpm);
   const setIsConnecting = useAudioStore((state) => state.setIsConnecting);
   const setAudioReady = useAudioStore((state) => state.setAudioReady);
   const setSelectedDeviceId = useAudioStore((state) => state.setSelectedDeviceId);
@@ -36,6 +38,10 @@ function App() {
   const setMasterVolume = useAudioStore((state) => state.setMasterVolume);
   const setMeters = useAudioStore((state) => state.setMeters);
   const resetAudioState = useAudioStore((state) => state.resetAudioState);
+  const selectedInputName = useMemo(() => {
+    const selectedDevice = inputDevices.find((device) => device.deviceId === selectedDeviceId);
+    return selectedDevice?.label || (selectedDeviceId ? 'Selected input' : 'Default input');
+  }, [inputDevices, selectedDeviceId]);
 
   useEffect(() => {
     audioEngineRef.current.setErrorHandler(setErrorMessage);
@@ -160,6 +166,10 @@ function App() {
     audioEngineRef.current.panicDisconnect();
   }, [setMasterVolume]);
 
+  const handleTunerQuick = useCallback(() => {
+    usePedalStore.getState().setSelectedPedal('tuner');
+  }, []);
+
   const handleChainRebuild = useCallback(
     (pedals: Pedal[]) => {
       try {
@@ -215,35 +225,49 @@ function App() {
           appName="Pedalboard Lab"
           connectionStatus={isAudioReady ? 'Connected' : isConnecting ? 'Connecting' : 'Not connected'}
           presetName={currentPresetName}
+          bpm={tempoBpm}
+          inputDeviceName={selectedInputName}
         />
       }
       footer={<FooterStatusBar sampleRate={sampleRate} latencyHint={latencyHint} />}
     >
-      <ConnectGuitarPanel
-        isAudioReady={isAudioReady}
-        isConnecting={isConnecting}
-        selectedDeviceId={selectedDeviceId}
-        inputDevices={inputDevices}
-        errorMessage={errorMessage}
-        onConnect={handleConnect}
-        onStop={handleStop}
-        onDeviceChange={handleDeviceChange}
-      />
-      <PedalBoard
-        onChainReordered={handleChainRebuild}
-        onPedalToggled={handleChainRebuild}
-        onPedalBypassChanged={handlePedalBypass}
-        onPedalParamChanged={handlePedalParam}
-      />
-      <PresetPanel onLoadPreset={handleLoadPreset} />
-      <MasterSection
-        masterVolume={masterVolume}
-        isAudioReady={isAudioReady}
-        inputMeter={inputMeter}
-        outputMeter={outputMeter}
-        onMasterVolumeChange={handleMasterVolumeChange}
-        onPanic={handlePanic}
-      />
+      <div className="performance-layout">
+        <div className="performance-main">
+          <ConnectGuitarPanel
+            isAudioReady={isAudioReady}
+            isConnecting={isConnecting}
+            selectedDeviceId={selectedDeviceId}
+            inputDevices={inputDevices}
+            errorMessage={errorMessage}
+            onConnect={handleConnect}
+            onStop={handleStop}
+            onDeviceChange={handleDeviceChange}
+          />
+          <PedalBoard
+            onChainReordered={handleChainRebuild}
+            onPedalToggled={handleChainRebuild}
+            onPedalBypassChanged={handlePedalBypass}
+            onPedalParamChanged={handlePedalParam}
+          />
+          <PedalDetailPanel
+            onPedalToggled={handleChainRebuild}
+            onPedalBypassChanged={handlePedalBypass}
+            onPedalParamChanged={handlePedalParam}
+          />
+          <PresetPanel onLoadPreset={handleLoadPreset} />
+        </div>
+        <aside className="performance-side">
+          <MasterSection
+            masterVolume={masterVolume}
+            isAudioReady={isAudioReady}
+            inputMeter={inputMeter}
+            outputMeter={outputMeter}
+            onMasterVolumeChange={handleMasterVolumeChange}
+            onPanic={handlePanic}
+            onTunerQuick={handleTunerQuick}
+          />
+        </aside>
+      </div>
     </AppShell>
   );
 }

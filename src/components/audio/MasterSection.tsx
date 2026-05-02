@@ -9,6 +9,7 @@ type MasterSectionProps = {
   outputMeter: MeterReading;
   onMasterVolumeChange: (volume: number) => void;
   onPanic: () => void;
+  onTunerQuick?: () => void;
 };
 
 function MasterSection({
@@ -18,6 +19,7 @@ function MasterSection({
   outputMeter,
   onMasterVolumeChange,
   onPanic,
+  onTunerQuick,
 }: MasterSectionProps) {
   return (
     <section className="master-section" aria-label="Master controls">
@@ -43,6 +45,9 @@ function MasterSection({
         </div>
         <button type="button" className="panic-button" onClick={onPanic}>
           Panic
+        </button>
+        <button type="button" className="tuner-quick-button" onClick={onTunerQuick}>
+          Tuner
         </button>
       </div>
     </section>

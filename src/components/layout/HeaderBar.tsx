@@ -2,9 +2,11 @@ type HeaderBarProps = {
   appName: string;
   connectionStatus: string;
   presetName: string;
+  bpm: number;
+  inputDeviceName: string;
 };
 
-function HeaderBar({ appName, connectionStatus, presetName }: HeaderBarProps) {
+function HeaderBar({ appName, connectionStatus, presetName, bpm, inputDeviceName }: HeaderBarProps) {
   return (
     <header className="app-header">
       <div className="title-block">
@@ -19,6 +21,14 @@ function HeaderBar({ appName, connectionStatus, presetName }: HeaderBarProps) {
         <div className="status-card">
           <span>Preset</span>
           <strong>{presetName}</strong>
+        </div>
+        <div className="status-card">
+          <span>BPM</span>
+          <strong>{bpm}</strong>
+        </div>
+        <div className="status-card">
+          <span>Input</span>
+          <strong>{inputDeviceName}</strong>
         </div>
       </div>
     </header>
