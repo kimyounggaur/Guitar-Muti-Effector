@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Pedal, PedalParamValue, createDefaultPedals } from '../audio/types';
+import { Pedal, PedalParamValue, createDefaultPedals, normalizePedalParams, normalizePedals } from '../audio/types';
 
 export const PRESET_STORAGE_KEY = 'web-guitar-pedalboard-presets';
 
@@ -35,10 +35,7 @@ type PresetStore = {
 };
 
 const clonePedals = (pedals: Pedal[]) =>
-  pedals.map((pedal) => ({
-    ...pedal,
-    params: { ...pedal.params },
-  }));
+  normalizePedals(pedals);
 
 const createId = (prefix = 'preset') =>
   `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -224,22 +221,8 @@ const normalizePreset = (value: unknown): PedalboardPreset | null => {
   );
 };
 
-const normalizePedals = (pedals: Pedal[]) =>
-  pedals.map((pedal) => ({
-    id: String(pedal.id),
-    type: pedal.type,
-    name: String(pedal.name),
-    enabled: Boolean(pedal.enabled),
-    bypassed: Boolean(pedal.bypassed),
-    params: normalizeParams(pedal.params),
-  }));
-
 const normalizeParams = (params: Record<string, PedalParamValue>) =>
-  Object.fromEntries(
-    Object.entries(params ?? {}).filter(
-      ([, value]) => typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean',
-    ),
-  );
+  normalizePedalParams(params);
 
 export const usePresetStore = create<PresetStore>((set, get) => ({
   presets: DEFAULT_PRESETS.map(clonePreset),
