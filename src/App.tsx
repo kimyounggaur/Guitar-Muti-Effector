@@ -167,7 +167,7 @@ function App() {
         onStop={handleStop}
         onDeviceChange={handleDeviceChange}
       />
-      <PedalBoard />
+      <PedalBoard onChainReordered={(pedals) => audioEngineRef.current.rebuildChain(pedals)} />
       <MasterSection
         masterVolume={masterVolume}
         isAudioReady={isAudioReady}

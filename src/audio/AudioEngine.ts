@@ -1,4 +1,5 @@
 import { MeterNode, MeterReading, emptyMeterReading } from './nodes/MeterNode';
+import { Pedal } from './types';
 
 export type AudioEngineState = {
   sampleRate: number;
@@ -69,6 +70,10 @@ export class AudioEngine {
 
   readOutputMeter(): MeterReading {
     return this.outputMeter?.read() ?? emptyMeterReading;
+  }
+
+  rebuildChain(_pedals: Pedal[]) {
+    // Effects are not connected yet. This hook is intentionally reserved for the DSP chain step.
   }
 
   async stop() {
