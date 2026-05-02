@@ -9,6 +9,21 @@ export type EffectType =
 
 export type ParameterKind = 'db' | 'ms' | 'ratio' | 'percent' | 'hz';
 
+export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'error';
+
+export type MeterReading = {
+  rms: number;
+  peak: number;
+  db: number;
+};
+
+export type TunerReading = {
+  note: string;
+  frequency: number | null;
+  cents: number;
+  confidence: number;
+};
+
 export type PedalParamDefinition = {
   key: string;
   label: string;
@@ -40,6 +55,8 @@ export type Pedal = {
   level: number;
   params: Record<string, number>;
 };
+
+export type PedalPatch = Partial<Omit<Pedal, 'params'>> & { params?: Record<string, number> };
 
 export type Preset = {
   id: string;
