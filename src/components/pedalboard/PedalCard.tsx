@@ -1,4 +1,5 @@
 import { Pedal, PedalParamValue } from '../../audio/types';
+import CompressorPedal from '../effects/CompressorPedal';
 import DrivePedal from '../effects/DrivePedal';
 
 type PedalCardProps = {
@@ -24,6 +25,22 @@ function PedalCard({
   onBypass,
   onParamChange,
 }: PedalCardProps) {
+  if (pedal.type === 'compressor') {
+    return (
+      <CompressorPedal
+        pedal={pedal}
+        selected={selected}
+        dragAttributes={dragAttributes}
+        dragListeners={dragListeners}
+        isDragging={isDragging}
+        onSelect={onSelect}
+        onToggle={onToggle}
+        onBypass={onBypass}
+        onParamChange={onParamChange}
+      />
+    );
+  }
+
   if (pedal.type === 'drive') {
     return (
       <DrivePedal

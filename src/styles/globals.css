@@ -429,6 +429,114 @@ input {
   accent-color: var(--accent);
 }
 
+.compressor-pedal {
+  min-height: 560px;
+  background:
+    linear-gradient(135deg, rgba(53, 208, 163, 0.14), transparent 44%),
+    linear-gradient(180deg, rgba(246, 200, 95, 0.08), transparent),
+    var(--card);
+}
+
+.compressor-display {
+  align-content: center;
+}
+
+.compressor-display em {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.gain-reduction-meter {
+  display: grid;
+  gap: 9px;
+  border: 1px solid #303a35;
+  border-radius: 8px;
+  background: #0a0d0c;
+  padding: 12px;
+}
+
+.gain-reduction-header,
+.gain-reduction-scale {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gain-reduction-header strong {
+  color: var(--text);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.gain-reduction-track {
+  position: relative;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid #303a35;
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 23%, rgba(255, 255, 255, 0.08) 23% 24%),
+    #080a09;
+}
+
+.gain-reduction-track i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #f6c85f 64%, var(--warning));
+  transform-origin: left center;
+  transition: transform 80ms linear;
+}
+
+.gain-reduction-scale {
+  color: var(--dim);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.compressor-controls,
+.compressor-advanced {
+  display: grid;
+  gap: 10px;
+}
+
+.compressor-control {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.8fr) minmax(0, 1fr) minmax(54px, auto);
+  gap: 8px;
+  align-items: center;
+}
+
+.compressor-control input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+.compressor-control strong {
+  color: var(--text);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.compressor-advanced {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 8px;
+}
+
+.compressor-advanced summary {
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .drive-pedal {
   min-height: 560px;
   background:

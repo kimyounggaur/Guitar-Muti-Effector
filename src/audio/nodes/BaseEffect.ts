@@ -112,30 +112,6 @@ export class PassthroughEffect extends BaseEffect {
   }
 }
 
-export class CompressorEffect extends BaseEffect {
-  private readonly compressor: DynamicsCompressorNode;
-  private readonly makeupGain: GainNode;
-
-  constructor(context: AudioContext, id: string) {
-    super(context, id, 'compressor');
-    this.compressor = context.createDynamicsCompressor();
-    this.makeupGain = context.createGain();
-    this.compressor.knee.value = 18;
-    this.compressor.attack.value = 0.012;
-    this.compressor.release.value = 0.18;
-    this.connectWet(this.compressor, this.makeupGain);
-    this.setMix(1);
-
-    this.paramHandlers.set('thresholdDb', (value) =>
-      smoothParam(context, this.compressor.threshold, asNumber(value, -24)),
-    );
-    this.paramHandlers.set('ratio', (value) => smoothParam(context, this.compressor.ratio, asNumber(value, 4)));
-    this.paramHandlers.set('makeupGainDb', (value) =>
-      smoothParam(context, this.makeupGain.gain, dbToGain(asNumber(value, 0))),
-    );
-  }
-}
-
 export class AmpEQEffect extends BaseEffect {
   constructor(context: AudioContext, id: string) {
     super(context, id, 'ampEQ');
@@ -251,8 +227,6 @@ export class ModulationEffect extends BaseEffect {
     this.setMix(0.5);
   }
 }
-
-const dbToGain = (db: number) => 10 ** (db / 20);
 
 const createReverbImpulse = (context: AudioContext) => {
   const sampleRate = context.sampleRate;

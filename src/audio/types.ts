@@ -54,10 +54,10 @@ export const createDefaultPedals = (): Pedal[] => [
   {
     id: 'compressor',
     type: 'compressor',
-    name: 'Compressor',
+    name: 'COMP',
     enabled: true,
     bypassed: false,
-    params: { thresholdDb: -24, ratio: 4, makeupGainDb: 0 },
+    params: { threshold: -28, ratio: 3.5, attack: 0.012, release: 0.22, knee: 18, sustain: 42, mix: 78, level: 72 },
   },
   {
     id: 'drive',
