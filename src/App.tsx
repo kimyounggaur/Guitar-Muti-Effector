@@ -43,6 +43,19 @@ function App() {
   }, [setErrorMessage]);
 
   useEffect(() => {
+    return useTempoStore.subscribe((state) => {
+      const syncedDelayPedals = usePedalStore
+        .getState()
+        .pedals.filter((pedal) => pedal.type === 'delay' && pedal.params.sync === true);
+
+      syncedDelayPedals.forEach((pedal) => {
+        usePedalStore.getState().updatePedalParam(pedal.id, 'bpm', state.bpm);
+        audioEngineRef.current.setPedalParam(pedal.id, 'bpm', state.bpm);
+      });
+    });
+  }, []);
+
+  useEffect(() => {
     if (!isAudioReady) {
       return undefined;
     }

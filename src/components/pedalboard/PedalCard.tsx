@@ -6,6 +6,7 @@ import DelayPedal from '../effects/DelayPedal';
 import DrivePedal from '../effects/DrivePedal';
 import LooperPanel from '../effects/LooperPanel';
 import ReverbPedal from '../effects/ReverbPedal';
+import RhythmPanel from '../effects/RhythmPanel';
 import TunerPanel from '../effects/TunerPanel';
 
 type PedalCardProps = {
@@ -66,6 +67,22 @@ function PedalCard({
   if (pedal.type === 'looper') {
     return (
       <LooperPanel
+        pedal={pedal}
+        selected={selected}
+        dragAttributes={dragAttributes}
+        dragListeners={dragListeners}
+        isDragging={isDragging}
+        onSelect={onSelect}
+        onToggle={onToggle}
+        onBypass={onBypass}
+        onParamChange={onParamChange}
+      />
+    );
+  }
+
+  if (pedal.type === 'rhythm') {
+    return (
+      <RhythmPanel
         pedal={pedal}
         selected={selected}
         dragAttributes={dragAttributes}

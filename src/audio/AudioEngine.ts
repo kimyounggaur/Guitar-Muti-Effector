@@ -10,6 +10,7 @@ import { DriveEffect } from './nodes/DriveEffect';
 import { LooperNode } from './nodes/LooperNode';
 import { MeterNode, MeterReading, emptyMeterReading } from './nodes/MeterNode';
 import { ReverbEffect } from './nodes/ReverbEffect';
+import { RhythmNode } from './nodes/RhythmNode';
 import { TunerNode } from './nodes/TunerNode';
 import { EffectNodeWrapper, Pedal, PedalParamValue, PedalType } from './types';
 
@@ -292,6 +293,10 @@ export class AudioEngine {
 
     if (type === 'looper') {
       return new LooperNode(this.audioContext, id);
+    }
+
+    if (type === 'rhythm') {
+      return new RhythmNode(this.audioContext, id);
     }
 
     if (type === 'modulation') {

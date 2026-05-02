@@ -6,6 +6,7 @@ type TempoStore = {
   bpm: number;
   lastTapAt: number | null;
   tapTimes: number[];
+  tapCount: number;
   setBpm: (bpm: number) => number;
   tapTempo: () => number;
   resetTapTempo: () => void;
@@ -15,6 +16,7 @@ export const useTempoStore = create<TempoStore>((set, get) => ({
   bpm: 120,
   lastTapAt: null,
   tapTimes: [],
+  tapCount: 0,
   setBpm: (bpm) => {
     const nextBpm = clamp(Math.round(bpm), 40, 240);
     set({ bpm: nextBpm });
@@ -26,15 +28,20 @@ export const useTempoStore = create<TempoStore>((set, get) => ({
     const tapTimes = [...previousTaps, now].slice(-5);
 
     if (tapTimes.length < 2) {
-      set({ tapTimes, lastTapAt: now });
+      set({ tapTimes, lastTapAt: now, tapCount: tapTimes.length });
       return get().bpm;
     }
 
     const intervals = tapTimes.slice(1).map((tapTime, index) => tapTime - tapTimes[index]);
     const averageInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
     const bpm = clamp(Math.round(60000 / averageInterval), 40, 240);
-    set({ bpm, tapTimes, lastTapAt: now });
+    set({ bpm, tapTimes, lastTapAt: now, tapCount: tapTimes.length });
     return bpm;
   },
-  resetTapTempo: () => set({ tapTimes: [], lastTapAt: null }),
+  resetTapTempo: () => set({ tapTimes: [], lastTapAt: null, tapCount: 0 }),
 }));
+
+export const subscribeTempo = (listener: (bpm: number) => void) =>
+  useTempoStore.subscribe((state) => listener(state.bpm));
+
+export const getTempoBpm = () => useTempoStore.getState().bpm;

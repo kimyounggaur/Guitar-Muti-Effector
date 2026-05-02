@@ -124,4 +124,17 @@ export const createDefaultPedals = (): Pedal[] => [
       halfSpeed: false,
     },
   },
+  {
+    id: 'rhythm',
+    type: 'rhythm',
+    name: 'RHYTHM',
+    enabled: true,
+    bypassed: false,
+    params: {
+      bpm: 120,
+      pattern: 'metronome',
+      volume: 70,
+      playing: false,
+    },
+  },
 ];

@@ -1580,6 +1580,124 @@ input {
   text-transform: none;
 }
 
+.rhythm-pedal {
+  border-color: rgba(246, 200, 95, 0.32);
+}
+
+.rhythm-display em {
+  color: #ffe0a4;
+}
+
+.rhythm-readout {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(246, 200, 95, 0.18);
+  border-radius: 8px;
+  background: rgba(246, 200, 95, 0.08);
+  padding: 12px;
+}
+
+.rhythm-readout div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.rhythm-readout strong {
+  color: #ffe0a4;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.rhythm-readout small {
+  color: var(--muted);
+}
+
+.beat-leds {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(24px, 1fr));
+  gap: 8px;
+}
+
+.beat-leds i,
+.rhythm-step-strip i {
+  display: block;
+  border: 1px solid rgba(246, 200, 95, 0.22);
+  border-radius: 999px;
+  background: #080a09;
+}
+
+.beat-leds i {
+  height: 28px;
+}
+
+.beat-leds i.is-active,
+.rhythm-step-strip i.is-active {
+  border-color: rgba(246, 200, 95, 0.82);
+  background: #f6c85f;
+  box-shadow: 0 0 18px rgba(246, 200, 95, 0.5);
+}
+
+.rhythm-step-strip {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 4px;
+  min-height: 16px;
+}
+
+.rhythm-step-strip i {
+  height: 10px;
+}
+
+.rhythm-transport {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 10px;
+}
+
+.rhythm-transport button {
+  min-height: 56px;
+  border: 1px solid rgba(246, 200, 95, 0.32);
+  border-radius: 8px;
+  background: rgba(246, 200, 95, 0.1);
+  color: var(--text);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.rhythm-transport button.is-playing {
+  border-color: rgba(255, 111, 97, 0.64);
+  background: rgba(255, 111, 97, 0.16);
+  color: #ffd9d4;
+}
+
+.rhythm-controls {
+  display: grid;
+  grid-template-columns: minmax(86px, 0.8fr) minmax(140px, 1.2fr) minmax(120px, 1fr);
+  gap: 10px;
+}
+
+.rhythm-control {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.rhythm-control input,
+.rhythm-control select {
+  min-width: 0;
+  width: 100%;
+}
+
+.rhythm-control input[type="range"] {
+  accent-color: #f6c85f;
+}
+
+.rhythm-control strong {
+  color: #ffe0a4;
+}
+
 .pedal-placeholder strong {
   align-self: end;
   font-size: 1.7rem;
