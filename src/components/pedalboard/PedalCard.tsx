@@ -4,6 +4,7 @@ import CabinetIRPedal from '../effects/CabinetIRPedal';
 import CompressorPedal from '../effects/CompressorPedal';
 import DelayPedal from '../effects/DelayPedal';
 import DrivePedal from '../effects/DrivePedal';
+import ReverbPedal from '../effects/ReverbPedal';
 
 type PedalCardProps = {
   pedal: Pedal;
@@ -28,6 +29,22 @@ function PedalCard({
   onBypass,
   onParamChange,
 }: PedalCardProps) {
+  if (pedal.type === 'reverb') {
+    return (
+      <ReverbPedal
+        pedal={pedal}
+        selected={selected}
+        dragAttributes={dragAttributes}
+        dragListeners={dragListeners}
+        isDragging={isDragging}
+        onSelect={onSelect}
+        onToggle={onToggle}
+        onBypass={onBypass}
+        onParamChange={onParamChange}
+      />
+    );
+  }
+
   if (pedal.type === 'delay') {
     return (
       <DelayPedal

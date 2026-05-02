@@ -104,9 +104,9 @@ export const createDefaultPedals = (): Pedal[] => [
   {
     id: 'reverb',
     type: 'reverb',
-    name: 'Reverb',
+    name: 'REVERB',
     enabled: true,
     bypassed: false,
-    params: { size: 0.45, damping: 0.4, mix: 0.18 },
+    params: { mode: 'room', decay: 0.9, preDelay: 22, lowCut: 120, highCut: 7600, mix: 24, level: 72 },
   },
 ];

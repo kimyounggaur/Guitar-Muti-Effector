@@ -429,6 +429,76 @@ input {
   accent-color: var(--accent);
 }
 
+.reverb-pedal {
+  min-height: 580px;
+  background:
+    linear-gradient(135deg, rgba(138, 186, 255, 0.13), transparent 42%),
+    linear-gradient(180deg, rgba(53, 208, 163, 0.08), transparent),
+    var(--card);
+}
+
+.reverb-display {
+  align-content: center;
+}
+
+.reverb-display em {
+  color: #8abaff;
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.reverb-tail-canvas {
+  display: block;
+  width: 100%;
+  height: 98px;
+  border: 1px solid #303a35;
+  border-radius: 8px;
+  background: #0a0d0c;
+}
+
+.reverb-row,
+.reverb-controls {
+  display: grid;
+  gap: 10px;
+}
+
+.reverb-control {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.74fr) minmax(0, 1fr) minmax(64px, auto);
+  gap: 8px;
+  align-items: center;
+}
+
+.reverb-control.is-wide {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.reverb-control select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111514;
+  color: var(--text);
+  padding: 0 10px;
+}
+
+.reverb-control input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: #8abaff;
+}
+
+.reverb-control strong {
+  color: var(--text);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 .delay-pedal {
   min-height: 620px;
   background:

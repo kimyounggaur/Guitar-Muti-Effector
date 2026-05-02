@@ -112,23 +112,6 @@ export class PassthroughEffect extends BaseEffect {
   }
 }
 
-export class ReverbEffect extends BaseEffect {
-  constructor(context: AudioContext, id: string) {
-    super(context, id, 'reverb');
-    const convolver = context.createConvolver();
-    const damping = context.createBiquadFilter();
-    damping.type = 'lowpass';
-    damping.frequency.value = 4800;
-    convolver.buffer = createReverbImpulse(context);
-    this.connectWet(convolver, damping);
-    this.setMix(0.18);
-    this.paramHandlers.set('mix', (value) => this.setMix(asNumber(value, 0.18)));
-    this.paramHandlers.set('damping', (value) =>
-      smoothParam(context, damping.frequency, 9000 - clamp(asNumber(value, 0.4), 0, 1) * 7200),
-    );
-  }
-}
-
 export class ModulationEffect extends BaseEffect {
   constructor(context: AudioContext, id: string) {
     super(context, id, 'modulation');
@@ -146,19 +129,3 @@ export class ModulationEffect extends BaseEffect {
     this.setMix(0.5);
   }
 }
-
-const createReverbImpulse = (context: AudioContext) => {
-  const sampleRate = context.sampleRate;
-  const length = Math.floor(sampleRate * 1.2);
-  const buffer = context.createBuffer(2, length, sampleRate);
-
-  for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
-    const data = buffer.getChannelData(channel);
-    for (let index = 0; index < length; index += 1) {
-      const seed = ((index * 16807 + channel * 48271) % 2147483647) / 2147483647;
-      data[index] = (seed * 2 - 1) * (1 - index / length) ** 2.3;
-    }
-  }
-
-  return buffer;
-};
