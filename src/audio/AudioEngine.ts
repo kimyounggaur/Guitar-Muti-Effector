@@ -9,6 +9,7 @@ import { DelayEffect } from './nodes/DelayEffect';
 import { DriveEffect } from './nodes/DriveEffect';
 import { MeterNode, MeterReading, emptyMeterReading } from './nodes/MeterNode';
 import { ReverbEffect } from './nodes/ReverbEffect';
+import { TunerNode } from './nodes/TunerNode';
 import { EffectNodeWrapper, Pedal, PedalParamValue, PedalType } from './types';
 
 export type AudioEngineState = {
@@ -262,6 +263,10 @@ export class AudioEngine {
 
     if (type === 'compressor') {
       return new CompressorEffect(this.audioContext, id);
+    }
+
+    if (type === 'tuner') {
+      return new TunerNode(this.audioContext, id);
     }
 
     if (type === 'drive') {

@@ -429,6 +429,195 @@ input {
   accent-color: var(--accent);
 }
 
+.tuner-pedal {
+  min-height: 600px;
+  background:
+    linear-gradient(135deg, rgba(53, 208, 163, 0.16), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent),
+    var(--card);
+}
+
+.tuner-display {
+  align-content: center;
+}
+
+.tuner-display em {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.tuner-readout {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  border: 1px solid #303a35;
+  border-radius: 8px;
+  background: #0a0d0c;
+  padding: 14px;
+}
+
+.tuner-readout span {
+  grid-column: 1 / -1;
+  color: #ffcf6d;
+}
+
+.tuner-readout strong {
+  color: var(--text);
+  font-size: 4.4rem;
+  line-height: 0.9;
+}
+
+.tuner-readout em {
+  color: var(--muted);
+  font-size: 1.4rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.tuner-readout small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner-readout.is-in-tune span {
+  color: var(--accent);
+}
+
+.tuner-readout.is-low strong,
+.tuner-readout.is-low em {
+  color: var(--dim);
+}
+
+.cents-meter {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.cents-track {
+  position: relative;
+  height: 18px;
+  border: 1px solid #303a35;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, #8abaff, rgba(53, 208, 163, 0.9) 50%, #ffcf6d),
+    #080a09;
+}
+
+.cents-track b,
+.cents-center {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 3px;
+  border-radius: 999px;
+}
+
+.cents-track b {
+  background: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.52);
+  transform: translateX(-50%);
+}
+
+.cents-center {
+  left: 50%;
+  background: #0a0d0c;
+  transform: translateX(-50%);
+}
+
+.cents-value {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+}
+
+.cents-value strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner-controls,
+.tuning-guide {
+  display: grid;
+  gap: 10px;
+}
+
+.tuner-control {
+  display: grid;
+  grid-template-columns: minmax(68px, 0.72fr) minmax(0, 1fr) minmax(58px, auto);
+  gap: 8px;
+  align-items: center;
+}
+
+.tuner-control.is-wide {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.tuner-control select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111514;
+  color: var(--text);
+  padding: 0 10px;
+}
+
+.tuner-control input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+.tuner-control strong {
+  color: var(--text);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.tuning-guide {
+  border: 1px solid #303a35;
+  border-radius: 8px;
+  background: #0a0d0c;
+  padding: 10px;
+}
+
+.tuning-guide div {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.tuning-guide strong {
+  display: grid;
+  justify-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111514;
+  color: var(--text);
+  padding: 8px 4px;
+  font-size: 0.86rem;
+}
+
+.tuning-guide strong.is-target {
+  border-color: rgba(53, 208, 163, 0.65);
+  background: rgba(53, 208, 163, 0.12);
+}
+
+.tuning-guide small {
+  color: var(--dim);
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .reverb-pedal {
   min-height: 580px;
   background:

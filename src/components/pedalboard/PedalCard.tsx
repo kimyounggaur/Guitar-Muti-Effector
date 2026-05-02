@@ -5,6 +5,7 @@ import CompressorPedal from '../effects/CompressorPedal';
 import DelayPedal from '../effects/DelayPedal';
 import DrivePedal from '../effects/DrivePedal';
 import ReverbPedal from '../effects/ReverbPedal';
+import TunerPanel from '../effects/TunerPanel';
 
 type PedalCardProps = {
   pedal: Pedal;
@@ -29,6 +30,22 @@ function PedalCard({
   onBypass,
   onParamChange,
 }: PedalCardProps) {
+  if (pedal.type === 'tuner') {
+    return (
+      <TunerPanel
+        pedal={pedal}
+        selected={selected}
+        dragAttributes={dragAttributes}
+        dragListeners={dragListeners}
+        isDragging={isDragging}
+        onSelect={onSelect}
+        onToggle={onToggle}
+        onBypass={onBypass}
+        onParamChange={onParamChange}
+      />
+    );
+  }
+
   if (pedal.type === 'reverb') {
     return (
       <ReverbPedal

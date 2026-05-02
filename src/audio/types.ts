@@ -38,10 +38,10 @@ export const createDefaultPedals = (): Pedal[] => [
   {
     id: 'tuner',
     type: 'tuner',
-    name: 'Tuner',
+    name: 'TUNER',
     enabled: true,
     bypassed: false,
-    params: { referenceHz: 440, mute: false },
+    params: { referenceA4: 440, mode: 'guitar', sensitivity: 64, smoothing: 62 },
   },
   {
     id: 'noise-gate',
