@@ -38,6 +38,12 @@ button {
   font: inherit;
 }
 
+button,
+select,
+input {
+  font: inherit;
+}
+
 .app-shell {
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -85,6 +91,7 @@ button {
 
 .status-card,
 .master-section,
+.connect-section,
 .pedal-placeholder {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -102,6 +109,7 @@ button {
 .pedal-placeholder span,
 .meter-shell span,
 .volume-shell span,
+.device-selector span,
 .footer-status span {
   color: var(--dim);
   font-size: 0.74rem;
@@ -114,6 +122,91 @@ button {
   margin-top: 8px;
   color: var(--text);
   font-size: 1.05rem;
+}
+
+.connect-section {
+  padding: 16px;
+}
+
+.connect-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(260px, 1fr) minmax(280px, 1.25fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.connection-card,
+.device-selector,
+.safety-card {
+  display: grid;
+  gap: 12px;
+  min-height: 128px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111514;
+  padding: 14px;
+}
+
+.connection-card {
+  grid-template-columns: 1fr;
+}
+
+.connect-button,
+.stop-button,
+.panic-button {
+  min-height: 52px;
+  border-radius: 8px;
+  font-weight: 900;
+}
+
+.connect-button {
+  border: 1px solid rgba(53, 208, 163, 0.56);
+  background: rgba(53, 208, 163, 0.14);
+  color: var(--text);
+}
+
+.stop-button {
+  border: 1px solid var(--line);
+  background: var(--panel-strong);
+  color: var(--muted);
+}
+
+.connect-button:disabled,
+.stop-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.device-selector select {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-strong);
+  color: var(--text);
+  padding: 0 14px;
+}
+
+.safety-card strong {
+  color: var(--text);
+}
+
+.safety-card ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.error-message {
+  margin: 12px 0 0;
+  border: 1px solid rgba(255, 111, 97, 0.48);
+  border-radius: 8px;
+  background: rgba(255, 111, 97, 0.1);
+  color: #ffd9d4;
+  padding: 12px;
 }
 
 .board-section {
@@ -196,8 +289,7 @@ button {
   padding: 14px;
 }
 
-.meter-shell i,
-.fake-slider {
+.meter-shell i {
   display: block;
   align-self: center;
   height: 16px;
@@ -207,8 +299,7 @@ button {
   background: #080a09;
 }
 
-.meter-shell i::before,
-.fake-slider i {
+.meter-shell i::before {
   display: block;
   width: 38%;
   height: 100%;
@@ -217,8 +308,15 @@ button {
   content: "";
 }
 
-.fake-slider i {
-  width: 62%;
+.volume-shell input {
+  width: 100%;
+  align-self: center;
+  accent-color: var(--accent);
+}
+
+.volume-shell strong {
+  color: var(--text);
+  font-size: 1.15rem;
 }
 
 .panic-button {
@@ -228,7 +326,7 @@ button {
   background: rgba(255, 111, 97, 0.13);
   color: #ffd9d4;
   font-weight: 900;
-  cursor: default;
+  cursor: pointer;
 }
 
 .footer-status {
@@ -243,6 +341,7 @@ button {
 
 @media (max-width: 900px) {
   .app-header,
+  .connect-grid,
   .master-grid {
     grid-template-columns: 1fr;
   }
