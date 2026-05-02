@@ -69,7 +69,7 @@ function PedalCard({
           ≡
         </button>
         <button type="button" className="pedal-select compact-display" onClick={() => onSelect(pedal.id)}>
-          <span>{typeLabels[pedal.type]}</span>
+          <span>{typeLabels[pedal.type] ?? 'Effect'}</span>
           <strong>{pedal.name}</strong>
           <em>{pedal.enabled ? (pedal.bypassed ? 'Bypass path' : 'Active path') : 'Muted block'}</em>
         </button>
@@ -167,7 +167,7 @@ const formatParamValue = (value: PedalParamValue) => {
     return Math.round(value).toString();
   }
 
-  return value.replace(/([A-Z])/g, ' $1').replace(/^./, (firstLetter) => firstLetter.toUpperCase());
+  return String(value).replace(/([A-Z])/g, ' $1').replace(/^./, (firstLetter) => firstLetter.toUpperCase());
 };
 
 export default PedalCard;

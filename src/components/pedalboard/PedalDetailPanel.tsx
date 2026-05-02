@@ -141,7 +141,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
     );
   }
 
-  const controls = Object.entries(selectedPedal.params).filter(([name]) => !name.startsWith('__'));
+  const controls = Object.entries(selectedPedal.params ?? {}).filter(([name]) => !name.startsWith('__'));
 
   const handleToggle = () => {
     togglePedal(selectedPedal.id);

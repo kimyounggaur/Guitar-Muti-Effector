@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Pedal, PedalParamValue, createDefaultPedals } from '../audio/types';
+import { Pedal, PedalParamValue, PedalType, createDefaultPedals } from '../audio/types';
 
 const PEDAL_STORAGE_KEY = 'guitar-multi-effector-pedals-v1';
 
@@ -20,23 +20,75 @@ type PedalStore = {
   loadPedalsFromStorage: () => void;
 };
 
+const isPedalParamValue = (value: unknown): value is PedalParamValue =>
+  typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean';
+
+const isPedalType = (value: unknown): value is PedalType =>
+  value === 'tuner' ||
+  value === 'noiseGate' ||
+  value === 'compressor' ||
+  value === 'drive' ||
+  value === 'ampEQ' ||
+  value === 'cabinetIR' ||
+  value === 'modulation' ||
+  value === 'delay' ||
+  value === 'reverb' ||
+  value === 'looper' ||
+  value === 'rhythm';
+
+const normalizeParams = (params: unknown): Record<string, PedalParamValue> => {
+  if (!params || typeof params !== 'object') {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(params).filter((entry): entry is [string, PedalParamValue] => isPedalParamValue(entry[1])),
+  );
+};
+
 const clonePedals = (pedals: Pedal[]) =>
   pedals.map((pedal) => ({
     ...pedal,
-    params: { ...pedal.params },
+    params: normalizeParams(pedal.params),
   }));
 
-const mergeWithDefaultPedals = (pedals: Pedal[]) => {
-  const clonedPedals = clonePedals(pedals);
-  const existingIds = new Set(clonedPedals.map((pedal) => pedal.id));
-  const missingPedals = createDefaultPedals().filter((pedal) => !existingIds.has(pedal.id));
-  return [...clonedPedals, ...clonePedals(missingPedals)];
+const mergeWithDefaultPedals = (pedals: unknown) => {
+  const defaultPedals = createDefaultPedals();
+  const defaultById = new Map(defaultPedals.map((pedal) => [pedal.id, pedal]));
+  const sourcePedals = Array.isArray(pedals) ? pedals : [];
+  const normalizedPedals = sourcePedals
+    .filter((pedal): pedal is Partial<Pedal> => Boolean(pedal) && typeof pedal === 'object')
+    .map((pedal) => {
+      const id = typeof pedal.id === 'string' ? pedal.id : '';
+      const fallback = defaultById.get(id);
+      const type = isPedalType(pedal.type) ? pedal.type : fallback?.type;
+
+      if (!id || !type) {
+        return null;
+      }
+
+      return {
+        id,
+        type,
+        name: typeof pedal.name === 'string' ? pedal.name : fallback?.name ?? id,
+        enabled: typeof pedal.enabled === 'boolean' ? pedal.enabled : fallback?.enabled ?? true,
+        bypassed: typeof pedal.bypassed === 'boolean' ? pedal.bypassed : fallback?.bypassed ?? false,
+        params: {
+          ...(fallback?.params ?? {}),
+          ...normalizeParams(pedal.params),
+        },
+      };
+    })
+    .filter(Boolean) as Pedal[];
+  const existingIds = new Set(normalizedPedals.map((pedal) => pedal.id));
+  const missingPedals = defaultPedals.filter((pedal) => !existingIds.has(pedal.id));
+  return [...clonePedals(normalizedPedals), ...clonePedals(missingPedals)];
 };
 
 const readStoredPedals = () => {
   try {
     const raw = window.localStorage.getItem(PEDAL_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Pedal[]) : null;
+    return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
