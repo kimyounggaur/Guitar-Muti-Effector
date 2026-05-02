@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { AudioEngine } from './audio/AudioEngine';
 import ConnectGuitarPanel from './components/audio/ConnectGuitarPanel';
 import MasterSection from './components/audio/MasterSection';
@@ -18,6 +18,8 @@ function App() {
   const latencyHint = useAudioStore((state) => state.latencyHint);
   const errorMessage = useAudioStore((state) => state.errorMessage);
   const masterVolume = useAudioStore((state) => state.masterVolume);
+  const inputMeter = useAudioStore((state) => state.inputMeter);
+  const outputMeter = useAudioStore((state) => state.outputMeter);
   const setIsConnecting = useAudioStore((state) => state.setIsConnecting);
   const setAudioReady = useAudioStore((state) => state.setAudioReady);
   const setSelectedDeviceId = useAudioStore((state) => state.setSelectedDeviceId);
@@ -26,7 +28,24 @@ function App() {
   const setLatencyHint = useAudioStore((state) => state.setLatencyHint);
   const setErrorMessage = useAudioStore((state) => state.setErrorMessage);
   const setMasterVolume = useAudioStore((state) => state.setMasterVolume);
+  const setMeters = useAudioStore((state) => state.setMeters);
   const resetAudioState = useAudioStore((state) => state.resetAudioState);
+
+  useEffect(() => {
+    if (!isAudioReady) {
+      return undefined;
+    }
+
+    let frameId = 0;
+
+    const updateMeters = () => {
+      setMeters(audioEngineRef.current.readInputMeter(), audioEngineRef.current.readOutputMeter());
+      frameId = window.requestAnimationFrame(updateMeters);
+    };
+
+    frameId = window.requestAnimationFrame(updateMeters);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [isAudioReady, setMeters]);
 
   const refreshInputDevices = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -152,6 +171,8 @@ function App() {
       <MasterSection
         masterVolume={masterVolume}
         isAudioReady={isAudioReady}
+        inputMeter={inputMeter}
+        outputMeter={outputMeter}
         onMasterVolumeChange={handleMasterVolumeChange}
         onPanic={handlePanic}
       />

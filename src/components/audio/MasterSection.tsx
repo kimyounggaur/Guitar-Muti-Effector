@@ -1,11 +1,24 @@
+import { MeterReading } from '../../audio/nodes/MeterNode';
+import InputMeter from './InputMeter';
+import OutputMeter from './OutputMeter';
+
 type MasterSectionProps = {
   masterVolume: number;
   isAudioReady: boolean;
+  inputMeter: MeterReading;
+  outputMeter: MeterReading;
   onMasterVolumeChange: (volume: number) => void;
   onPanic: () => void;
 };
 
-function MasterSection({ masterVolume, isAudioReady, onMasterVolumeChange, onPanic }: MasterSectionProps) {
+function MasterSection({
+  masterVolume,
+  isAudioReady,
+  inputMeter,
+  outputMeter,
+  onMasterVolumeChange,
+  onPanic,
+}: MasterSectionProps) {
   return (
     <section className="master-section" aria-label="Master controls">
       <div className="panel-heading">
@@ -13,14 +26,8 @@ function MasterSection({ masterVolume, isAudioReady, onMasterVolumeChange, onPan
         <strong>{isAudioReady ? 'Live monitor active' : 'Waiting for guitar input'}</strong>
       </div>
       <div className="master-grid">
-        <div className="meter-shell">
-          <span>Input</span>
-          <i />
-        </div>
-        <div className="meter-shell">
-          <span>Output</span>
-          <i />
-        </div>
+        <InputMeter meter={inputMeter} />
+        <OutputMeter meter={outputMeter} />
         <div className="volume-shell">
           <span>Master Volume</span>
           <input

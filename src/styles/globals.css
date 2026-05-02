@@ -108,6 +108,7 @@ input {
 .panel-heading span,
 .pedal-placeholder span,
 .meter-shell span,
+.level-meter span,
 .volume-shell span,
 .device-selector span,
 .footer-status span {
@@ -278,6 +279,7 @@ input {
   align-items: stretch;
 }
 
+.level-meter,
 .meter-shell,
 .volume-shell {
   display: grid;
@@ -287,6 +289,77 @@ input {
   border-radius: 8px;
   background: #111514;
   padding: 14px;
+}
+
+.level-meter {
+  align-content: space-between;
+}
+
+.meter-header,
+.meter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.meter-header strong {
+  color: var(--text);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.meter-bar {
+  position: relative;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid #303a35;
+  border-radius: 999px;
+  background: #080a09;
+}
+
+.meter-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--accent), #f6c85f 88%, var(--warning));
+}
+
+.peak-hold {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 3px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.45);
+}
+
+.meter-footer {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.clip-label {
+  border: 1px solid rgba(255, 111, 97, 0.32);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: rgba(255, 217, 212, 0.38);
+}
+
+.clip-label.is-on,
+.level-meter.is-clipping .clip-label {
+  border-color: rgba(255, 111, 97, 0.75);
+  background: rgba(255, 111, 97, 0.18);
+  color: #ffd9d4;
+}
+
+.level-meter.is-warning .meter-fill {
+  background: linear-gradient(90deg, var(--accent), #f6c85f 62%, #ffcf6d);
+}
+
+.level-meter.is-clipping .meter-fill {
+  background: linear-gradient(90deg, var(--accent), #f6c85f 58%, var(--warning));
 }
 
 .meter-shell i {

@@ -1,3 +1,5 @@
+import { MeterNode, MeterReading, emptyMeterReading } from './nodes/MeterNode';
+
 export type AudioEngineState = {
   sampleRate: number;
   latencyHint: AudioContextLatencyCategory;
@@ -17,6 +19,8 @@ export class AudioEngine {
   private stream: MediaStream | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
   private masterGain: GainNode | null = null;
+  private inputMeter: MeterNode | null = null;
+  private outputMeter: MeterNode | null = null;
   private readonly latencyHint: AudioContextLatencyCategory = 'interactive';
 
   get isReady() {
@@ -59,6 +63,14 @@ export class AudioEngine {
     this.masterGain.gain.setTargetAtTime(volume, now, 0.015);
   }
 
+  readInputMeter(): MeterReading {
+    return this.inputMeter?.read() ?? emptyMeterReading;
+  }
+
+  readOutputMeter(): MeterReading {
+    return this.outputMeter?.read() ?? emptyMeterReading;
+  }
+
   async stop() {
     this.stopTracks();
     this.disconnectNodes();
@@ -69,6 +81,8 @@ export class AudioEngine {
 
     this.audioContext = null;
     this.masterGain = null;
+    this.inputMeter = null;
+    this.outputMeter = null;
   }
 
   private async ensureContext() {
@@ -79,6 +93,8 @@ export class AudioEngine {
     const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
     this.audioContext = new AudioContextConstructor({ latencyHint: this.latencyHint });
     this.masterGain = this.audioContext.createGain();
+    this.inputMeter = new MeterNode(this.audioContext);
+    this.outputMeter = new MeterNode(this.audioContext);
   }
 
   private async replaceStream(selectedDeviceId: string) {
@@ -94,13 +110,15 @@ export class AudioEngine {
   }
 
   private rebuildPassThrough(masterVolume: number) {
-    if (!this.audioContext || !this.source || !this.masterGain) {
+    if (!this.audioContext || !this.source || !this.masterGain || !this.inputMeter || !this.outputMeter) {
       return;
     }
 
     this.masterGain.gain.setValueAtTime(masterVolume, this.audioContext.currentTime);
-    this.source.connect(this.masterGain);
-    this.masterGain.connect(this.audioContext.destination);
+    this.source.connect(this.inputMeter.input);
+    this.inputMeter.output.connect(this.masterGain);
+    this.masterGain.connect(this.outputMeter.input);
+    this.outputMeter.output.connect(this.audioContext.destination);
   }
 
   private stopTracks() {
@@ -111,6 +129,8 @@ export class AudioEngine {
   private disconnectNodes() {
     safeDisconnect(this.source);
     safeDisconnect(this.masterGain);
+    safeDisconnect(this.inputMeter?.input ?? null);
+    safeDisconnect(this.outputMeter?.input ?? null);
     this.source = null;
   }
 }

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { MeterReading, emptyMeterReading } from '../audio/nodes/MeterNode';
 
 export type AudioStoreState = {
   isAudioReady: boolean;
@@ -9,6 +10,8 @@ export type AudioStoreState = {
   latencyHint: string;
   errorMessage: string;
   masterVolume: number;
+  inputMeter: MeterReading;
+  outputMeter: MeterReading;
   setIsConnecting: (isConnecting: boolean) => void;
   setAudioReady: (isAudioReady: boolean) => void;
   setSelectedDeviceId: (selectedDeviceId: string) => void;
@@ -17,6 +20,7 @@ export type AudioStoreState = {
   setLatencyHint: (latencyHint: string) => void;
   setErrorMessage: (errorMessage: string) => void;
   setMasterVolume: (masterVolume: number) => void;
+  setMeters: (inputMeter: MeterReading, outputMeter: MeterReading) => void;
   resetAudioState: () => void;
 };
 
@@ -29,6 +33,8 @@ export const useAudioStore = create<AudioStoreState>((set) => ({
   latencyHint: 'interactive',
   errorMessage: '',
   masterVolume: 0.35,
+  inputMeter: emptyMeterReading,
+  outputMeter: emptyMeterReading,
   setIsConnecting: (isConnecting) => set({ isConnecting }),
   setAudioReady: (isAudioReady) => set({ isAudioReady }),
   setSelectedDeviceId: (selectedDeviceId) => set({ selectedDeviceId }),
@@ -37,11 +43,14 @@ export const useAudioStore = create<AudioStoreState>((set) => ({
   setLatencyHint: (latencyHint) => set({ latencyHint }),
   setErrorMessage: (errorMessage) => set({ errorMessage }),
   setMasterVolume: (masterVolume) => set({ masterVolume }),
+  setMeters: (inputMeter, outputMeter) => set({ inputMeter, outputMeter }),
   resetAudioState: () =>
     set({
       isAudioReady: false,
       isConnecting: false,
       sampleRate: 0,
       errorMessage: '',
+      inputMeter: emptyMeterReading,
+      outputMeter: emptyMeterReading,
     }),
 }));
