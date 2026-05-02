@@ -113,6 +113,11 @@ function PedalBoard({
   };
 
   const handleParamChange = (id: string, paramName: string, value: PedalParamValue) => {
+    if (paramName.startsWith('__')) {
+      onPedalParamChanged?.(id, paramName, value);
+      return;
+    }
+
     updatePedalParam(id, paramName, value);
     onPedalParamChanged?.(id, paramName, value);
   };

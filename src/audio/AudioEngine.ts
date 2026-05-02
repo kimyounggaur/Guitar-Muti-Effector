@@ -7,6 +7,7 @@ import { CabinetIREffect } from './nodes/CabinetIREffect';
 import { CompressorEffect } from './nodes/CompressorEffect';
 import { DelayEffect } from './nodes/DelayEffect';
 import { DriveEffect } from './nodes/DriveEffect';
+import { LooperNode } from './nodes/LooperNode';
 import { MeterNode, MeterReading, emptyMeterReading } from './nodes/MeterNode';
 import { ReverbEffect } from './nodes/ReverbEffect';
 import { TunerNode } from './nodes/TunerNode';
@@ -287,6 +288,10 @@ export class AudioEngine {
 
     if (type === 'reverb') {
       return new ReverbEffect(this.audioContext, id);
+    }
+
+    if (type === 'looper') {
+      return new LooperNode(this.audioContext, id);
     }
 
     if (type === 'modulation') {

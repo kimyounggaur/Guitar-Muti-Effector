@@ -4,6 +4,7 @@ import CabinetIRPedal from '../effects/CabinetIRPedal';
 import CompressorPedal from '../effects/CompressorPedal';
 import DelayPedal from '../effects/DelayPedal';
 import DrivePedal from '../effects/DrivePedal';
+import LooperPanel from '../effects/LooperPanel';
 import ReverbPedal from '../effects/ReverbPedal';
 import TunerPanel from '../effects/TunerPanel';
 
@@ -49,6 +50,22 @@ function PedalCard({
   if (pedal.type === 'reverb') {
     return (
       <ReverbPedal
+        pedal={pedal}
+        selected={selected}
+        dragAttributes={dragAttributes}
+        dragListeners={dragListeners}
+        isDragging={isDragging}
+        onSelect={onSelect}
+        onToggle={onToggle}
+        onBypass={onBypass}
+        onParamChange={onParamChange}
+      />
+    );
+  }
+
+  if (pedal.type === 'looper') {
+    return (
+      <LooperPanel
         pedal={pedal}
         selected={selected}
         dragAttributes={dragAttributes}

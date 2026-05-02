@@ -109,4 +109,19 @@ export const createDefaultPedals = (): Pedal[] => [
     bypassed: false,
     params: { mode: 'room', decay: 0.9, preDelay: 22, lowCut: 120, highCut: 7600, mix: 24, level: 72 },
   },
+  {
+    id: 'looper',
+    type: 'looper',
+    name: 'LOOPER',
+    enabled: true,
+    bypassed: false,
+    params: {
+      level: 85,
+      overdubLevel: 85,
+      feedback: 100,
+      quantize: 'off',
+      reverse: false,
+      halfSpeed: false,
+    },
+  },
 ];

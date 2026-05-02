@@ -26,6 +26,13 @@ const clonePedals = (pedals: Pedal[]) =>
     params: { ...pedal.params },
   }));
 
+const mergeWithDefaultPedals = (pedals: Pedal[]) => {
+  const clonedPedals = clonePedals(pedals);
+  const existingIds = new Set(clonedPedals.map((pedal) => pedal.id));
+  const missingPedals = createDefaultPedals().filter((pedal) => !existingIds.has(pedal.id));
+  return [...clonedPedals, ...clonePedals(missingPedals)];
+};
+
 const readStoredPedals = () => {
   try {
     const raw = window.localStorage.getItem(PEDAL_STORAGE_KEY);
@@ -72,7 +79,7 @@ export const usePedalStore = create<PedalStore>((set, get) => ({
       ),
     })),
   setPedals: (pedals) => {
-    const nextPedals = clonePedals(pedals);
+    const nextPedals = mergeWithDefaultPedals(pedals);
     writeStoredPedals(nextPedals);
     set({
       pedals: nextPedals,
@@ -112,7 +119,9 @@ export const usePedalStore = create<PedalStore>((set, get) => ({
     const storedPedals = readStoredPedals();
 
     if (storedPedals) {
-      set({ pedals: clonePedals(storedPedals), selectedPedalId: storedPedals[0]?.id ?? null });
+      const pedals = mergeWithDefaultPedals(storedPedals);
+      writeStoredPedals(pedals);
+      set({ pedals, selectedPedalId: pedals[0]?.id ?? null });
     }
   },
 }));
