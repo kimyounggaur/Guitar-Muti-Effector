@@ -1698,6 +1698,126 @@ input {
   color: #ffe0a4;
 }
 
+.modulation-pedal {
+  border-color: rgba(124, 214, 255, 0.3);
+}
+
+.modulation-display em {
+  color: #bfeeff;
+}
+
+.modulation-orbit {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 108px;
+  overflow: hidden;
+  border: 1px solid rgba(124, 214, 255, 0.2);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(124, 214, 255, 0.18), transparent 54%),
+    #0a0d0c;
+}
+
+.modulation-orbit i {
+  position: absolute;
+  width: 54%;
+  height: 22px;
+  border: 1px solid rgba(124, 214, 255, 0.26);
+  border-radius: 999px;
+}
+
+.modulation-orbit i:nth-child(1) {
+  transform: rotate(0deg);
+}
+
+.modulation-orbit i:nth-child(2) {
+  transform: rotate(55deg);
+}
+
+.modulation-orbit i:nth-child(3) {
+  transform: rotate(-55deg);
+}
+
+.modulation-orbit strong {
+  z-index: 1;
+  color: #bfeeff;
+  font-size: 1.22rem;
+  letter-spacing: 0;
+}
+
+.modulation-orbit span {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.modulation-orbit.is-flanger i {
+  border-color: rgba(246, 200, 95, 0.34);
+}
+
+.modulation-orbit.is-phaser i {
+  border-color: rgba(183, 143, 255, 0.36);
+}
+
+.modulation-orbit.is-tremolo i {
+  border-color: rgba(255, 111, 97, 0.34);
+}
+
+.modulation-row,
+.modulation-tempo-panel {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(82px, auto);
+  gap: 10px;
+}
+
+.modulation-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.modulation-control,
+.modulation-sync-toggle {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.modulation-sync-toggle {
+  align-items: center;
+  justify-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px;
+}
+
+.modulation-control input,
+.modulation-control select {
+  min-width: 0;
+  width: 100%;
+}
+
+.modulation-control input[type="range"] {
+  accent-color: #7cd6ff;
+}
+
+.modulation-control strong {
+  color: #bfeeff;
+}
+
+.modulation-control.is-disabled {
+  opacity: 0.55;
+}
+
+.modulation-tempo-panel {
+  grid-template-columns: minmax(110px, 1fr) minmax(128px, 1fr) minmax(92px, auto);
+  align-items: end;
+}
+
 .pedal-placeholder strong {
   align-self: end;
   font-size: 1.7rem;

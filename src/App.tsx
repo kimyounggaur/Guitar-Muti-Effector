@@ -46,7 +46,9 @@ function App() {
     return useTempoStore.subscribe((state) => {
       const syncedDelayPedals = usePedalStore
         .getState()
-        .pedals.filter((pedal) => pedal.type === 'delay' && pedal.params.sync === true);
+        .pedals.filter(
+          (pedal) => (pedal.type === 'delay' || pedal.type === 'modulation') && pedal.params.sync === true,
+        );
 
       syncedDelayPedals.forEach((pedal) => {
         usePedalStore.getState().updatePedalParam(pedal.id, 'bpm', state.bpm);

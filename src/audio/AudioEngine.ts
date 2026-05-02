@@ -1,7 +1,4 @@
-import {
-  ModulationEffect,
-  PassthroughEffect,
-} from './nodes/BaseEffect';
+import { PassthroughEffect } from './nodes/BaseEffect';
 import { AmpEQEffect } from './nodes/AmpEQEffect';
 import { CabinetIREffect } from './nodes/CabinetIREffect';
 import { CompressorEffect } from './nodes/CompressorEffect';
@@ -9,6 +6,7 @@ import { DelayEffect } from './nodes/DelayEffect';
 import { DriveEffect } from './nodes/DriveEffect';
 import { LooperNode } from './nodes/LooperNode';
 import { MeterNode, MeterReading, emptyMeterReading } from './nodes/MeterNode';
+import { ModulationEffect } from './nodes/ModulationEffect';
 import { ReverbEffect } from './nodes/ReverbEffect';
 import { RhythmNode } from './nodes/RhythmNode';
 import { TunerNode } from './nodes/TunerNode';

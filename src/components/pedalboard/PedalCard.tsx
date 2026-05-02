@@ -5,6 +5,7 @@ import CompressorPedal from '../effects/CompressorPedal';
 import DelayPedal from '../effects/DelayPedal';
 import DrivePedal from '../effects/DrivePedal';
 import LooperPanel from '../effects/LooperPanel';
+import ModulationPedal from '../effects/ModulationPedal';
 import ReverbPedal from '../effects/ReverbPedal';
 import RhythmPanel from '../effects/RhythmPanel';
 import TunerPanel from '../effects/TunerPanel';
@@ -99,6 +100,22 @@ function PedalCard({
   if (pedal.type === 'delay') {
     return (
       <DelayPedal
+        pedal={pedal}
+        selected={selected}
+        dragAttributes={dragAttributes}
+        dragListeners={dragListeners}
+        isDragging={isDragging}
+        onSelect={onSelect}
+        onToggle={onToggle}
+        onBypass={onBypass}
+        onParamChange={onParamChange}
+      />
+    );
+  }
+
+  if (pedal.type === 'modulation') {
+    return (
+      <ModulationPedal
         pedal={pedal}
         selected={selected}
         dragAttributes={dragAttributes}

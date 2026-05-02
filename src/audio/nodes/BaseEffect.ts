@@ -111,21 +111,3 @@ export class PassthroughEffect extends BaseEffect {
     this.setMix(1);
   }
 }
-
-export class ModulationEffect extends BaseEffect {
-  constructor(context: AudioContext, id: string) {
-    super(context, id, 'modulation');
-    const delay = context.createDelay(0.04);
-    const depth = context.createGain();
-    const lfo = context.createOscillator();
-    delay.delayTime.value = 0.012;
-    depth.gain.value = 0.004;
-    lfo.frequency.value = 0.7;
-    lfo.connect(depth);
-    depth.connect(delay.delayTime);
-    lfo.start();
-    this.connectWet(delay);
-    this.nodes.push(depth, lfo);
-    this.setMix(0.5);
-  }
-}
