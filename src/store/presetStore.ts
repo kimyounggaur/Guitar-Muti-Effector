@@ -42,6 +42,8 @@ const createId = (prefix = 'preset') =>
 
 const nowIso = () => new Date().toISOString();
 
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
 const sanitizeName = (name: string, fallback = 'Untitled Preset') => {
   const trimmed = name.trim();
   return trimmed.length > 0 ? trimmed.slice(0, 64) : fallback;
@@ -326,5 +328,3 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
   },
   exportPresets: () => JSON.stringify({ version: 1, presets: get().presets.map(clonePreset) }, null, 2),
 }));
-
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));

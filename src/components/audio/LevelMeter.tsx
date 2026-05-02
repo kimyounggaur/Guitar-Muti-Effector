@@ -7,6 +7,7 @@ type LevelMeterProps = {
 };
 
 const formatDb = (db: number) => `${Math.round(db)} dBFS`;
+const nowMs = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
 function LevelMeter({ label, meter }: LevelMeterProps) {
   const [clipUntil, setClipUntil] = useState(0);
@@ -14,13 +15,13 @@ function LevelMeter({ label, meter }: LevelMeterProps) {
 
   useEffect(() => {
     if (meter.isClipping) {
-      setClipUntil(performance.now() + 900);
+      setClipUntil(nowMs() + 900);
     }
 
     setPeakHold((current) => Math.max(meter.peakDb, current - 0.7));
   }, [meter.isClipping, meter.peakDb]);
 
-  const isClipHeld = clipUntil > performance.now();
+  const isClipHeld = clipUntil > nowMs();
   const peakPercent = Math.min(100, Math.max(0, ((peakHold + 60) / 60) * 100));
 
   return (
