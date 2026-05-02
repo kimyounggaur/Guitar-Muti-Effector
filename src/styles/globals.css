@@ -429,6 +429,201 @@ input {
   accent-color: var(--accent);
 }
 
+.cabinet-ir-pedal {
+  min-height: 570px;
+  background:
+    linear-gradient(135deg, rgba(170, 181, 173, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(246, 200, 95, 0.08), transparent),
+    var(--card);
+}
+
+.cabinet-display {
+  align-content: center;
+}
+
+.cabinet-display em {
+  color: #ffcf6d;
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.cabinet-curve-canvas {
+  display: block;
+  width: 100%;
+  height: 100px;
+  border: 1px solid #303a35;
+  border-radius: 8px;
+  background: #0a0d0c;
+}
+
+.cabinet-row,
+.cabinet-controls {
+  display: grid;
+  gap: 10px;
+}
+
+.cabinet-row {
+  grid-template-columns: 1fr 1fr;
+}
+
+.cabinet-control {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.78fr) minmax(0, 1fr) minmax(68px, auto);
+  gap: 8px;
+  align-items: center;
+}
+
+.cabinet-control.is-wide {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.cabinet-control select,
+.ir-upload input::file-selector-button {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111514;
+  color: var(--text);
+}
+
+.cabinet-control select {
+  width: 100%;
+  padding: 0 10px;
+}
+
+.cabinet-control input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: #ffcf6d;
+}
+
+.cabinet-control strong {
+  color: var(--text);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ir-upload {
+  display: grid;
+  grid-template-columns: minmax(58px, 0.7fr) minmax(0, 1.15fr);
+  gap: 8px;
+  align-items: center;
+  border: 1px solid #303a35;
+  border-radius: 8px;
+  background: #0a0d0c;
+  padding: 10px;
+}
+
+.ir-upload input {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.ir-upload input::file-selector-button {
+  margin-right: 8px;
+  padding: 0 10px;
+  font-weight: 900;
+}
+
+.ir-upload strong {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amp-eq-pedal {
+  min-height: 590px;
+  background:
+    linear-gradient(135deg, rgba(246, 200, 95, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(53, 208, 163, 0.08), transparent),
+    var(--card);
+}
+
+.amp-eq-display {
+  align-content: center;
+}
+
+.amp-eq-display em {
+  color: #f6c85f;
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.eq-curve-canvas {
+  display: block;
+  width: 100%;
+  height: 108px;
+  border: 1px solid #303a35;
+  border-radius: 8px;
+  background: #0a0d0c;
+}
+
+.amp-eq-row,
+.amp-eq-controls,
+.amp-eq-advanced {
+  display: grid;
+  gap: 10px;
+}
+
+.amp-eq-control {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.78fr) minmax(0, 1fr) minmax(58px, auto);
+  gap: 8px;
+  align-items: center;
+}
+
+.amp-eq-control.is-wide {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.amp-eq-control select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111514;
+  color: var(--text);
+  padding: 0 10px;
+}
+
+.amp-eq-control input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: #f6c85f;
+}
+
+.amp-eq-control strong {
+  color: var(--text);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.amp-eq-advanced {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 8px;
+}
+
+.amp-eq-advanced summary {
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .compressor-pedal {
   min-height: 560px;
   background:

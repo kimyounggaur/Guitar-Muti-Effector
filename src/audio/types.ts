@@ -70,18 +70,18 @@ export const createDefaultPedals = (): Pedal[] => [
   {
     id: 'amp-eq',
     type: 'ampEQ',
-    name: 'Amp EQ',
+    name: 'AMP EQ',
     enabled: true,
     bypassed: false,
-    params: { bassDb: 2, midDb: -1, trebleDb: 2, presenceDb: 1 },
+    params: { lowCut: 70, bass: 2, mid: -1, midFreq: 760, midQ: 0.9, treble: 2, presence: 1, level: 72 },
   },
   {
     id: 'cabinet-ir',
     type: 'cabinetIR',
-    name: 'Cabinet IR',
+    name: 'CAB IR',
     enabled: true,
     bypassed: false,
-    params: { cabinet: 'Cab IR', mix: 1 },
+    params: { cabinetType: '2x12', mic: 'dynamic', lowCut: 80, highCut: 6500, mix: 100, level: 72 },
   },
   {
     id: 'delay',

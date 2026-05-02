@@ -1,11 +1,11 @@
 import {
-  AmpEQEffect,
-  CabinetIREffect,
   DelayEffect,
   ModulationEffect,
   PassthroughEffect,
   ReverbEffect,
 } from './nodes/BaseEffect';
+import { AmpEQEffect } from './nodes/AmpEQEffect';
+import { CabinetIREffect } from './nodes/CabinetIREffect';
 import { CompressorEffect } from './nodes/CompressorEffect';
 import { DriveEffect } from './nodes/DriveEffect';
 import { MeterNode, MeterReading, emptyMeterReading } from './nodes/MeterNode';

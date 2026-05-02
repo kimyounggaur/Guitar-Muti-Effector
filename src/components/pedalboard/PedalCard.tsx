@@ -1,4 +1,6 @@
 import { Pedal, PedalParamValue } from '../../audio/types';
+import AmpEQPedal from '../effects/AmpEQPedal';
+import CabinetIRPedal from '../effects/CabinetIRPedal';
 import CompressorPedal from '../effects/CompressorPedal';
 import DrivePedal from '../effects/DrivePedal';
 
@@ -25,6 +27,38 @@ function PedalCard({
   onBypass,
   onParamChange,
 }: PedalCardProps) {
+  if (pedal.type === 'cabinetIR') {
+    return (
+      <CabinetIRPedal
+        pedal={pedal}
+        selected={selected}
+        dragAttributes={dragAttributes}
+        dragListeners={dragListeners}
+        isDragging={isDragging}
+        onSelect={onSelect}
+        onToggle={onToggle}
+        onBypass={onBypass}
+        onParamChange={onParamChange}
+      />
+    );
+  }
+
+  if (pedal.type === 'ampEQ') {
+    return (
+      <AmpEQPedal
+        pedal={pedal}
+        selected={selected}
+        dragAttributes={dragAttributes}
+        dragListeners={dragListeners}
+        isDragging={isDragging}
+        onSelect={onSelect}
+        onToggle={onToggle}
+        onBypass={onBypass}
+        onParamChange={onParamChange}
+      />
+    );
+  }
+
   if (pedal.type === 'compressor') {
     return (
       <CompressorPedal

@@ -112,56 +112,6 @@ export class PassthroughEffect extends BaseEffect {
   }
 }
 
-export class AmpEQEffect extends BaseEffect {
-  constructor(context: AudioContext, id: string) {
-    super(context, id, 'ampEQ');
-    const bass = context.createBiquadFilter();
-    const mid = context.createBiquadFilter();
-    const treble = context.createBiquadFilter();
-    const presence = context.createBiquadFilter();
-
-    bass.type = 'lowshelf';
-    bass.frequency.value = 140;
-    mid.type = 'peaking';
-    mid.frequency.value = 760;
-    mid.Q.value = 0.9;
-    treble.type = 'highshelf';
-    treble.frequency.value = 2600;
-    presence.type = 'peaking';
-    presence.frequency.value = 4200;
-    presence.Q.value = 0.7;
-
-    this.connectWet(bass, mid, treble, presence);
-    this.setMix(1);
-
-    this.paramHandlers.set('bassDb', (value) => smoothParam(context, bass.gain, asNumber(value, 0)));
-    this.paramHandlers.set('midDb', (value) => smoothParam(context, mid.gain, asNumber(value, 0)));
-    this.paramHandlers.set('trebleDb', (value) => smoothParam(context, treble.gain, asNumber(value, 0)));
-    this.paramHandlers.set('presenceDb', (value) => smoothParam(context, presence.gain, asNumber(value, 0)));
-  }
-}
-
-export class CabinetIREffect extends BaseEffect {
-  constructor(context: AudioContext, id: string) {
-    super(context, id, 'cabinetIR');
-    const highpass = context.createBiquadFilter();
-    const body = context.createBiquadFilter();
-    const lowpass = context.createBiquadFilter();
-    highpass.type = 'highpass';
-    highpass.frequency.value = 70;
-    body.type = 'peaking';
-    body.frequency.value = 240;
-    body.gain.value = 3;
-    body.Q.value = 0.8;
-    lowpass.type = 'lowpass';
-    lowpass.frequency.value = 5200;
-    lowpass.Q.value = 0.7;
-    this.connectWet(highpass, body, lowpass);
-    this.setMix(1);
-    this.paramHandlers.set('mix', (value) => this.setMix(asNumber(value, 1)));
-  }
-}
-
 export class DelayEffect extends BaseEffect {
   private readonly delay: DelayNode;
   private readonly feedback: GainNode;
