@@ -307,7 +307,9 @@ function App() {
           <RightUtilityPanel
             bpm={tempoBpm}
             tapCount={tapCount}
+            masterVolume={masterVolume}
             selectedPedalName={selectedPedal?.name ?? 'NONE'}
+            onMasterVolumeChange={handleMasterVolumeChange}
             onTapTempo={handleTapTempo}
             onTuner={handleTunerQuick}
           />

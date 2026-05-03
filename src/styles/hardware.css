@@ -519,7 +519,8 @@
 }
 
 .utility-readout,
-.tempo-readout {
+.tempo-readout,
+.master-volume-readout {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.22);
@@ -542,6 +543,57 @@
   color: #7f8a84;
   font-size: 0.7rem;
   font-weight: 900;
+}
+
+.master-volume-readout {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.master-utility-knob.knob-control {
+  width: 100%;
+  min-height: 126px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  gap: 8px;
+}
+
+.master-utility-knob.knob-control > span {
+  justify-self: center;
+  color: #9fd5e8;
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.master-utility-knob .knob-face {
+  width: clamp(70px, 5.4vw, 92px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(circle at 36% 28%, rgba(255, 255, 255, 0.28), transparent 22%),
+    radial-gradient(circle, #34363b 0 42%, #101116 45% 100%);
+  box-shadow:
+    inset 0 9px 18px rgba(255, 255, 255, 0.08),
+    inset 0 -14px 22px rgba(0, 0, 0, 0.7),
+    0 12px 18px rgba(0, 0, 0, 0.28);
+}
+
+.master-utility-knob .knob-face::before {
+  background: conic-gradient(from -135deg, var(--skin-mint, #36f0ce), #eef8ff, var(--skin-red, #ff5d54));
+  opacity: 0.9;
+}
+
+.master-utility-knob .knob-face::after {
+  background: linear-gradient(180deg, #fff9f5, #f0ece8);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.34);
+}
+
+.master-utility-knob strong {
+  color: #f7fbff;
+  font-size: 0.9rem;
 }
 
 .tap-button,
@@ -910,6 +962,7 @@
 .patch-identity strong,
 .screen-param-cell strong,
 .right-utility-panel strong,
+.master-utility-knob strong,
 .expression-label strong,
 .master-status-item strong {
   color: var(--skin-ink);
@@ -919,6 +972,7 @@
 .patch-identity span,
 .screen-param-cell span,
 .right-utility-panel span,
+.master-utility-knob.knob-control > span,
 .expression-label span,
 .master-status-item b,
 .tempo-readout small {
@@ -940,6 +994,7 @@
 
 .mode-encoder,
 .hardware-knob-control .knob-face,
+.master-utility-knob .knob-face,
 .hardware-footswitch::before {
   background:
     radial-gradient(circle at 38% 28%, rgba(255, 255, 255, 0.28), transparent 22%),
@@ -975,6 +1030,7 @@
 .screen-chain-window,
 .utility-readout,
 .tempo-readout,
+.master-volume-readout,
 .master-status-item {
   border-color: rgba(45, 39, 41, 0.16);
   background: rgba(16, 18, 22, 0.82);
