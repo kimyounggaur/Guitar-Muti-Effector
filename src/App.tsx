@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { AudioEngine } from './audio/AudioEngine';
 import { Pedal, PedalParamValue } from './audio/types';
+import AudioFilePlayerPanel from './components/audio/AudioFilePlayerPanel';
 import ConnectGuitarPanel from './components/audio/ConnectGuitarPanel';
 import CentralScreen from './components/hardware/CentralScreen';
 import ControlKnobPanel from './components/hardware/ControlKnobPanel';
@@ -316,6 +317,7 @@ function App() {
           onStop={handleStop}
           onDeviceChange={handleDeviceChange}
         />
+        <AudioFilePlayerPanel />
         <PedalDetailPanel
           onPedalToggled={handleChainRebuild}
           onPedalBypassChanged={handlePedalBypass}
