@@ -47,6 +47,17 @@ const AMP_EQ_PRESETS: AmpEQPreset[] = [
   },
 ];
 
+const AMP_EQ_RESET_PARAMS: AmpEQParams = {
+  lowCut: 70,
+  bass: 0,
+  mid: 0,
+  midFreq: 760,
+  midQ: 0.9,
+  treble: 0,
+  presence: 0,
+  level: 72,
+};
+
 type AmpEQPedalProps = {
   pedal: Pedal;
   selected: boolean;
@@ -94,33 +105,39 @@ function AmpEQPedal({
     Object.entries(preset.params).forEach(([name, value]) => setParam(name, value));
   };
 
+  const resetEQ = () => {
+    Object.entries(AMP_EQ_RESET_PARAMS).forEach(([name, value]) => setParam(name, value));
+  };
+
   return (
     <article
-      className={`pedal-card amp-eq-pedal ${selected ? 'is-selected' : ''} ${pedal.enabled ? 'is-on' : 'is-off'} ${
+      className={`pedal-card amp-eq-pedal classic-eq-module ${selected ? 'is-selected' : ''} ${
+        pedal.enabled ? 'is-on' : 'is-off'
+      } ${
         isDragging ? 'is-dragging' : ''
       }`}
     >
-      <div className="pedal-top">
+      <span className="classic-eq-slot is-top-left" aria-hidden="true" />
+      <span className="classic-eq-slot is-top-right" aria-hidden="true" />
+      <span className="classic-eq-slot is-bottom-left" aria-hidden="true" />
+      <span className="classic-eq-slot is-bottom-right" aria-hidden="true" />
+
+      <div className="classic-eq-header">
         <button
           type="button"
-          className="drag-handle"
+          className="drag-handle classic-eq-drag"
           aria-label={`Move ${pedal.name}`}
           {...dragAttributes}
           {...dragListeners}
         >
           ≡
         </button>
-        <button type="button" className="pedal-select amp-eq-display" onClick={() => onSelect(pedal.id)}>
-          <span>Amp tone stack</span>
-          <strong>AMP EQ</strong>
+        <button type="button" className="pedal-select amp-eq-display classic-eq-title" onClick={() => onSelect(pedal.id)}>
+          <span>AMP MODULE</span>
+          <strong>CLASSIC EQ</strong>
           <em>{formatToneLabel(params)}</em>
         </button>
-      </div>
-
-      <canvas ref={canvasRef} className="eq-curve-canvas" width="580" height="156" aria-label="Amp EQ curve graph" />
-
-      <div className="amp-eq-row">
-        <label className="amp-eq-control is-wide">
+        <label className="classic-eq-preset">
           <span>Preset</span>
           <select value={matchedPreset} onChange={(event) => applyPreset(event.target.value)}>
             <option value="custom">Custom</option>
@@ -133,45 +150,116 @@ function AmpEQPedal({
         </label>
       </div>
 
-      <div className="amp-eq-controls">
-        <EQSlider label="Bass" value={params.bass} min={-12} max={12} suffix="dB" onChange={(value) => setParam('bass', value)} />
-        <EQSlider label="Mid" value={params.mid} min={-12} max={12} suffix="dB" onChange={(value) => setParam('mid', value)} />
-        <EQSlider
-          label="Mid Freq"
-          value={params.midFreq}
-          min={250}
-          max={1500}
-          suffix="Hz"
-          onChange={(value) => setParam('midFreq', value)}
-        />
-        <EQSlider
-          label="Treble"
-          value={params.treble}
-          min={-12}
-          max={12}
-          suffix="dB"
-          onChange={(value) => setParam('treble', value)}
-        />
-        <EQSlider
-          label="Presence"
-          value={params.presence}
-          min={-12}
-          max={12}
-          suffix="dB"
-          onChange={(value) => setParam('presence', value)}
-        />
-        <EQSlider label="Level" value={params.level} min={0} max={100} onChange={(value) => setParam('level', value)} />
+      <div className="classic-eq-top-deck">
+        <div className="classic-eq-toggle-stack">
+          <span className="classic-eq-lamp is-reset" aria-hidden="true" />
+          <button type="button" className="classic-eq-metal-toggle" onClick={resetEQ}>
+            Reset
+          </button>
+          <div className="classic-eq-mode-pad" aria-label="Channel mode">
+            <button type="button">L</button>
+            <button type="button" className="is-active">
+              L/R
+            </button>
+            <button type="button">R</button>
+            <button type="button">M/S</button>
+          </div>
+        </div>
+
+        <div className="classic-eq-graph-wrap">
+          <canvas ref={canvasRef} className="eq-curve-canvas" width="760" height="186" aria-label="Amp EQ curve graph" />
+          <div className="classic-eq-graph-labels" aria-hidden="true">
+            <span>20Hz</span>
+            <span>200Hz</span>
+            <span>+20dB</span>
+            <span>2kHz</span>
+            <span>20kHz</span>
+            <span>-20dB</span>
+          </div>
+        </div>
+
+        <div className="classic-eq-toggle-stack is-bypass">
+          <span className={`classic-eq-lamp ${pedal.bypassed ? 'is-lit' : ''}`} aria-hidden="true" />
+          <button
+            type="button"
+            className={`classic-eq-metal-toggle ${pedal.bypassed ? 'is-bypassed' : ''}`}
+            onClick={() => onBypass(pedal.id, !pedal.bypassed)}
+          >
+            Bypass
+          </button>
+        </div>
       </div>
 
-      <details className="amp-eq-advanced">
-        <summary>Advanced</summary>
+      <div className="classic-eq-main-controls">
         <EQSlider
+          band="1"
           label="Low Cut"
           value={params.lowCut}
           min={40}
           max={160}
           suffix="Hz"
           onChange={(value) => setParam('lowCut', value)}
+        />
+        <EQSlider
+          band="2"
+          label="Bass"
+          value={params.bass}
+          min={-12}
+          max={12}
+          step={0.5}
+          suffix="dB"
+          onChange={(value) => setParam('bass', value)}
+        />
+        <EQSlider
+          band="3"
+          label="Mid"
+          value={params.mid}
+          min={-12}
+          max={12}
+          step={0.5}
+          suffix="dB"
+          onChange={(value) => setParam('mid', value)}
+        />
+        <EQSlider
+          band="4"
+          label="Treble"
+          value={params.treble}
+          min={-12}
+          max={12}
+          step={0.5}
+          suffix="dB"
+          onChange={(value) => setParam('treble', value)}
+        />
+        <EQSlider
+          band="5"
+          label="Presence"
+          value={params.presence}
+          min={-12}
+          max={12}
+          step={0.5}
+          suffix="dB"
+          onChange={(value) => setParam('presence', value)}
+        />
+        <EQSlider
+          band="6"
+          label="Output"
+          value={params.level}
+          min={0}
+          max={100}
+          onChange={(value) => setParam('level', value)}
+        />
+      </div>
+
+      <div className="classic-eq-lower-controls">
+        <span>Freq / Q</span>
+        <EQSlider
+          label="Mid Freq"
+          value={params.midFreq}
+          min={250}
+          max={1500}
+          step={10}
+          suffix="Hz"
+          onChange={(value) => setParam('midFreq', value)}
         />
         <EQSlider
           label="Mid Q"
@@ -181,11 +269,11 @@ function AmpEQPedal({
           step={0.1}
           onChange={(value) => setParam('midQ', value)}
         />
-      </details>
+      </div>
 
       <div className="pedal-switches">
         <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-          {pedal.enabled ? 'On' : 'Off'}
+          {pedal.enabled ? 'Module On' : 'Module Off'}
         </button>
         <button
           type="button"
@@ -200,6 +288,7 @@ function AmpEQPedal({
 }
 
 type EQSliderProps = {
+  band?: string;
   label: string;
   value: number;
   min: number;
@@ -209,18 +298,21 @@ type EQSliderProps = {
   onChange: (value: number) => void;
 };
 
-function EQSlider({ label, value, min, max, step = 1, suffix = '', onChange }: EQSliderProps) {
+function EQSlider({ band, label, value, min, max, step = 1, suffix = '', onChange }: EQSliderProps) {
   return (
-    <KnobControl
-      className="amp-eq-control"
-      label={label}
-      value={value}
-      min={min}
-      max={max}
-      step={step}
-      suffix={suffix}
-      onChange={onChange}
-    />
+    <div className="classic-eq-knob-wrap">
+      {band ? <span className="classic-eq-band">{band}</span> : null}
+      <KnobControl
+        className="amp-eq-control classic-eq-knob"
+        label={label}
+        value={value}
+        min={min}
+        max={max}
+        step={step}
+        suffix={suffix}
+        onChange={onChange}
+      />
+    </div>
   );
 }
 
@@ -278,7 +370,7 @@ const drawEQCurve = (canvas: HTMLCanvasElement, params: AmpEQParams) => {
   context.clearRect(0, 0, width, height);
   drawEQGrid(context, width, height);
 
-  context.strokeStyle = '#35d0a3';
+  context.strokeStyle = '#6d9b22';
   context.lineWidth = 2.5;
   context.beginPath();
 
@@ -295,15 +387,16 @@ const drawEQCurve = (canvas: HTMLCanvasElement, params: AmpEQParams) => {
   }
 
   context.stroke();
+  drawEQBandNodes(context, width, height, params);
 };
 
 const drawEQGrid = (context: CanvasRenderingContext2D, width: number, height: number) => {
-  context.fillStyle = '#0a0d0c';
+  context.fillStyle = '#151718';
   context.fillRect(0, 0, width, height);
   context.strokeStyle = 'rgba(255, 255, 255, 0.08)';
   context.lineWidth = 1;
 
-  [80, 250, 750, 1500, 4000, 8000].forEach((frequency) => {
+  [40, 80, 160, 250, 500, 750, 1500, 2200, 4000, 8000, 12000].forEach((frequency) => {
     const x = frequencyToX(frequency, width);
     context.beginPath();
     context.moveTo(x, 0);
@@ -321,12 +414,45 @@ const drawEQGrid = (context: CanvasRenderingContext2D, width: number, height: nu
 
   context.fillStyle = 'rgba(255, 255, 255, 0.45)';
   context.font = '10px system-ui';
-  context.fillText('80', frequencyToX(80, width) + 3, height - 8);
-  context.fillText('750', frequencyToX(750, width) + 3, height - 8);
-  context.fillText('4k', frequencyToX(4000, width) + 3, height - 8);
-  context.fillText('+12', 8, dbToY(12, height) + 10);
+  context.fillText('20Hz', 5, height * 0.58);
+  context.fillText('200Hz', frequencyToX(200, width) + 3, height * 0.58);
+  context.fillText('2kHz', frequencyToX(2000, width) + 3, height * 0.58);
+  context.fillText('20kHz', width - 42, height * 0.58);
+  context.fillText('+20dB', width / 2 + 8, 16);
   context.fillText('0', 8, dbToY(0, height) - 4);
-  context.fillText('-12', 8, dbToY(-12, height) - 4);
+  context.fillText('-20dB', width / 2 + 8, height - 12);
+};
+
+const drawEQBandNodes = (context: CanvasRenderingContext2D, width: number, height: number, params: AmpEQParams) => {
+  const nodes = [
+    { label: '1', frequency: params.lowCut, db: calculateApproxResponse(params.lowCut, params) + 7 },
+    { label: '2', frequency: 135, db: params.bass },
+    { label: '3', frequency: params.midFreq, db: params.mid },
+    { label: '4', frequency: 2700, db: params.treble },
+    { label: '5', frequency: 4300, db: params.presence },
+    { label: '6', frequency: 8000, db: params.presence * 0.35 },
+  ];
+
+  context.save();
+  context.font = 'bold 13px system-ui';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+
+  nodes.forEach((node) => {
+    const x = frequencyToX(node.frequency, width);
+    const y = Math.max(18, Math.min(height - 18, dbToY(node.db, height) - 18));
+    context.beginPath();
+    context.arc(x, y, 15, 0, Math.PI * 2);
+    context.fillStyle = 'rgba(109, 155, 34, 0.24)';
+    context.fill();
+    context.lineWidth = 3;
+    context.strokeStyle = '#6d9b22';
+    context.stroke();
+    context.fillStyle = '#b8dc5f';
+    context.fillText(node.label, x, y);
+  });
+
+  context.restore();
 };
 
 const calculateApproxResponse = (frequency: number, params: AmpEQParams) => {
