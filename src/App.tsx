@@ -217,6 +217,32 @@ function App() {
     audioEngineRef.current.setPedalParam(pedalId, paramName, value);
   }, []);
 
+  const handlePrepareUploadedAudio = useCallback(
+    async (audioElement: HTMLAudioElement) => {
+      setIsConnecting(true);
+      setErrorMessage('');
+
+      try {
+        const state = await audioEngineRef.current.connectUploadedAudio(
+          audioElement,
+          useAudioStore.getState().masterVolume,
+          usePedalStore.getState().pedals,
+        );
+        setSampleRate(state.sampleRate);
+        setLatencyHint(state.latencyHint);
+        setAudioReady(true);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Could not route uploaded audio through effects.';
+        setAudioReady(false);
+        setErrorMessage(message);
+        throw new Error(message);
+      } finally {
+        setIsConnecting(false);
+      }
+    },
+    [setAudioReady, setErrorMessage, setIsConnecting, setLatencyHint, setSampleRate],
+  );
+
   const handleLoadPreset = useCallback(
     (preset: PedalboardPreset) => {
       usePedalStore.getState().setPedals(preset.pedals);
@@ -318,7 +344,7 @@ function App() {
           onStop={handleStop}
           onDeviceChange={handleDeviceChange}
         />
-        <AudioFilePlayerPanel />
+        <AudioFilePlayerPanel isEffectChainReady={isAudioReady} onPreparePlayback={handlePrepareUploadedAudio} />
         <PedalDetailPanel
           onPedalToggled={handleChainRebuild}
           onPedalBypassChanged={handlePedalBypass}

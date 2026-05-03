@@ -30,6 +30,8 @@ export class AudioEngine {
   private audioContext: AudioContext | null = null;
   private stream: MediaStream | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
+  private mediaElement: HTMLMediaElement | null = null;
+  private mediaElementSource: MediaElementAudioSourceNode | null = null;
   private masterGain: GainNode | null = null;
   private inputMeter: MeterNode | null = null;
   private outputMeter: MeterNode | null = null;
@@ -40,7 +42,7 @@ export class AudioEngine {
   private readonly latencyHint: AudioContextLatencyCategory = 'interactive';
 
   get isReady() {
-    return Boolean(this.audioContext && this.stream && this.masterGain);
+    return Boolean(this.audioContext && this.masterGain && (this.stream || this.mediaElementSource));
   }
 
   async connect(selectedDeviceId: string, masterVolume: number): Promise<AudioEngineState> {
@@ -62,6 +64,34 @@ export class AudioEngine {
 
     await this.replaceStream(selectedDeviceId);
     this.rebuildPassThrough(masterVolume);
+
+    return {
+      sampleRate: this.audioContext.sampleRate,
+      latencyHint: this.latencyHint,
+    };
+  }
+
+  async connectUploadedAudio(
+    mediaElement: HTMLMediaElement,
+    masterVolume: number,
+    pedals: Pedal[],
+  ): Promise<AudioEngineState> {
+    await this.ensureContext();
+
+    if (!this.audioContext || !this.masterGain) {
+      throw new Error('AudioContext is not ready.');
+    }
+
+    if (this.mediaElement !== mediaElement) {
+      safeDisconnect(this.mediaElementSource);
+      this.mediaElementSource = this.audioContext.createMediaElementSource(mediaElement);
+      this.mediaElement = mediaElement;
+    }
+
+    this.currentMasterVolume = masterVolume;
+    this.masterGain.gain.setValueAtTime(masterVolume, this.audioContext.currentTime);
+    this.rebuildChain(pedals);
+    await this.audioContext.resume();
 
     return {
       sampleRate: this.audioContext.sampleRate,
@@ -94,7 +124,7 @@ export class AudioEngine {
   }
 
   rebuildChain(pedals: Pedal[]) {
-    if (!this.audioContext || !this.source || !this.masterGain || !this.inputMeter || !this.outputMeter) {
+    if (!this.audioContext || !this.masterGain || !this.inputMeter || !this.outputMeter || !this.hasInputSource()) {
       return;
     }
 
@@ -105,14 +135,14 @@ export class AudioEngine {
     this.pendingRebuildTimer = window.setTimeout(() => {
       this.pendingRebuildTimer = 0;
       try {
-        if (!this.audioContext || !this.source || !this.masterGain || !this.inputMeter || !this.outputMeter) {
+        if (!this.audioContext || !this.masterGain || !this.inputMeter || !this.outputMeter || !this.hasInputSource()) {
           return;
         }
 
         this.disconnectAudioGraph();
         this.disposeMissingEffects(pedals);
 
-        this.source.connect(this.inputMeter.input);
+        this.connectInputSources();
         let previousNode: AudioNode = this.inputMeter.output;
 
         pedals.forEach((pedal) => {
@@ -182,6 +212,8 @@ export class AudioEngine {
     this.masterGain = null;
     this.inputMeter = null;
     this.outputMeter = null;
+    this.mediaElement = null;
+    this.mediaElementSource = null;
     this.effectMap.forEach((effect) => effect.dispose());
     this.effectMap.clear();
   }
@@ -211,13 +243,13 @@ export class AudioEngine {
   }
 
   private rebuildPassThrough(masterVolume: number) {
-    if (!this.audioContext || !this.source || !this.masterGain || !this.inputMeter || !this.outputMeter) {
+    if (!this.audioContext || !this.masterGain || !this.inputMeter || !this.outputMeter || !this.hasInputSource()) {
       return;
     }
 
     this.currentMasterVolume = masterVolume;
     this.masterGain.gain.setValueAtTime(masterVolume, this.audioContext.currentTime);
-    this.source.connect(this.inputMeter.input);
+    this.connectInputSources();
     this.inputMeter.output.connect(this.outputMeter.input);
     this.outputMeter.output.connect(this.masterGain);
     this.masterGain.connect(this.audioContext.destination);
@@ -235,10 +267,29 @@ export class AudioEngine {
 
   private disconnectAudioGraph() {
     safeDisconnect(this.source);
+    safeDisconnect(this.mediaElementSource);
     safeDisconnect(this.inputMeter?.input ?? null);
     safeDisconnect(this.outputMeter?.input ?? null);
     safeDisconnect(this.masterGain);
     this.effectMap.forEach((effect) => effect.disconnect());
+  }
+
+  private hasInputSource() {
+    return Boolean(this.source || this.mediaElementSource);
+  }
+
+  private connectInputSources() {
+    if (!this.inputMeter) {
+      return;
+    }
+
+    if (this.source) {
+      this.source.connect(this.inputMeter.input);
+    }
+
+    if (this.mediaElementSource) {
+      this.mediaElementSource.connect(this.inputMeter.input);
+    }
   }
 
   private getOrCreateEffect(type: PedalType, id: string) {

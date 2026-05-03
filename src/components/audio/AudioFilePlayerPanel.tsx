@@ -6,11 +6,17 @@ type UploadedTrack = {
   url: string;
 };
 
+type AudioFilePlayerPanelProps = {
+  isEffectChainReady: boolean;
+  onPreparePlayback: (audioElement: HTMLAudioElement) => Promise<void>;
+};
+
 const seekStepSeconds = 10;
 
-function AudioFilePlayerPanel() {
+function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFilePlayerPanelProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
+  const [audioElementKey, setAudioElementKey] = useState(0);
   const [track, setTrack] = useState<UploadedTrack | null>(null);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -25,6 +31,17 @@ function AudioFilePlayerPanel() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (isEffectChainReady) {
+      return;
+    }
+
+    audioRef.current?.pause();
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setAudioElementKey((key) => key + 1);
+  }, [isEffectChainReady]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -52,11 +69,12 @@ function AudioFilePlayerPanel() {
     }
 
     try {
+      await onPreparePlayback(audioRef.current);
       await audioRef.current.play();
       setIsPlaying(true);
       setErrorMessage('');
-    } catch {
-      setErrorMessage('재생을 시작할 수 없습니다.');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '재생을 시작할 수 없습니다.');
     }
   };
 
@@ -104,6 +122,7 @@ function AudioFilePlayerPanel() {
       </label>
 
       <audio
+        key={audioElementKey}
         ref={audioRef}
         src={track?.url ?? ''}
         preload="metadata"
@@ -117,13 +136,17 @@ function AudioFilePlayerPanel() {
       <div className="audio-track-display">
         <div className="audio-time-row">
           <span>{formatTime(currentTime)}</span>
-          <strong>{isPlaying ? 'PLAY' : track ? 'READY' : 'EMPTY'}</strong>
+          <strong>{isPlaying ? 'FX PLAY' : track ? (isEffectChainReady ? 'FX READY' : 'READY') : 'EMPTY'}</strong>
           <span>{formatTime(duration)}</span>
         </div>
         <div className="audio-progress-track" aria-hidden="true">
           <i style={{ width: `${progress}%` }} />
         </div>
       </div>
+
+      <p className="audio-player-hint">
+        재생 시 업로드 음원이 현재 LCD 이펙터 체인을 통과합니다.
+      </p>
 
       <div className="audio-transport-buttons">
         <button type="button" onClick={() => handleSeek(-seekStepSeconds)} disabled={!track}>
