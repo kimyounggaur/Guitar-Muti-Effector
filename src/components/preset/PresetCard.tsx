@@ -13,6 +13,7 @@ type PresetCardProps = {
 function PresetCard({ preset, active, onLoad, onRename, onDelete, onDuplicate }: PresetCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(preset.name);
+  const isFactory = preset.origin === 'factory';
 
   const handleRename = () => {
     onRename(preset.id, name);
@@ -27,7 +28,7 @@ function PresetCard({ preset, active, onLoad, onRename, onDelete, onDuplicate }:
   };
 
   return (
-    <article className={`preset-card ${active ? 'is-active' : ''}`}>
+    <article className={`preset-card preset-library-row ${active ? 'is-active' : ''}`}>
       <div className="preset-card-main">
         {isEditing ? (
           <input
@@ -48,13 +49,13 @@ function PresetCard({ preset, active, onLoad, onRename, onDelete, onDuplicate }:
           />
         ) : (
           <button type="button" className="preset-title-button" onClick={() => onLoad(preset)}>
-            <span>{active ? 'Current preset' : 'Preset'}</span>
             <strong>{preset.name}</strong>
+            <span>
+              {preset.category.toUpperCase()} / {preset.origin.toUpperCase()}
+            </span>
           </button>
         )}
-        <small>
-          {preset.pedals.length} pedals · {Math.round(preset.masterVolume * 100)}% master · {preset.tempoBpm} BPM
-        </small>
+        <small>{preset.description || `${preset.pedals.length} pedals · ${preset.tempoBpm} BPM`}</small>
       </div>
 
       <div className="preset-actions">
@@ -71,9 +72,9 @@ function PresetCard({ preset, active, onLoad, onRename, onDelete, onDuplicate }:
           </button>
         )}
         <button type="button" onClick={() => onDuplicate(preset.id)}>
-          Duplicate
+          Copy
         </button>
-        <button type="button" className="is-danger" onClick={handleDelete}>
+        <button type="button" className="is-danger" onClick={handleDelete} disabled={isFactory}>
           Delete
         </button>
       </div>

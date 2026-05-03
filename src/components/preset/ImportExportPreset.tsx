@@ -1,7 +1,11 @@
 import { useRef, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
 
-function ImportExportPreset() {
+type ImportExportPresetProps = {
+  compact?: boolean;
+};
+
+function ImportExportPreset({ compact = false }: ImportExportPresetProps) {
   const exportPresets = usePresetStore((state) => state.exportPresets);
   const importPresets = usePresetStore((state) => state.importPresets);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -46,16 +50,16 @@ function ImportExportPreset() {
   };
 
   return (
-    <div className="preset-import-export">
+    <div className={`preset-import-export ${compact ? 'is-compact' : ''}`}>
       <div className="preset-io-actions">
         <button type="button" onClick={handleExport}>
-          JSON Export
+          Export
         </button>
         <button type="button" onClick={handleCopy}>
-          Copy JSON
+          Copy
         </button>
         <button type="button" onClick={() => fileInputRef.current?.click()}>
-          JSON Import
+          Import
         </button>
       </div>
 
@@ -70,13 +74,13 @@ function ImportExportPreset() {
       <textarea
         value={jsonText}
         onChange={(event) => setJsonText(event.target.value)}
-        placeholder="Paste preset JSON here"
+        placeholder="Preset JSON"
         aria-label="Preset JSON"
       />
 
       <div className="preset-io-footer">
         <button type="button" onClick={() => handleImport(jsonText)} disabled={!jsonText.trim()}>
-          Import Pasted JSON
+          Import JSON
         </button>
         <span>{status || 'localStorage key: web-guitar-pedalboard-presets'}</span>
       </div>
