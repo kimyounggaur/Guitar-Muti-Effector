@@ -4,6 +4,7 @@ import { usePedalStore } from '../../store/pedalStore';
 import { useTempoStore } from '../../store/tempoStore';
 import KnobControl from '../controls/KnobControl';
 import AmpEQPedal from '../effects/AmpEQPedal';
+import TunerPanel from '../effects/TunerPanel';
 
 type PedalDetailPanelProps = {
   onPedalToggled?: (pedals: Pedal[]) => void;
@@ -199,6 +200,36 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
           </button>
           <button type="button" onClick={() => setSelectedPedal('tuner')}>
             Tuner
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (selectedPedal.type === 'tuner') {
+    return (
+      <section className="detail-section tuner-detail-section" aria-label="Tuner detail">
+        <TunerPanel
+          pedal={selectedPedal}
+          selected
+          onSelect={setSelectedPedal}
+          onToggle={() => handleToggle()}
+          onBypass={(_, bypassed) => {
+            setPedalBypass(selectedPedal.id, bypassed);
+            onPedalBypassChanged?.(selectedPedal.id, bypassed);
+          }}
+          onParamChange={(_, paramName, value) => handleParamChange(paramName, value)}
+        />
+
+        <div className="detail-actions tuner-detail-actions">
+          <button type="button" onClick={savePedalsToStorage}>
+            Save Chain
+          </button>
+          <button type="button" onClick={handleReset}>
+            Reset Board
+          </button>
+          <button type="button" onClick={() => setSelectedPedal('ampEQ')}>
+            Amp EQ
           </button>
         </div>
       </section>
