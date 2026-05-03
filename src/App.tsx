@@ -266,6 +266,7 @@ function App() {
                 selectedPedalId={selectedPedalId}
                 onSelectPedal={setSelectedPedal}
                 onChainReordered={handleChainRebuild}
+                onPedalToggled={handleChainRebuild}
               />
             }
           />

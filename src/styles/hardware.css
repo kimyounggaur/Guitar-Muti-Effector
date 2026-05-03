@@ -1273,3 +1273,114 @@
     grid-column: 1 / -1;
   }
 }
+
+/* Full-width hardware layout and expanded two-row LCD chain */
+.hardware-app {
+  padding: clamp(8px, 1vw, 14px);
+  box-sizing: border-box;
+}
+
+.hardware-frame,
+.hardware-support-panels {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.hardware-frame {
+  margin: 0;
+}
+
+.hardware-support-panels {
+  margin: 20px 0 0;
+}
+
+.hardware-core {
+  grid-template-columns: minmax(132px, 0.58fr) minmax(760px, 4.7fr) minmax(132px, 0.58fr) minmax(148px, 0.66fr);
+}
+
+.screen-glass {
+  grid-template-rows: auto minmax(360px, 1fr) auto;
+  min-height: clamp(520px, 43vw, 700px);
+}
+
+.screen-chain-window {
+  min-height: 360px;
+  overflow: hidden;
+}
+
+.lcd-chain-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  grid-auto-rows: minmax(126px, auto);
+  align-items: stretch;
+  gap: 16px;
+  min-height: 340px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.chain-effect-shell {
+  min-width: 0;
+  flex: initial;
+}
+
+.chain-effect-shell:not(:last-child)::after {
+  display: none;
+}
+
+.chain-effect-main {
+  min-height: 128px;
+}
+
+@media (min-width: 1200px) {
+  .lcd-chain-rail {
+    grid-template-columns: repeat(6, minmax(118px, 1fr));
+    grid-template-rows: repeat(2, minmax(128px, 1fr));
+  }
+}
+
+@media (max-width: 1199px) {
+  .hardware-core {
+    grid-template-columns: minmax(124px, 0.52fr) minmax(0, 2.7fr) minmax(124px, 0.58fr);
+  }
+
+  .screen-glass {
+    min-height: clamp(460px, 58vw, 620px);
+  }
+
+  .screen-chain-window {
+    min-height: 320px;
+  }
+
+  .lcd-chain-rail {
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 767px) {
+  .hardware-app {
+    padding: 8px;
+  }
+
+  .hardware-core {
+    grid-template-columns: 1fr;
+  }
+
+  .screen-chain-window {
+    min-height: 420px;
+  }
+
+  .lcd-chain-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 420px;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .chain-effect-main {
+    min-height: 118px;
+  }
+}

@@ -11,7 +11,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import {
-  horizontalListSortingStrategy,
+  rectSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
@@ -25,10 +25,18 @@ type EffectChainDisplayProps = {
   selectedPedalId: string | null;
   onSelectPedal: (id: string) => void;
   onChainReordered?: (pedals: Pedal[]) => void;
+  onPedalToggled?: (pedals: Pedal[]) => void;
 };
 
-function EffectChainDisplay({ pedals, selectedPedalId, onSelectPedal, onChainReordered }: EffectChainDisplayProps) {
+function EffectChainDisplay({
+  pedals,
+  selectedPedalId,
+  onSelectPedal,
+  onChainReordered,
+  onPedalToggled,
+}: EffectChainDisplayProps) {
   const draggingPedalId = usePedalStore((state) => state.draggingPedalId);
+  const togglePedal = usePedalStore((state) => state.togglePedal);
   const setDraggingPedal = usePedalStore((state) => state.setDraggingPedal);
   const reorderPedals = usePedalStore((state) => state.reorderPedals);
   const [updated, setUpdated] = useState(false);
@@ -69,6 +77,16 @@ function EffectChainDisplay({ pedals, selectedPedalId, onSelectPedal, onChainReo
     });
   };
 
+  const handleEffectClick = (pedalId: string) => {
+    onSelectPedal(pedalId);
+    togglePedal(pedalId);
+    window.requestAnimationFrame(() => {
+      onPedalToggled?.(usePedalStore.getState().pedals);
+      setUpdated(true);
+      window.setTimeout(() => setUpdated(false), 1300);
+    });
+  };
+
   return (
     <div className="effect-chain-display" aria-label="Effect signal chain">
       <DndContext
@@ -78,14 +96,14 @@ function EffectChainDisplay({ pedals, selectedPedalId, onSelectPedal, onChainReo
         onDragEnd={handleDragEnd}
         onDragCancel={() => setDraggingPedal(null)}
       >
-        <SortableContext items={pedalIds} strategy={horizontalListSortingStrategy}>
+        <SortableContext items={pedalIds} strategy={rectSortingStrategy}>
           <div className={`lcd-chain-rail ${draggingPedalId ? 'is-dragging' : ''}`}>
             {pedals.map((pedal) => (
               <SortableEffectBlock
                 key={pedal.id}
                 pedal={pedal}
                 selected={pedal.id === selectedPedalId}
-                onSelect={onSelectPedal}
+                onToggle={handleEffectClick}
               />
             ))}
           </div>
@@ -99,10 +117,10 @@ function EffectChainDisplay({ pedals, selectedPedalId, onSelectPedal, onChainReo
 type SortableEffectBlockProps = {
   pedal: Pedal;
   selected: boolean;
-  onSelect: (id: string) => void;
+  onToggle: (id: string) => void;
 };
 
-function SortableEffectBlock({ pedal, selected, onSelect }: SortableEffectBlockProps) {
+function SortableEffectBlock({ pedal, selected, onToggle }: SortableEffectBlockProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pedal.id });
   const palette = effectPalette[pedal.type];
   const style = {
@@ -120,7 +138,12 @@ function SortableEffectBlock({ pedal, selected, onSelect }: SortableEffectBlockP
       } ${pedal.bypassed ? 'is-bypassed' : ''} ${isDragging ? 'is-dragging' : ''}`}
       style={style}
     >
-      <button type="button" className="chain-effect-main" onClick={() => onSelect(pedal.id)}>
+      <button
+        type="button"
+        className="chain-effect-main"
+        aria-pressed={pedal.enabled}
+        onClick={() => onToggle(pedal.id)}
+      >
         <span>{shortLabels[pedal.type]}</span>
         <strong>{pedal.name}</strong>
         <i aria-hidden="true" />
