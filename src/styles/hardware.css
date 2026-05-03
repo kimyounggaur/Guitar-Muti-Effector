@@ -2946,3 +2946,122 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Compact preset browser width */
+.hardware-support-panels .preset-library-section {
+  justify-self: start;
+  width: min(100%, 620px);
+  max-width: 620px;
+}
+
+.preset-browser-topline {
+  grid-template-columns: minmax(132px, 0.82fr) minmax(92px, 0.55fr) minmax(42px, auto);
+  min-height: 42px;
+  padding: 0 10px;
+}
+
+.preset-browser-grid {
+  grid-template-columns: minmax(154px, 0.42fr) minmax(0, 1fr);
+  min-height: 560px;
+}
+
+.preset-category-list button {
+  min-height: 31px;
+  font-size: 0.86rem;
+  padding: 0 10px;
+}
+
+.preset-tools-panel,
+.preset-output-panel {
+  padding: 10px 8px;
+}
+
+.preset-tools-panel input,
+.preset-search-box input {
+  min-height: 40px;
+}
+
+.preset-tool-buttons button,
+.preset-io-actions button,
+.preset-io-footer button,
+.preset-actions button {
+  min-height: 34px;
+}
+
+.preset-import-export.is-compact textarea {
+  min-height: 54px;
+}
+
+.preset-list-header {
+  padding: 12px 10px 7px;
+}
+
+.preset-list-header h2 {
+  font-size: 0.98rem;
+}
+
+.preset-list-header strong {
+  white-space: nowrap;
+}
+
+.preset-search-box {
+  padding: 0 10px 10px;
+}
+
+.preset-library-list {
+  padding: 2px 10px 12px;
+}
+
+.preset-library-row {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 54px;
+  padding: 5px 4px 5px 0;
+}
+
+.preset-library-row .preset-title-button strong {
+  font-size: 0.92rem;
+}
+
+.preset-library-row small {
+  max-width: 100%;
+  font-size: 0.66rem;
+}
+
+.preset-library-row .preset-actions {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  z-index: 3;
+  max-width: calc(100% - 8px);
+  border: 1px solid rgba(86, 240, 255, 0.16);
+  border-radius: 6px;
+  background: rgba(8, 6, 13, 0.96);
+  padding: 4px;
+  transform: translateY(-50%);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.34);
+}
+
+.preset-library-row .preset-actions button {
+  min-height: 28px;
+  padding: 0 6px;
+}
+
+@media (max-width: 980px) {
+  .hardware-support-panels .preset-library-section {
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .preset-browser-grid {
+    min-height: 0;
+  }
+
+  .preset-library-row .preset-actions {
+    position: static;
+    transform: none;
+  }
+}
