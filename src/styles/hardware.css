@@ -1,4 +1,8 @@
 .hardware-app {
+  --lcd-effect-block-height: clamp(104px, 7.1vw, 116px);
+  --lcd-effect-block-height-mobile: 108px;
+  --lcd-effect-rail-min-height: 292px;
+  --lcd-effect-window-min-height: 312px;
   min-height: 100vh;
   background:
     radial-gradient(circle at 50% -10%, rgba(30, 107, 138, 0.22), transparent 42%),
@@ -1364,22 +1368,22 @@
 }
 
 .screen-glass {
-  grid-template-rows: auto minmax(360px, 1fr) auto;
+  grid-template-rows: auto minmax(var(--lcd-effect-window-min-height), 1fr) auto;
   min-height: clamp(520px, 43vw, 700px);
 }
 
 .screen-chain-window {
-  min-height: 360px;
+  min-height: var(--lcd-effect-window-min-height);
   overflow: hidden;
 }
 
 .lcd-chain-rail {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
-  grid-auto-rows: minmax(126px, auto);
+  grid-auto-rows: minmax(var(--lcd-effect-block-height), auto);
   align-items: stretch;
   gap: 16px;
-  min-height: 340px;
+  min-height: var(--lcd-effect-rail-min-height);
   overflow-x: hidden;
   overflow-y: auto;
   padding: 16px;
@@ -1395,13 +1399,13 @@
 }
 
 .chain-effect-main {
-  min-height: 128px;
+  min-height: var(--lcd-effect-block-height);
 }
 
 @media (min-width: 1200px) {
   .lcd-chain-rail {
     grid-template-columns: repeat(6, minmax(118px, 1fr));
-    grid-template-rows: repeat(2, minmax(128px, 1fr));
+    grid-template-rows: repeat(2, minmax(var(--lcd-effect-block-height), 1fr));
   }
 }
 
@@ -1415,12 +1419,12 @@
   }
 
   .screen-chain-window {
-    min-height: 320px;
+    min-height: calc(var(--lcd-effect-window-min-height) - 16px);
   }
 
   .lcd-chain-rail {
     grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-    min-height: 300px;
+    min-height: calc(var(--lcd-effect-rail-min-height) - 16px);
   }
 }
 
@@ -1434,18 +1438,19 @@
   }
 
   .screen-chain-window {
-    min-height: 420px;
+    min-height: 360px;
   }
 
   .lcd-chain-rail {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    min-height: 420px;
+    grid-auto-rows: minmax(var(--lcd-effect-block-height-mobile), auto);
+    min-height: 360px;
     gap: 12px;
     padding: 12px;
   }
 
   .chain-effect-main {
-    min-height: 118px;
+    min-height: var(--lcd-effect-block-height-mobile);
   }
 }
 
@@ -1930,7 +1935,7 @@
 /* SVG LCD effect blocks */
 .chain-effect-svg-button {
   display: block;
-  min-height: 136px;
+  min-height: var(--lcd-effect-block-height);
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -1948,7 +1953,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 136px;
+  min-height: var(--lcd-effect-block-height);
   overflow: visible;
 }
 
@@ -2064,7 +2069,7 @@
 @media (max-width: 767px) {
   .chain-effect-svg-button,
   .chain-effect-svg {
-    min-height: 126px;
+    min-height: var(--lcd-effect-block-height-mobile);
   }
 }
 
