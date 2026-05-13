@@ -11,7 +11,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import {
-  rectSortingStrategy,
+  horizontalListSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
@@ -89,26 +89,36 @@ function EffectChainDisplay({
 
   return (
     <div className="effect-chain-display" aria-label="Effect signal chain">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={() => setDraggingPedal(null)}
-      >
-        <SortableContext items={pedalIds} strategy={rectSortingStrategy}>
-          <div className={`lcd-chain-rail ${draggingPedalId ? 'is-dragging' : ''}`}>
-            {pedals.map((pedal) => (
-              <SortableEffectBlock
-                key={pedal.id}
-                pedal={pedal}
-                selected={pedal.id === selectedPedalId}
-                onToggle={handleEffectClick}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      <div className="tone-chain-stage">
+        <span className="tone-chain-jack is-input" aria-hidden="true">
+          <i />
+          IN
+        </span>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => setDraggingPedal(null)}
+        >
+          <SortableContext items={pedalIds} strategy={horizontalListSortingStrategy}>
+            <div className={`lcd-chain-rail tone-master-rail ${draggingPedalId ? 'is-dragging' : ''}`}>
+              {pedals.map((pedal) => (
+                <SortableEffectBlock
+                  key={pedal.id}
+                  pedal={pedal}
+                  selected={pedal.id === selectedPedalId}
+                  onToggle={handleEffectClick}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+        <span className="tone-chain-jack is-output" aria-hidden="true">
+          OUT
+          <i />
+        </span>
+      </div>
       <span className={`lcd-chain-toast ${updated ? 'is-visible' : ''}`}>Signal Chain Updated</span>
     </div>
   );
@@ -169,12 +179,52 @@ function EffectBlockSvg({ pedal, palette, selected }: EffectBlockSvgProps) {
   const status = pedal.enabled ? (pedal.bypassed ? 'BYPASS' : 'ACTIVE') : 'OFF';
   const ledColor = pedal.enabled && !pedal.bypassed ? palette.color : '#53615d';
 
+  if (pedal.type === 'ampEQ') {
+    return (
+      <svg className="chain-effect-svg tone-master-effect-svg is-amp-svg" viewBox="0 0 260 150" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stopColor="#d7dde0" stopOpacity="0.96" />
+            <stop offset="0.5" stopColor="#949a9d" stopOpacity="0.95" />
+            <stop offset="1" stopColor="#5b6062" stopOpacity="1" />
+          </linearGradient>
+          <filter id={glowId} x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="2.8" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <rect className="effect-svg-shadow" x="12" y="24" width="236" height="98" rx="7" />
+        <rect className="effect-svg-body tone-amp-body" x="18" y="18" width="224" height="100" rx="6" fill={`url(#${gradientId})`} stroke={palette.color} />
+        <rect className="tone-amp-grille" x="30" y="30" width="200" height="76" rx="3" />
+        <path className="tone-amp-grille-lines" d="M38 36H222M38 44H222M38 52H222M38 60H222M38 68H222M38 76H222M38 84H222M38 92H222M38 100H222" />
+        <path className="tone-amp-cloth" d="M44 34L216 104M74 34L230 98M104 34L230 82M134 34L230 66M164 34L226 58M34 58L148 106M34 74L118 106M34 90L88 106" />
+        <rect className="tone-amp-top" x="38" y="21" width="184" height="13" rx="2" />
+        <circle className="effect-svg-led-halo" cx="36" cy="126" r="13" fill={ledColor} />
+        <circle className="effect-svg-led" cx="36" cy="126" r="5.8" fill={ledColor} />
+        <text className="effect-svg-short-label" x="130" y="53" textAnchor="middle">
+          AMP
+        </text>
+        <text className="effect-svg-name tone-amp-name" x="130" y="76" textAnchor="middle">
+          {name}
+        </text>
+        <text className="effect-svg-status" x="130" y="96" textAnchor="middle">
+          {status}
+        </text>
+        {selected ? <rect className="effect-svg-selected" x="8" y="8" width="244" height="124" rx="10" /> : null}
+      </svg>
+    );
+  }
+
   return (
-    <svg className="chain-effect-svg" viewBox="0 0 180 140" aria-hidden="true" focusable="false">
+    <svg className="chain-effect-svg tone-master-effect-svg" viewBox="0 0 180 140" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0" stopColor={palette.color} stopOpacity="0.34" />
-          <stop offset="0.42" stopColor="#152228" stopOpacity="0.96" />
+          <stop offset="0" stopColor={palette.color} stopOpacity="0.9" />
+          <stop offset="0.48" stopColor={palette.color} stopOpacity="0.5" />
           <stop offset="1" stopColor="#070b0e" stopOpacity="1" />
         </linearGradient>
         <filter id={glowId} x="-40%" y="-40%" width="180%" height="180%">
@@ -186,36 +236,36 @@ function EffectBlockSvg({ pedal, palette, selected }: EffectBlockSvgProps) {
         </filter>
       </defs>
 
-      <rect className="effect-svg-shadow" x="10" y="10" width="160" height="120" rx="14" />
+      <rect className="effect-svg-shadow" x="48" y="17" width="84" height="100" rx="6" />
       <rect
         className="effect-svg-body"
-        x="14"
-        y="9"
-        width="152"
-        height="118"
-        rx="13"
+        x="52"
+        y="13"
+        width="76"
+        height="100"
+        rx="5"
         fill={`url(#${gradientId})`}
         stroke={palette.color}
       />
-      <path className="effect-svg-top-shine" d="M28 18H153C157 18 160 21 160 25V43C122 34 74 35 20 44V26C20 21 24 18 28 18Z" />
-      <rect className="effect-svg-display" x="27" y="48" width="126" height="46" rx="7" />
-      <path className="effect-svg-grid" d="M43 48V94M59 48V94M75 48V94M91 48V94M107 48V94M123 48V94M139 48V94M27 63H153M27 78H153" />
+      <path className="effect-svg-top-shine" d="M60 20H120V36C101 31 82 31 60 37Z" />
+      <rect className="effect-svg-display" x="62" y="43" width="56" height="34" rx="3" />
+      <path className="effect-svg-grid" d="M73 43V77M84 43V77M96 43V77M107 43V77M62 54H118M62 66H118" />
       <path className="effect-svg-icon" d={iconPath} stroke={palette.color} filter={`url(#${glowId})`} />
-      <circle className="effect-svg-led-halo" cx="47" cy="111" r="15" fill={ledColor} />
-      <circle className="effect-svg-led" cx="47" cy="111" r="7" fill={ledColor} />
-      <rect className="effect-svg-chip" x="122" y="101" width="26" height="19" rx="4" />
-      <path className="effect-svg-chip-lines" d="M128 106H142M128 111H142M128 116H137" />
+      <circle className="effect-svg-led-halo" cx="70" cy="95" r="11" fill={ledColor} />
+      <circle className="effect-svg-led" cx="70" cy="95" r="4.8" fill={ledColor} />
+      <rect className="effect-svg-chip" x="96" y="88" width="19" height="15" rx="3" />
+      <path className="effect-svg-chip-lines" d="M101 92H111M101 96H111M101 100H108" />
 
-      <text className="effect-svg-short-label" x="30" y="35">
+      <text className="effect-svg-short-label" x="90" y="29" textAnchor="middle">
         {shortLabels[pedal.type]}
       </text>
-      <text className="effect-svg-name" x="90" y="72" textAnchor="middle">
+      <text className="effect-svg-name" x="90" y="126" textAnchor="middle">
         {name}
       </text>
-      <text className="effect-svg-status" x="90" y="88" textAnchor="middle">
+      <text className="effect-svg-status" x="90" y="136" textAnchor="middle">
         {status}
       </text>
-      {selected ? <rect className="effect-svg-selected" x="7" y="5" width="166" height="128" rx="17" /> : null}
+      {selected ? <rect className="effect-svg-selected" x="43" y="8" width="94" height="132" rx="8" /> : null}
     </svg>
   );
 }
