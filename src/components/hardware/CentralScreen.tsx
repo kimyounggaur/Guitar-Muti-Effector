@@ -13,6 +13,7 @@ type CentralScreenProps = {
   outputMeter: MeterReading;
   selectedPedal: Pedal | null;
   effectChain: ReactNode;
+  presetBrowser?: ReactNode;
 };
 
 function CentralScreen({
@@ -25,11 +26,14 @@ function CentralScreen({
   outputMeter,
   selectedPedal,
   effectChain,
+  presetBrowser,
 }: CentralScreenProps) {
+  const isBrowsingPresets = Boolean(presetBrowser);
+
   return (
     <section className="central-screen" aria-label="LCD touchscreen">
       <div className="screen-bezel">
-        <div className="screen-glass">
+        <div className={`screen-glass ${isBrowsingPresets ? 'is-preset-browser' : ''}`}>
           <PatchHeader
             bank={bank}
             patch={patch}
@@ -39,22 +43,24 @@ function CentralScreen({
             inputMeter={inputMeter}
             outputMeter={outputMeter}
           />
-          <div className="screen-chain-window">{effectChain}</div>
-          <div className="screen-param-strip">
-            {selectedPedal ? (
-              getPedalSummary(selectedPedal).map(([name, value]) => (
-                <div key={name} className="screen-param-cell">
-                  <span>{formatParamName(name)}</span>
-                  <strong>{formatParamValue(value)}</strong>
+          <div className="screen-chain-window">{presetBrowser ?? effectChain}</div>
+          {!isBrowsingPresets ? (
+            <div className="screen-param-strip">
+              {selectedPedal ? (
+                getPedalSummary(selectedPedal).map(([name, value]) => (
+                  <div key={name} className="screen-param-cell">
+                    <span>{formatParamName(name)}</span>
+                    <strong>{formatParamValue(value)}</strong>
+                  </div>
+                ))
+              ) : (
+                <div className="screen-param-cell is-empty">
+                  <span>Selected</span>
+                  <strong>None</strong>
                 </div>
-              ))
-            ) : (
-              <div className="screen-param-cell is-empty">
-                <span>Selected</span>
-                <strong>None</strong>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          ) : null}
         </div>
       </div>
     </section>

@@ -3258,3 +3258,377 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Helix-inspired preset stomp layout */
+.hardware-core {
+  grid-template-columns: minmax(132px, 0.58fr) minmax(720px, 4.5fr) minmax(176px, 0.76fr) minmax(148px, 0.66fr);
+  grid-template-areas:
+    "left screen knobs expression"
+    "left foot knobs expression"
+    "status status utility expression";
+}
+
+.hardware-knob-bay {
+  min-height: 100%;
+}
+
+.hardware-knob-bay .control-knob-panel {
+  height: 100%;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(4, minmax(112px, 1fr));
+  gap: 12px;
+}
+
+.hardware-knob-bay .hardware-knob-control.knob-control,
+.hardware-knob-bay .hardware-knob-empty {
+  min-height: 0;
+  padding: 10px;
+}
+
+.hardware-knob-bay .hardware-knob-control .knob-face {
+  width: clamp(58px, 4.8vw, 82px);
+}
+
+.hardware-knob-bay .hardware-knob-control.knob-control > span,
+.hardware-knob-bay .hardware-knob-empty span {
+  font-size: 0.68rem;
+}
+
+.hardware-knob-bay .hardware-knob-control strong,
+.hardware-knob-bay .hardware-knob-empty strong {
+  font-size: 0.86rem;
+}
+
+.hardware-utility-panel .right-utility-panel {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-content: stretch;
+  align-items: stretch;
+  min-height: auto;
+  gap: 8px;
+  padding: 10px;
+}
+
+.hardware-utility-panel .utility-readout,
+.hardware-utility-panel .tempo-readout,
+.hardware-utility-panel .master-volume-readout {
+  display: grid;
+  align-content: center;
+  min-height: 74px;
+  padding: 8px;
+}
+
+.hardware-utility-panel .tempo-readout strong {
+  font-size: 1.35rem;
+}
+
+.hardware-utility-panel .tap-button,
+.hardware-utility-panel .tuner-hold-button {
+  min-height: 74px;
+  padding: 0 8px;
+}
+
+.hardware-utility-panel .master-utility-knob.knob-control {
+  min-height: 74px;
+  gap: 3px;
+}
+
+.hardware-utility-panel .master-utility-knob .knob-face {
+  width: clamp(42px, 3.8vw, 56px);
+}
+
+.hardware-utility-panel .master-utility-knob strong {
+  font-size: 0.72rem;
+}
+
+.preset-stomp-panel {
+  grid-template-columns: repeat(5, minmax(112px, 1fr));
+  gap: 12px 16px;
+  align-items: stretch;
+  padding: 14px;
+  border: 1px solid rgba(20, 16, 18, 0.34);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 44%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 8px),
+    #111216;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -18px 28px rgba(0, 0, 0, 0.38);
+}
+
+.stomp-category-switch {
+  min-height: 126px;
+  gap: 6px;
+  padding: 0 4px 6px;
+  color: #dfe7ea;
+}
+
+.stomp-category-switch .stomp-label-strip {
+  order: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+  width: 100%;
+  min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 3px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent),
+    #080a0d;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.36),
+    0 8px 18px rgba(0, 0, 0, 0.18);
+  padding: 0 8px;
+  text-align: left;
+}
+
+.stomp-category-switch .stomp-label-strip b {
+  color: #f8fbff;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.stomp-category-switch .stomp-label-strip em {
+  overflow: hidden;
+  color: #aeb9bd;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: 0.01em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stomp-category-switch::before {
+  order: 2;
+  width: clamp(38px, 4.2vw, 52px);
+  margin-top: 3px;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.stomp-category-switch .footswitch-led {
+  order: 3;
+}
+
+.stomp-category-switch strong {
+  order: 4;
+  color: #f6f7f8;
+  font-size: 0.78rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.stomp-category-switch small {
+  order: 5;
+  color: var(--skin-mint);
+  font-size: 0.64rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.stomp-category-switch.is-selected .stomp-label-strip {
+  border-color: rgba(54, 240, 206, 0.58);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(210, 232, 236, 0.92)),
+    #e9f4f6;
+}
+
+.stomp-category-switch.is-selected .stomp-label-strip b,
+.stomp-category-switch.is-selected .stomp-label-strip em {
+  color: #11161a;
+}
+
+.screen-glass.is-preset-browser {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.screen-glass.is-preset-browser .screen-chain-window {
+  min-height: var(--lcd-effect-window-min-height);
+}
+
+.lcd-preset-grid-view {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+  height: 100%;
+}
+
+.lcd-preset-grid-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.lcd-preset-grid-header span,
+.lcd-preset-card span,
+.lcd-preset-card small {
+  color: #6eefff;
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lcd-preset-grid-header strong {
+  display: block;
+  color: #ffffff;
+  font-size: clamp(1.1rem, 2vw, 1.65rem);
+  font-weight: 950;
+  letter-spacing: 0.01em;
+}
+
+.lcd-preset-grid-header button {
+  min-height: 34px;
+  border: 1px solid rgba(110, 239, 255, 0.28);
+  border-radius: 4px;
+  background: rgba(6, 14, 19, 0.88);
+  color: #f7fdff;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.lcd-preset-card-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, minmax(92px, 1fr));
+  grid-auto-columns: minmax(178px, 226px);
+  gap: 12px;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 4px 10px;
+  scroll-snap-type: x proximity;
+}
+
+.lcd-preset-card {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  gap: 4px;
+  min-height: 92px;
+  border: 1px solid rgba(110, 239, 255, 0.18);
+  border-radius: 6px;
+  background:
+    linear-gradient(135deg, rgba(110, 239, 255, 0.14), transparent 38%),
+    rgba(3, 8, 12, 0.76);
+  color: #f7fbff;
+  cursor: pointer;
+  padding: 10px;
+  text-align: left;
+  scroll-snap-align: start;
+}
+
+.lcd-preset-card:hover,
+.lcd-preset-card:focus-visible,
+.lcd-preset-card.is-active {
+  border-color: rgba(110, 239, 255, 0.72);
+  background:
+    linear-gradient(135deg, rgba(110, 239, 255, 0.24), rgba(255, 95, 86, 0.1)),
+    rgba(4, 18, 25, 0.92);
+  box-shadow: 0 0 0 1px rgba(110, 239, 255, 0.24), 0 0 18px rgba(54, 240, 206, 0.16);
+}
+
+.lcd-preset-card strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 950;
+  line-height: 1.05;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.lcd-preset-card small {
+  color: #b7c5c9;
+  font-size: 0.58rem;
+}
+
+.lcd-preset-card em {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(221, 236, 241, 0.72);
+  font-size: 0.62rem;
+  font-style: normal;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.lcd-preset-empty {
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  min-height: 220px;
+  color: #dbe7ea;
+  text-align: center;
+}
+
+@media (max-width: 1199px) {
+  .hardware-core {
+    grid-template-columns: minmax(118px, 0.5fr) minmax(0, 2.6fr) minmax(164px, 0.62fr);
+    grid-template-areas:
+      "left screen knobs"
+      "foot foot knobs"
+      "utility utility expression"
+      "status status status";
+  }
+
+  .hardware-knob-bay .control-knob-panel {
+    grid-template-rows: repeat(4, minmax(104px, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .hardware-core {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "screen"
+      "knobs"
+      "foot"
+      "left"
+      "utility"
+      "expression"
+      "status";
+  }
+
+  .hardware-knob-bay .control-knob-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+  }
+
+  .preset-stomp-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .stomp-category-switch {
+    min-height: 118px;
+  }
+
+  .hardware-utility-panel .right-utility-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lcd-preset-card-grid {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-columns: initial;
+    grid-auto-rows: minmax(112px, auto);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .preset-stomp-panel,
+  .lcd-preset-card-grid {
+    grid-template-columns: 1fr;
+  }
+}

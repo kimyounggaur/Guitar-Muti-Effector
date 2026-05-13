@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AudioEngine } from './audio/AudioEngine';
 import { Pedal, PedalParamValue } from './audio/types';
 import AudioFilePlayerPanel from './components/audio/AudioFilePlayerPanel';
@@ -7,9 +7,10 @@ import CentralScreen from './components/hardware/CentralScreen';
 import ControlKnobPanel from './components/hardware/ControlKnobPanel';
 import EffectChainDisplay from './components/hardware/EffectChainDisplay';
 import ExpressionPedal from './components/hardware/ExpressionPedal';
-import FootSwitchPanel from './components/hardware/FootSwitchPanel';
+import FootSwitchPanel, { STOMP_PRESET_CATEGORIES, type StompPresetCategory } from './components/hardware/FootSwitchPanel';
 import HardwareFrame from './components/hardware/HardwareFrame';
 import LeftModePanel from './components/hardware/LeftModePanel';
+import LcdPresetGrid from './components/hardware/LcdPresetGrid';
 import MasterStatusBar from './components/hardware/MasterStatusBar';
 import RightUtilityPanel from './components/hardware/RightUtilityPanel';
 import PedalDetailPanel from './components/pedalboard/PedalDetailPanel';
@@ -21,6 +22,7 @@ import { useTempoStore } from './store/tempoStore';
 
 function App() {
   const audioEngineRef = useRef(new AudioEngine());
+  const [activePresetCategory, setActivePresetCategory] = useState<StompPresetCategory | null>(null);
   const isAudioReady = useAudioStore((state) => state.isAudioReady);
   const isConnecting = useAudioStore((state) => state.isConnecting);
   const selectedDeviceId = useAudioStore((state) => state.selectedDeviceId);
@@ -31,7 +33,11 @@ function App() {
   const masterVolume = useAudioStore((state) => state.masterVolume);
   const inputMeter = useAudioStore((state) => state.inputMeter);
   const outputMeter = useAudioStore((state) => state.outputMeter);
+  const presets = usePresetStore((state) => state.presets);
+  const activePresetId = usePresetStore((state) => state.activePresetId);
   const currentPresetName = usePresetStore((state) => state.currentPresetName);
+  const hydratePresets = usePresetStore((state) => state.hydratePresets);
+  const loadPreset = usePresetStore((state) => state.loadPreset);
   const tempoBpm = useTempoStore((state) => state.bpm);
   const tapCount = useTempoStore((state) => state.tapCount);
   const pedals = usePedalStore((state) => state.pedals);
@@ -56,6 +62,25 @@ function App() {
     const selectedDevice = inputDevices.find((device) => device.deviceId === selectedDeviceId);
     return selectedDevice?.label || (selectedDeviceId ? 'Selected input' : 'Default input');
   }, [inputDevices, selectedDeviceId]);
+  const presetCategoryCounts = useMemo(
+    () =>
+      STOMP_PRESET_CATEGORIES.reduce<Record<string, number>>((counts, category) => {
+        counts[category] = presets.filter((preset) => isPresetInStompCategory(preset, category)).length;
+        return counts;
+      }, {}),
+    [presets],
+  );
+  const lcdCategoryPresets = useMemo(
+    () =>
+      activePresetCategory
+        ? presets.filter((preset) => isPresetInStompCategory(preset, activePresetCategory))
+        : [],
+    [activePresetCategory, presets],
+  );
+
+  useEffect(() => {
+    hydratePresets();
+  }, [hydratePresets]);
 
   useEffect(() => {
     loadPedalsFromStorage();
@@ -258,6 +283,16 @@ function App() {
     [handleChainRebuild, setMasterVolume],
   );
 
+  const handleLoadPresetFromLcd = useCallback(
+    (preset: PedalboardPreset) => {
+      const loadedPreset = loadPreset(preset.id);
+      if (loadedPreset) {
+        handleLoadPreset(loadedPreset);
+      }
+    },
+    [handleLoadPreset, loadPreset],
+  );
+
   const handleStop = useCallback(async () => {
     setIsConnecting(true);
     setErrorMessage('');
@@ -295,13 +330,28 @@ function App() {
                 onPedalToggled={handleChainRebuild}
               />
             }
+            presetBrowser={
+              activePresetCategory ? (
+                <LcdPresetGrid
+                  category={activePresetCategory}
+                  presets={lcdCategoryPresets}
+                  activePresetId={activePresetId}
+                  onLoadPreset={handleLoadPresetFromLcd}
+                  onClose={() => setActivePresetCategory(null)}
+                />
+              ) : undefined
+            }
           />
         }
         controlKnobPanel={
           <ControlKnobPanel selectedPedal={selectedPedal} onPedalParamChanged={handlePedalParam} />
         }
         footSwitchPanel={
-          <FootSwitchPanel pedals={pedals} selectedPedalId={selectedPedalId} onPedalToggled={handleChainRebuild} />
+          <FootSwitchPanel
+            activeCategory={activePresetCategory}
+            categoryCounts={presetCategoryCounts}
+            onCategorySelected={setActivePresetCategory}
+          />
         }
         rightUtilityPanel={
           <RightUtilityPanel
@@ -357,5 +407,10 @@ function App() {
     </main>
   );
 }
+
+const isPresetInStompCategory = (preset: PedalboardPreset, category: StompPresetCategory) =>
+  category === 'User Presets'
+    ? preset.origin !== 'factory' || preset.category === 'User Presets'
+    : preset.category === category;
 
 export default App;
