@@ -3379,6 +3379,38 @@
     inset 0 -18px 28px rgba(0, 0, 0, 0.38);
 }
 
+.stomp-mode-toggle-row {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.stomp-mode-toggle-row button {
+  min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent),
+    #080a0d;
+  color: #aeb9bd;
+  cursor: pointer;
+  font-size: 0.64rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  padding: 0 12px;
+  text-transform: uppercase;
+}
+
+.stomp-mode-toggle-row button.is-active {
+  border-color: rgba(54, 240, 206, 0.58);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(210, 232, 236, 0.92)),
+    #e9f4f6;
+  color: #11161a;
+  box-shadow: 0 0 14px rgba(54, 240, 206, 0.16);
+}
+
 .stomp-category-switch {
   min-height: 126px;
   gap: 6px;
@@ -3437,10 +3469,14 @@
 
 .stomp-category-switch strong {
   order: 4;
+  max-width: 100%;
+  overflow: hidden;
   color: #f6f7f8;
   font-size: 0.78rem;
   font-weight: 950;
+  text-overflow: ellipsis;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .stomp-category-switch small {
@@ -3449,6 +3485,23 @@
   font-size: 0.64rem;
   font-weight: 950;
   text-transform: uppercase;
+}
+
+.stomp-category-switch:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.preset-stomp-panel.is-effects-mode .stomp-category-switch.is-effect-assigned .stomp-label-strip {
+  border-color: color-mix(in srgb, var(--skin-mint) 18%, rgba(255, 255, 255, 0.13));
+}
+
+.preset-stomp-panel.is-effects-mode .stomp-category-switch.is-effect-assigned small {
+  color: #aeb9bd;
+}
+
+.preset-stomp-panel.is-effects-mode .stomp-category-switch.is-on small {
+  color: var(--skin-mint);
 }
 
 .stomp-category-switch.is-selected .stomp-label-strip {

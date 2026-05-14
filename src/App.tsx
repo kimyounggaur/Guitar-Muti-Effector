@@ -7,7 +7,11 @@ import CentralScreen from './components/hardware/CentralScreen';
 import ControlKnobPanel from './components/hardware/ControlKnobPanel';
 import EffectChainDisplay from './components/hardware/EffectChainDisplay';
 import ExpressionPedal from './components/hardware/ExpressionPedal';
-import FootSwitchPanel, { STOMP_PRESET_CATEGORIES, type StompPresetCategory } from './components/hardware/FootSwitchPanel';
+import FootSwitchPanel, {
+  STOMP_PRESET_CATEGORIES,
+  type StompPresetCategory,
+  type StompSwitchMode,
+} from './components/hardware/FootSwitchPanel';
 import HardwareFrame from './components/hardware/HardwareFrame';
 import LeftModePanel from './components/hardware/LeftModePanel';
 import LcdPresetGrid from './components/hardware/LcdPresetGrid';
@@ -23,6 +27,7 @@ import { useTempoStore } from './store/tempoStore';
 function App() {
   const audioEngineRef = useRef(new AudioEngine());
   const [activePresetCategory, setActivePresetCategory] = useState<StompPresetCategory | null>(null);
+  const [stompSwitchMode, setStompSwitchMode] = useState<StompSwitchMode>('presets');
   const isAudioReady = useAudioStore((state) => state.isAudioReady);
   const isConnecting = useAudioStore((state) => state.isConnecting);
   const selectedDeviceId = useAudioStore((state) => state.selectedDeviceId);
@@ -76,6 +81,10 @@ function App() {
         ? presets.filter((preset) => isPresetInStompCategory(preset, activePresetCategory))
         : [],
     [activePresetCategory, presets],
+  );
+  const footSwitchEffectPedals = useMemo(
+    () => pedals.filter((pedal) => pedal.type !== 'tuner').slice(0, STOMP_PRESET_CATEGORIES.length),
+    [pedals],
   );
 
   useEffect(() => {
@@ -223,6 +232,14 @@ function App() {
     useTempoStore.getState().tapTempo();
   }, []);
 
+  const handleStompSwitchModeChange = useCallback((mode: StompSwitchMode) => {
+    setStompSwitchMode(mode);
+
+    if (mode === 'effects') {
+      setActivePresetCategory(null);
+    }
+  }, []);
+
   const handleChainRebuild = useCallback(
     (pedals: Pedal[]) => {
       try {
@@ -241,6 +258,34 @@ function App() {
   const handlePedalParam = useCallback((pedalId: string, paramName: string, value: PedalParamValue) => {
     audioEngineRef.current.setPedalParam(pedalId, paramName, value);
   }, []);
+
+  const handleFootSwitchEffectToggle = useCallback(
+    (pedalId: string) => {
+      const pedalStore = usePedalStore.getState();
+      const pedal = pedalStore.pedals.find((item) => item.id === pedalId);
+
+      if (!pedal) {
+        return;
+      }
+
+      pedalStore.setSelectedPedal(pedalId);
+
+      if (pedal.enabled && !pedal.bypassed) {
+        pedalStore.togglePedal(pedalId);
+      } else {
+        if (!pedal.enabled) {
+          pedalStore.togglePedal(pedalId);
+        }
+
+        if (pedal.bypassed) {
+          pedalStore.setPedalBypass(pedalId, false);
+        }
+      }
+
+      window.requestAnimationFrame(() => handleChainRebuild(usePedalStore.getState().pedals));
+    },
+    [handleChainRebuild],
+  );
 
   const handlePrepareUploadedAudio = useCallback(
     async (audioElement: HTMLAudioElement) => {
@@ -348,9 +393,14 @@ function App() {
         }
         footSwitchPanel={
           <FootSwitchPanel
+            mode={stompSwitchMode}
             activeCategory={activePresetCategory}
             categoryCounts={presetCategoryCounts}
+            effectPedals={footSwitchEffectPedals}
+            selectedPedalId={selectedPedalId}
+            onModeChanged={handleStompSwitchModeChange}
             onCategorySelected={setActivePresetCategory}
+            onEffectPedalToggled={handleFootSwitchEffectToggle}
           />
         }
         rightUtilityPanel={
