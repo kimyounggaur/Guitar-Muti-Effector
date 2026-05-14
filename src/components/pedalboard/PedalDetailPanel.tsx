@@ -1,5 +1,6 @@
-import { type CSSProperties, useEffect, useMemo } from 'react';
+import { type CSSProperties, useEffect, useMemo, useState } from 'react';
 import { Pedal, PedalParamValue, PedalType } from '../../audio/types';
+import { subscribeCompressorReduction } from '../../audio/nodes/CompressorEffect';
 import { usePedalStore } from '../../store/pedalStore';
 import { useTempoStore } from '../../store/tempoStore';
 import KnobControl from '../controls/KnobControl';
@@ -261,6 +262,31 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
     );
   }
 
+  if (selectedPedal.type === 'compressor') {
+    return (
+      <section className="detail-section compressor-detail-section" aria-label="Compressor detail">
+        <CompressorLa2aPanel
+          pedal={selectedPedal}
+          onToggle={handleToggle}
+          onBypass={handleBypass}
+          onParamChange={handleParamChange}
+        />
+
+        <div className="detail-actions compressor-detail-actions">
+          <button type="button" onClick={savePedalsToStorage}>
+            Save Chain
+          </button>
+          <button type="button" onClick={handleReset}>
+            Reset Board
+          </button>
+          <button type="button" onClick={() => setSelectedPedal('tuner')}>
+            Tuner
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="detail-section" aria-label="Selected pedal detail">
       <div className="detail-header">
@@ -309,6 +335,179 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
         </button>
       </div>
     </section>
+  );
+}
+
+type CompressorLa2aPanelProps = {
+  pedal: Pedal;
+  onToggle: () => void;
+  onBypass: () => void;
+  onParamChange: (paramName: string, value: PedalParamValue) => void;
+};
+
+function CompressorLa2aPanel({ pedal, onToggle, onBypass, onParamChange }: CompressorLa2aPanelProps) {
+  const [liveReduction, setLiveReduction] = useState(0);
+  const threshold = readNumberParam(pedal.params.threshold, -28, -60, -10);
+  const ratio = readNumberParam(pedal.params.ratio, 3.5, 1, 20);
+  const attack = readNumberParam(pedal.params.attack, 0.012, 0.001, 0.1);
+  const release = readNumberParam(pedal.params.release, 0.22, 0.05, 1);
+  const knee = readNumberParam(pedal.params.knee, 18, 0, 40);
+  const sustain = readNumberParam(pedal.params.sustain, 42, 0, 100);
+  const mix = readNumberParam(pedal.params.mix, 78, 0, 100);
+  const level = readNumberParam(pedal.params.level, 72, 0, 100);
+  const isLimitMode = ratio >= 8;
+  const estimatedReduction = (sustain / 100) * 14 + percentFromRange(-threshold, 10, 60) * 0.07;
+  const meterReduction = clampNumber(Math.max(Math.abs(liveReduction), estimatedReduction), 0, 24);
+  const needleAngle = -38 + percentFromRange(meterReduction, 0, 24) * 0.76;
+
+  useEffect(() => subscribeCompressorReduction(pedal.id, setLiveReduction), [pedal.id]);
+
+  return (
+    <div className={`la2a-module ${pedal.enabled && !pedal.bypassed ? 'is-online' : ''}`}>
+      <span className="la2a-rack-ear is-left" aria-hidden="true" />
+      <span className="la2a-rack-ear is-right" aria-hidden="true" />
+      <span className="la2a-screw is-top-left" aria-hidden="true" />
+      <span className="la2a-screw is-top-right" aria-hidden="true" />
+      <span className="la2a-screw is-bottom-left" aria-hidden="true" />
+      <span className="la2a-screw is-bottom-right" aria-hidden="true" />
+
+      <div className="la2a-brand">
+        <strong>TELETRONIX</strong>
+        <i aria-hidden="true" />
+      </div>
+
+      <div className="la2a-model-plate">
+        <span>LEVELING AMPLIFIER</span>
+        <strong>MODEL LA-2A</strong>
+      </div>
+
+      <La2aKnob label="Gain" value={level} min={0} max={100} step={1} onChange={(value) => onParamChange('level', value)} />
+
+      <div className="la2a-vu-meter" aria-label={`Gain reduction ${Math.round(meterReduction)} dB`}>
+        <span>VU</span>
+        <em>VU Level Indicator</em>
+        <div className="la2a-vu-scale" aria-hidden="true">
+          <b>-20</b>
+          <b>-10</b>
+          <b>0</b>
+          <b>+3</b>
+        </div>
+        <i className="la2a-vu-needle" style={{ '--la2a-needle-angle': `${needleAngle}deg` } as CSSProperties} aria-hidden="true" />
+        <strong>TELETRONIX</strong>
+      </div>
+
+      <La2aKnob
+        label="Peak Reduction"
+        value={sustain}
+        min={0}
+        max={100}
+        step={1}
+        onChange={(value) => onParamChange('sustain', value)}
+      />
+
+      <div className="la2a-switch-bank">
+        <div className="la2a-meter-select">
+          <span>GAIN REDUCTION</span>
+          <button type="button" onClick={() => onParamChange('mix', 100)}>
+            GR
+          </button>
+          <button type="button" onClick={() => onParamChange('level', 84)}>
+            +10
+          </button>
+          <button type="button" onClick={() => onParamChange('level', 72)}>
+            +4
+          </button>
+        </div>
+
+        <button
+          type="button"
+          className={`la2a-limit-switch ${isLimitMode ? 'is-limit' : ''}`}
+          onClick={() => onParamChange('ratio', isLimitMode ? 3.5 : 12)}
+          aria-pressed={isLimitMode}
+        >
+          <span>Compress</span>
+          <i aria-hidden="true" />
+          <span>Limit</span>
+        </button>
+
+        <button type="button" className={`la2a-power ${pedal.enabled ? 'is-on' : ''}`} onClick={onToggle} aria-pressed={pedal.enabled}>
+          <i aria-hidden="true" />
+          <span>Power</span>
+        </button>
+
+        <button type="button" className={`la2a-bypass ${pedal.bypassed ? 'is-bypassed' : ''}`} onClick={onBypass} aria-pressed={pedal.bypassed}>
+          {pedal.bypassed ? 'Bypass' : 'In Line'}
+        </button>
+      </div>
+
+      <div className="la2a-trim-strip">
+        <La2aTrim
+          label="Threshold"
+          value={threshold}
+          min={-60}
+          max={-10}
+          step={1}
+          suffix="dB"
+          onChange={(value) => onParamChange('threshold', value)}
+        />
+        <La2aTrim
+          label="Attack"
+          value={attack * 1000}
+          min={1}
+          max={100}
+          step={1}
+          suffix="ms"
+          onChange={(value) => onParamChange('attack', value / 1000)}
+        />
+        <La2aTrim label="Release" value={release} min={0.05} max={1} step={0.01} suffix="s" onChange={(value) => onParamChange('release', value)} />
+        <La2aTrim label="Knee" value={knee} min={0} max={40} step={1} suffix="dB" onChange={(value) => onParamChange('knee', value)} />
+        <La2aTrim label="Mix" value={mix} min={0} max={100} step={1} suffix="%" onChange={(value) => onParamChange('mix', value)} />
+      </div>
+    </div>
+  );
+}
+
+type La2aKnobProps = {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (value: number) => void;
+};
+
+function La2aKnob({ label, value, min, max, step, onChange }: La2aKnobProps) {
+  const clamped = clampNumber(value, min, max);
+  const fill = percentFromRange(clamped, min, max);
+  const angle = -135 + (fill / 100) * 270;
+
+  return (
+    <label className="la2a-knob" style={{ '--la2a-knob-angle': `${angle}deg` } as CSSProperties}>
+      <span>{label}</span>
+      <input type="range" min={min} max={max} step={step} value={clamped} onChange={(event) => onChange(Number(event.target.value))} />
+      <i aria-hidden="true" />
+      <strong>{Math.round(clamped)}</strong>
+    </label>
+  );
+}
+
+type La2aTrimProps = La2aKnobProps & {
+  suffix: string;
+};
+
+function La2aTrim({ label, value, min, max, step, suffix, onChange }: La2aTrimProps) {
+  const clamped = clampNumber(value, min, max);
+  const fill = percentFromRange(clamped, min, max);
+
+  return (
+    <label className="la2a-trim" style={{ '--la2a-trim-fill': `${fill}%` } as CSSProperties}>
+      <span>{label}</span>
+      <input type="range" min={min} max={max} step={step} value={clamped} onChange={(event) => onChange(Number(event.target.value))} />
+      <strong>
+        {Math.round(clamped * 100) / 100}
+        {suffix}
+      </strong>
+    </label>
   );
 }
 
