@@ -37,6 +37,7 @@ function EffectChainDisplay({
 }: EffectChainDisplayProps) {
   const draggingPedalId = usePedalStore((state) => state.draggingPedalId);
   const togglePedal = usePedalStore((state) => state.togglePedal);
+  const setPedalBypass = usePedalStore((state) => state.setPedalBypass);
   const setDraggingPedal = usePedalStore((state) => state.setDraggingPedal);
   const reorderPedals = usePedalStore((state) => state.reorderPedals);
   const [updated, setUpdated] = useState(false);
@@ -79,7 +80,24 @@ function EffectChainDisplay({
 
   const handleEffectClick = (pedalId: string) => {
     onSelectPedal(pedalId);
-    togglePedal(pedalId);
+    const pedal = usePedalStore.getState().pedals.find((item) => item.id === pedalId);
+
+    if (!pedal) {
+      return;
+    }
+
+    if (pedal.enabled && !pedal.bypassed) {
+      togglePedal(pedalId);
+    } else {
+      if (!pedal.enabled) {
+        togglePedal(pedalId);
+      }
+
+      if (pedal.bypassed) {
+        setPedalBypass(pedalId, false);
+      }
+    }
+
     window.requestAnimationFrame(() => {
       onPedalToggled?.(usePedalStore.getState().pedals);
       setUpdated(true);
@@ -133,6 +151,7 @@ type SortableEffectBlockProps = {
 function SortableEffectBlock({ pedal, selected, onToggle }: SortableEffectBlockProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pedal.id });
   const palette = effectPalette[pedal.type];
+  const active = pedal.enabled && !pedal.bypassed;
   const style = {
     '--effect-color': palette.color,
     '--effect-bg': palette.bg,
@@ -151,14 +170,23 @@ function SortableEffectBlock({ pedal, selected, onToggle }: SortableEffectBlockP
       <button
         type="button"
         className="chain-effect-main chain-effect-svg-button"
-        aria-pressed={pedal.enabled}
-        aria-label={`${pedal.name} ${pedal.enabled ? 'on' : 'off'}${pedal.bypassed ? ', bypassed' : ''}`}
+        aria-pressed={active}
+        aria-label={`${pedal.name} ${active ? 'active' : pedal.enabled ? 'bypassed' : 'off'}`}
         onClick={() => onToggle(pedal.id)}
       >
         <EffectBlockSvg pedal={pedal} palette={palette} selected={selected} />
       </button>
-      <button type="button" className="chain-effect-grip" aria-label={`Move ${pedal.name}`} {...attributes} {...listeners}>
-        ≡
+      <button
+        type="button"
+        className="chain-effect-grip"
+        {...attributes}
+        {...listeners}
+        aria-label={`Toggle ${pedal.name} ${active ? 'off' : 'on'}`}
+        aria-pressed={active}
+        title={`Toggle ${pedal.name}`}
+        onClick={() => onToggle(pedal.id)}
+      >
+        <span className="chain-effect-switch-icon" aria-hidden="true" />
       </button>
     </div>
   );

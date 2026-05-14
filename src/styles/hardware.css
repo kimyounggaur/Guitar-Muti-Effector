@@ -410,14 +410,27 @@
   position: absolute;
   right: 6px;
   bottom: 5px;
+  display: grid;
+  place-items: center;
   width: 28px;
   height: 24px;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.24);
   color: rgba(255, 255, 255, 0.8);
-  cursor: grab;
+  cursor: pointer;
   font-weight: 950;
+}
+
+.chain-effect-switch-icon {
+  width: 11px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow:
+    0 -4px 0 currentColor,
+    0 4px 0 currentColor;
+  pointer-events: none;
 }
 
 .chain-effect-shell.is-selected .chain-effect-main {
@@ -425,6 +438,12 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.18),
     0 0 0 3px rgba(255, 255, 255, 0.16),
     0 0 30px color-mix(in srgb, var(--effect-color) 42%, transparent);
+}
+
+.chain-effect-shell.is-enabled:not(.is-bypassed) .chain-effect-grip {
+  border-color: color-mix(in srgb, var(--effect-color) 38%, rgba(255, 255, 255, 0.08));
+  color: var(--effect-color);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--effect-color) 30%, transparent);
 }
 
 .chain-effect-shell.is-disabled,
