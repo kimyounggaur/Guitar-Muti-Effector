@@ -167,6 +167,9 @@ function SortableEffectBlock({ pedal, selected, onToggle }: SortableEffectBlockP
       } ${pedal.bypassed ? 'is-bypassed' : ''} ${isDragging ? 'is-dragging' : ''}`}
       style={style}
     >
+      <span className="chain-effect-lcd-label" title={pedal.name}>
+        {truncateLabel(pedal.name.toUpperCase(), 13)}
+      </span>
       <button
         type="button"
         className="chain-effect-main chain-effect-svg-button"

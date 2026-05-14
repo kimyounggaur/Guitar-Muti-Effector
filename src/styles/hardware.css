@@ -354,6 +354,10 @@
   opacity: 0.98;
 }
 
+.chain-effect-lcd-label {
+  display: none;
+}
+
 .chain-effect-shell:not(:last-child)::after {
   content: "";
   position: absolute;
@@ -3763,26 +3767,45 @@
   grid-auto-rows: initial;
   justify-content: center;
   align-items: center;
-  gap: clamp(8px, 1.5vw, 20px);
+  gap: clamp(6px, 0.9vw, 12px);
   width: 100%;
   height: 100%;
   min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: clamp(16px, 2vw, 28px) clamp(4px, 1vw, 12px);
+  padding: clamp(22px, 2.4vw, 34px) clamp(4px, 1vw, 12px) clamp(16px, 2vw, 28px);
 }
 
 .screen-glass:not(.is-preset-browser) .chain-effect-shell {
-  flex: 0 0 clamp(58px, 5vw, 78px);
-  min-width: 58px;
+  display: grid;
+  flex: 0 0 clamp(72px, 6vw, 92px);
+  gap: 4px;
+  justify-items: center;
+  min-width: 72px;
 }
 
 .screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ {
-  flex-basis: clamp(132px, 15vw, 218px);
+  flex-basis: clamp(158px, 17vw, 238px);
 }
 
 .screen-glass:not(.is-preset-browser) .chain-effect-shell.type-cabinetIR {
-  flex-basis: clamp(62px, 5.5vw, 88px);
+  flex-basis: clamp(78px, 6.4vw, 100px);
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-lcd-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: rgba(235, 241, 242, 0.94);
+  font-size: clamp(0.58rem, 0.68vw, 0.72rem);
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--effect-color) 38%, transparent);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .screen-glass:not(.is-preset-browser) .chain-effect-shell:not(:last-child)::after {
@@ -3790,12 +3813,12 @@
 }
 
 .screen-glass:not(.is-preset-browser) .chain-effect-svg-button {
-  height: clamp(106px, 12vw, 142px);
+  height: clamp(124px, 14vw, 166px);
   min-height: 0;
 }
 
 .screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ .chain-effect-svg-button {
-  height: clamp(118px, 13vw, 154px);
+  height: clamp(140px, 15.5vw, 190px);
 }
 
 .screen-glass:not(.is-preset-browser) .chain-effect-main {
@@ -3942,10 +3965,10 @@
   }
 
   .screen-glass:not(.is-preset-browser) .chain-effect-shell {
-    flex-basis: 76px;
+    flex-basis: 88px;
   }
 
   .screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ {
-    flex-basis: 178px;
+    flex-basis: 208px;
   }
 }
