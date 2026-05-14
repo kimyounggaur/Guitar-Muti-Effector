@@ -3856,7 +3856,7 @@
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 5px;
+  gap: 1px;
   justify-items: center;
   width: 100%;
   min-width: 0;
@@ -3929,7 +3929,8 @@
   font-weight: 950;
   letter-spacing: 0.05em;
   line-height: 1;
-  padding: 4px 7px;
+  margin-bottom: -2px;
+  padding: 2px 6px;
   text-align: center;
   text-overflow: ellipsis;
   text-shadow: 0 0 10px color-mix(in srgb, var(--effect-color) 46%, transparent);
