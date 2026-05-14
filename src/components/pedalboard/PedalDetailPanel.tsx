@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { type CSSProperties, useEffect, useMemo } from 'react';
 import { Pedal, PedalParamValue, PedalType } from '../../audio/types';
 import { usePedalStore } from '../../store/pedalStore';
 import { useTempoStore } from '../../store/tempoStore';
@@ -236,6 +236,31 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
     );
   }
 
+  if (selectedPedal.type === 'noiseGate') {
+    return (
+      <section className="detail-section noise-gate-detail-section" aria-label="Noise Gate detail">
+        <NoiseGateRackPanel
+          pedal={selectedPedal}
+          onToggle={handleToggle}
+          onBypass={handleBypass}
+          onParamChange={handleParamChange}
+        />
+
+        <div className="detail-actions noise-gate-detail-actions">
+          <button type="button" onClick={savePedalsToStorage}>
+            Save Chain
+          </button>
+          <button type="button" onClick={handleReset}>
+            Reset Board
+          </button>
+          <button type="button" onClick={() => setSelectedPedal('tuner')}>
+            Tuner
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="detail-section" aria-label="Selected pedal detail">
       <div className="detail-header">
@@ -286,6 +311,200 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
     </section>
   );
 }
+
+type NoiseGateRackPanelProps = {
+  pedal: Pedal;
+  onToggle: () => void;
+  onBypass: () => void;
+  onParamChange: (paramName: string, value: PedalParamValue) => void;
+};
+
+function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamChange }: NoiseGateRackPanelProps) {
+  const threshold = readNumberParam(pedal.params.thresholdDb, -48, -60, -10);
+  const release = readNumberParam(pedal.params.releaseMs, 180, 20, 500);
+  const thresholdPercent = percentFromRange(threshold, -60, -10);
+  const sensitivity = Math.round(thresholdPercent);
+  const gateState = pedal.enabled && !pedal.bypassed ? 'ONLINE' : pedal.bypassed ? 'BYPASS' : 'OFFLINE';
+  const hardMode = threshold >= -42;
+
+  return (
+    <div className={`noise-rack-module ${pedal.enabled && !pedal.bypassed ? 'is-online' : ''}`}>
+      <span className="noise-rack-screw is-top-left" aria-hidden="true" />
+      <span className="noise-rack-screw is-top-right" aria-hidden="true" />
+      <span className="noise-rack-screw is-bottom-left" aria-hidden="true" />
+      <span className="noise-rack-screw is-bottom-right" aria-hidden="true" />
+
+      <div className="noise-rack-threshold">
+        <div className="noise-rack-meter-scale" aria-hidden="true">
+          {[100, 80, 60, 40, 20, 0].map((mark) => (
+            <span key={mark}>{mark}</span>
+          ))}
+        </div>
+        <label className="noise-rack-fader">
+          <span>Threshold</span>
+          <input
+            type="range"
+            min="-60"
+            max="-10"
+            step="1"
+            value={threshold}
+            onChange={(event) => onParamChange('thresholdDb', Number(event.target.value))}
+            aria-label="Noise gate threshold"
+            style={{ '--noise-fader-fill': `${thresholdPercent}%` } as CSSProperties}
+          />
+          <strong>{Math.round(threshold)}dB</strong>
+        </label>
+      </div>
+
+      <div className="noise-rack-brand">
+        <span>TL</span>
+        <strong>NOISE REDUCER</strong>
+      </div>
+
+      <div className="noise-rack-status" aria-label={`Noise gate status ${gateState}`}>
+        <span className={pedal.enabled && !pedal.bypassed ? 'is-lit' : ''}>
+          <i aria-hidden="true" />
+          Online
+        </span>
+        <span className={pedal.bypassed || !pedal.enabled ? 'is-lit is-bypass' : ''}>
+          <i aria-hidden="true" />
+          Bypass
+        </span>
+      </div>
+
+      <button type="button" className={`noise-rack-auto ${pedal.enabled ? 'is-on' : ''}`} onClick={onToggle}>
+        <i aria-hidden="true">ON</i>
+        <span>Auto mode</span>
+        <strong>{pedal.enabled ? 'Auto' : 'Off'}</strong>
+      </button>
+
+      <div className="noise-rack-knobs">
+        <RackDial
+          label="Depth"
+          value={sensitivity}
+          min={0}
+          max={100}
+          step={1}
+          suffix=""
+          onChange={(value) => onParamChange('thresholdDb', -60 + (value / 100) * 50)}
+        />
+        <RackDial
+          label="Attack"
+          value={Math.max(20, Math.round(release * 0.42))}
+          min={20}
+          max={210}
+          step={1}
+          suffix="ms"
+          onChange={(value) => onParamChange('releaseMs', Math.min(500, Math.round(value / 0.42)))}
+        />
+        <RackDial
+          label="Hold"
+          value={Math.max(40, Math.round(release * 0.78))}
+          min={40}
+          max={390}
+          step={1}
+          suffix="ms"
+          onChange={(value) => onParamChange('releaseMs', Math.min(500, Math.round(value / 0.78)))}
+        />
+        <RackDial
+          label="Decay"
+          value={release}
+          min={20}
+          max={500}
+          step={5}
+          suffix="ms"
+          onChange={(value) => onParamChange('releaseMs', value)}
+        />
+      </div>
+
+      <aside className="noise-easy-gate" aria-label="Easy Gate quick controls">
+        <span className="noise-easy-pin is-left" aria-hidden="true" />
+        <span className="noise-easy-pin is-right" aria-hidden="true" />
+        <div className="noise-easy-title">EASY GATE</div>
+        <RackDial
+          label="Sensitivity"
+          value={sensitivity}
+          min={0}
+          max={100}
+          step={1}
+          suffix=""
+          onChange={(value) => onParamChange('thresholdDb', -60 + (value / 100) * 50)}
+        />
+        <div className="noise-hard-soft" aria-label="Hard soft gate preset">
+          <span>Hard</span>
+          <button
+            type="button"
+            className={hardMode ? 'is-hard' : ''}
+            onClick={() => onParamChange('thresholdDb', hardMode ? -54 : -38)}
+            aria-pressed={hardMode}
+          >
+            <i aria-hidden="true" />
+          </button>
+          <span>Soft</span>
+          <strong>{Math.round(threshold)}</strong>
+        </div>
+        <button
+          type="button"
+          className={`noise-power-slide ${pedal.enabled ? 'is-on' : ''}`}
+          onClick={onToggle}
+          aria-pressed={pedal.enabled}
+        >
+          <span>ON</span>
+          <i aria-hidden="true" />
+          <span>OFF</span>
+        </button>
+      </aside>
+    </div>
+  );
+}
+
+type RackDialProps = {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  suffix: string;
+  onChange: (value: number) => void;
+};
+
+function RackDial({ label, value, min, max, step, suffix, onChange }: RackDialProps) {
+  const clamped = clampNumber(value, min, max);
+  const fill = percentFromRange(clamped, min, max);
+  const angle = -135 + (fill / 100) * 270;
+
+  return (
+    <label className="noise-rack-dial" style={{ '--noise-dial-angle': `${angle}deg`, '--noise-dial-fill': `${fill}%` } as CSSProperties}>
+      <span>{label}</span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={clamped}
+        onChange={(event) => onChange(Number(event.target.value))}
+        aria-label={label}
+      />
+      <i aria-hidden="true" />
+      <strong>
+        {Math.round(clamped)}
+        {suffix}
+      </strong>
+    </label>
+  );
+}
+
+const readNumberParam = (value: PedalParamValue | undefined, fallback: number, min: number, max: number) => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return fallback;
+  }
+
+  return clampNumber(value, min, max);
+};
+
+const clampNumber = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+const percentFromRange = (value: number, min: number, max: number) => ((clampNumber(value, min, max) - min) / (max - min)) * 100;
 
 type DetailControlProps = {
   pedal: Pedal;
