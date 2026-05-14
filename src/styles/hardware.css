@@ -3465,16 +3465,20 @@
 
 .screen-glass.is-preset-browser {
   grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  min-height: clamp(260px, 26vw, 350px);
+  padding: 12px;
 }
 
 .screen-glass.is-preset-browser .screen-chain-window {
-  min-height: var(--lcd-effect-window-min-height);
+  min-height: clamp(190px, 20vw, 260px);
+  padding: 12px;
 }
 
 .lcd-preset-grid-view {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 10px;
+  grid-template-rows: auto minmax(0, auto);
+  gap: 8px;
   min-height: 0;
   height: 100%;
 }
@@ -3499,7 +3503,7 @@
 .lcd-preset-grid-header strong {
   display: block;
   color: #ffffff;
-  font-size: clamp(1.1rem, 2vw, 1.65rem);
+  font-size: clamp(1rem, 1.65vw, 1.35rem);
   font-weight: 950;
   letter-spacing: 0.01em;
 }
@@ -3519,21 +3523,22 @@
 .lcd-preset-card-grid {
   display: grid;
   grid-auto-flow: column;
-  grid-template-rows: repeat(2, minmax(92px, 1fr));
+  grid-template-rows: repeat(2, minmax(78px, 98px));
   grid-auto-columns: minmax(178px, 226px);
-  gap: 12px;
+  gap: 10px;
+  align-content: start;
   min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 2px 4px 10px;
+  padding: 2px 4px 8px;
   scroll-snap-type: x proximity;
 }
 
 .lcd-preset-card {
   display: grid;
   grid-template-rows: auto auto auto 1fr;
-  gap: 4px;
-  min-height: 92px;
+  gap: 3px;
+  min-height: 0;
   border: 1px solid rgba(110, 239, 255, 0.18);
   border-radius: 6px;
   background:
@@ -3541,7 +3546,7 @@
     rgba(3, 8, 12, 0.76);
   color: #f7fbff;
   cursor: pointer;
-  padding: 10px;
+  padding: 8px;
   text-align: left;
   scroll-snap-align: start;
 }
@@ -3560,7 +3565,7 @@
   display: -webkit-box;
   overflow: hidden;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   font-weight: 950;
   line-height: 1.05;
   -webkit-box-orient: vertical;
@@ -3576,9 +3581,9 @@
   display: -webkit-box;
   overflow: hidden;
   color: rgba(221, 236, 241, 0.72);
-  font-size: 0.62rem;
+  font-size: 0.56rem;
   font-style: normal;
-  line-height: 1.25;
+  line-height: 1.16;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -3643,7 +3648,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: none;
     grid-auto-columns: initial;
-    grid-auto-rows: minmax(112px, auto);
+    grid-auto-rows: minmax(86px, auto);
     overflow-x: hidden;
     overflow-y: auto;
   }
