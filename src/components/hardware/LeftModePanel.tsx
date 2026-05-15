@@ -8,7 +8,7 @@ function LeftModePanel() {
   return (
     <nav className="left-mode-panel" aria-label="Hardware modes">
       <div className="hardware-brand">
-        <span>WEB FX</span>
+        <span>Guitar Muti-effector</span>
         <strong>Touch Multi Processor</strong>
       </div>
       <div className="mode-button-stack">
