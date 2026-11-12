@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { MeterReading, emptyMeterReading } from '../audio/nodes/MeterNode';
+import type { InputChannel } from '../audio/AudioEngine';
 
 export type AudioStoreState = {
   isAudioReady: boolean;
   isConnecting: boolean;
   selectedDeviceId: string;
+  inputChannel: InputChannel;
   inputDevices: MediaDeviceInfo[];
   sampleRate: number;
   latencyHint: string;
@@ -15,6 +17,7 @@ export type AudioStoreState = {
   setIsConnecting: (isConnecting: boolean) => void;
   setAudioReady: (isAudioReady: boolean) => void;
   setSelectedDeviceId: (selectedDeviceId: string) => void;
+  setInputChannel: (inputChannel: InputChannel) => void;
   setInputDevices: (inputDevices: MediaDeviceInfo[]) => void;
   setSampleRate: (sampleRate: number) => void;
   setLatencyHint: (latencyHint: string) => void;
@@ -28,9 +31,10 @@ export const useAudioStore = create<AudioStoreState>((set) => ({
   isAudioReady: false,
   isConnecting: false,
   selectedDeviceId: '',
+  inputChannel: '1',
   inputDevices: [],
   sampleRate: 0,
-  latencyHint: 'interactive',
+  latencyHint: '측정 불가',
   errorMessage: '',
   masterVolume: 0.35,
   inputMeter: emptyMeterReading,
@@ -38,6 +42,7 @@ export const useAudioStore = create<AudioStoreState>((set) => ({
   setIsConnecting: (isConnecting) => set({ isConnecting }),
   setAudioReady: (isAudioReady) => set({ isAudioReady }),
   setSelectedDeviceId: (selectedDeviceId) => set({ selectedDeviceId }),
+  setInputChannel: (inputChannel) => set({ inputChannel }),
   setInputDevices: (inputDevices) => set({ inputDevices }),
   setSampleRate: (sampleRate) => set({ sampleRate }),
   setLatencyHint: (latencyHint) => set({ latencyHint }),

@@ -42,7 +42,13 @@ function LooperPanel({
   useEffect(() => subscribeLooper(pedal.id, setReading), [pedal.id]);
 
   const setParam = (name: string, value: PedalParamValue) => onParamChange(pedal.id, name, value);
-  const sendCommand = (command: string) => onParamChange(pedal.id, '__looperCommand', command);
+  const unavailable = reading.state === 'loading' || reading.state === 'error' || !pedal.enabled || pedal.bypassed;
+  const sendCommand = (command: string) => {
+    if (unavailable) return;
+    if (command === 'clear' && reading.hasLoop && !window.confirm('녹음된 루프를 지울까요?')) return;
+    if (command === 'record' && reading.hasLoop && reading.state !== 'recording' && !window.confirm('기존 루프를 지우고 새로 녹음할까요?')) return;
+    onParamChange(pedal.id, '__looperCommand', command);
+  };
 
   return (
     <article
@@ -85,10 +91,12 @@ function LooperPanel({
         </div>
       </div>
 
+      {unavailable && <p role="status">{reading.state === 'error' ? '루퍼를 시작하지 못했습니다. 브라우저와 오디오 연결을 확인해 주세요.' : !pedal.enabled || pedal.bypassed ? '루퍼를 켜고 바이패스를 해제해 주세요.' : '기타 또는 오디오를 연결하면 루퍼를 사용할 수 있습니다.'}</p>}
       <div className="looper-footswitches">
         <button
           type="button"
           className={reading.state === 'recording' ? 'is-recording' : ''}
+          disabled={unavailable}
           onClick={() => sendCommand('record')}
         >
           REC
@@ -96,6 +104,7 @@ function LooperPanel({
         <button
           type="button"
           className={reading.state === 'playing' ? 'is-playing' : ''}
+          disabled={unavailable || !reading.hasLoop}
           onClick={() => sendCommand('play')}
         >
           PLAY
@@ -103,6 +112,7 @@ function LooperPanel({
         <button
           type="button"
           className={reading.state === 'overdubbing' ? 'is-overdubbing' : ''}
+          disabled={unavailable}
           onClick={() => sendCommand('overdub')}
         >
           OVERDUB
@@ -110,13 +120,13 @@ function LooperPanel({
       </div>
 
       <div className="looper-actions">
-        <button type="button" onClick={() => sendCommand('stop')}>
+        <button type="button" disabled={unavailable} onClick={() => sendCommand('stop')}>
           Stop
         </button>
-        <button type="button" onClick={() => sendCommand('undo')} disabled={!reading.canUndo}>
+        <button type="button" onClick={() => sendCommand('undo')} disabled={unavailable || !reading.canUndo}>
           Undo
         </button>
-        <button type="button" className="is-danger" onClick={() => sendCommand('clear')}>
+        <button type="button" className="is-danger" disabled={unavailable || !reading.hasLoop} onClick={() => sendCommand('clear')}>
           Clear
         </button>
       </div>

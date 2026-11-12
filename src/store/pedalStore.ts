@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { writeLocal } from './safeStorage';
 import { Pedal, PedalParamValue, createDefaultPedals, normalizePedals } from '../audio/types';
 
 const PEDAL_STORAGE_KEY = 'guitar-multi-effector-pedals-v1';
@@ -38,7 +39,7 @@ const readStoredPedals = () => {
 };
 
 const writeStoredPedals = (pedals: Pedal[]) => {
-  window.localStorage.setItem(PEDAL_STORAGE_KEY, JSON.stringify(pedals));
+  writeLocal(PEDAL_STORAGE_KEY, JSON.stringify(pedals));
 };
 
 export const usePedalStore = create<PedalStore>((set, get) => ({

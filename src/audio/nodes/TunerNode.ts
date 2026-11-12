@@ -85,13 +85,13 @@ export class TunerNode extends BaseEffect {
 
   override dispose() {
     window.cancelAnimationFrame(this.rafId);
-    listenersById.delete(this.id);
+    this.publish(emptyTunerReading);
     super.dispose();
   }
 
   private start() {
     const tick = (timestamp: number) => {
-      if (timestamp - this.lastReadAt >= 50) {
+      if (listenersById.get(this.id)?.size && timestamp - this.lastReadAt >= 50) {
         this.lastReadAt = timestamp;
         this.readPitch();
       }

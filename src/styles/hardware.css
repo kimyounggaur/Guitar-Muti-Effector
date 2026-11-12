@@ -6254,3 +6254,76 @@
     flex-basis: 240px;
   }
 }
+
+/* Safety and touch accessibility: give each utility its own usable space. */
+@media (min-width: 1200px) {
+  .hardware-core {
+    grid-template-areas:
+      "left screen knobs expression"
+      "left foot knobs expression"
+      "utility utility utility expression"
+      "status status status expression";
+  }
+}
+.hardware-utility-panel .right-utility-panel {
+  grid-template-columns: minmax(110px, 1.3fr) minmax(90px, 1fr) minmax(116px, 1fr) minmax(80px, 1fr) minmax(120px, 1fr);
+  min-width: 0;
+}
+.hardware-utility-panel .right-utility-panel > * { min-width: 0; }
+.hardware-utility-panel .master-volume-readout { overflow: visible; }
+.hardware-utility-panel .tap-button,
+.hardware-utility-panel .tuner-hold-button { position: relative; z-index: 1; }
+.knob-control { touch-action: pan-y; }
+.knob-face { touch-action: pan-y; }
+.knob-adjust { display: none; }
+.master-status-item strong,
+.master-status-item.is-live strong { color: #f4fbff; }
+.rack-tuner-controls .knob-control strong { color: #f4fbff; }
+.chain-effect-grip { touch-action: none; }
+@media (pointer: coarse) {
+  .knob-adjust { display: flex; gap: 6px; justify-content: center; }
+  .knob-adjust button {
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid #78928b;
+    border-radius: 7px;
+    background: #182823;
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+  }
+  .knob-adjust button:disabled { opacity: .45; }
+}
+@media (max-width: 767px) {
+  .hardware-utility-panel .right-utility-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: auto;
+    min-height: 195px;
+    padding: 10px;
+    scroll-snap-type: x proximity;
+  }
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail::before { display: none; }
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell,
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ {
+    flex: 0 0 92px;
+    scroll-snap-align: start;
+  }
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label { font-size: 0; }
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label::after { font-size: 12px; }
+  .type-tuner .chain-effect-lcd-label::after { content: 'TUN'; }
+  .type-noiseGate .chain-effect-lcd-label::after { content: 'GATE'; }
+  .type-compressor .chain-effect-lcd-label::after { content: 'COMP'; }
+  .type-drive .chain-effect-lcd-label::after { content: 'DRIVE'; }
+  .type-ampEQ .chain-effect-lcd-label::after { content: 'AMP'; }
+  .type-cabinetIR .chain-effect-lcd-label::after { content: 'CAB'; }
+  .type-modulation .chain-effect-lcd-label::after { content: 'MOD'; }
+  .type-delay .chain-effect-lcd-label::after { content: 'DELAY'; }
+  .type-reverb .chain-effect-lcd-label::after { content: 'REVERB'; }
+  .type-looper .chain-effect-lcd-label::after { content: 'LOOP'; }
+  .type-rhythm .chain-effect-lcd-label::after { content: 'RHYTHM'; }
+  .chain-effect-grip { min-height: 44px; min-width: 44px; }
+}

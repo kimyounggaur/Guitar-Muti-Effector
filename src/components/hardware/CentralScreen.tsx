@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { Pedal, PedalParamValue } from '../../audio/types';
-import { MeterReading } from '../../audio/nodes/MeterNode';
 import PatchHeader from './PatchHeader';
 
 type CentralScreenProps = {
@@ -9,8 +8,6 @@ type CentralScreenProps = {
   patch: string;
   bpm: number;
   isAudioReady: boolean;
-  inputMeter: MeterReading;
-  outputMeter: MeterReading;
   selectedPedal: Pedal | null;
   effectChain: ReactNode;
   presetBrowser?: ReactNode;
@@ -22,8 +19,6 @@ function CentralScreen({
   patch,
   bpm,
   isAudioReady,
-  inputMeter,
-  outputMeter,
   selectedPedal,
   effectChain,
   presetBrowser,
@@ -40,8 +35,6 @@ function CentralScreen({
             patchName={patchName}
             bpm={bpm}
             isAudioReady={isAudioReady}
-            inputMeter={inputMeter}
-            outputMeter={outputMeter}
           />
           <div className="screen-chain-window">{presetBrowser ?? effectChain}</div>
           {!isBrowsingPresets ? (

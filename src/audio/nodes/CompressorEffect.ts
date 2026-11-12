@@ -98,7 +98,7 @@ export class CompressorEffect extends BaseEffect {
 
   override dispose() {
     window.cancelAnimationFrame(this.reductionRaf);
-    reductionListeners.delete(this.id);
+    reductionListeners.get(this.id)?.forEach((listener) => listener(0));
     super.dispose();
   }
 
@@ -122,7 +122,7 @@ export class CompressorEffect extends BaseEffect {
   private applyLevel(smooth = true) {
     const sustainAmount = percentToUnit(this.sustain, 42);
     const levelAmount = percentToUnit(this.level, 72);
-    const makeupDb = -10 + levelAmount * 20 + sustainAmount * 5.5;
+    const makeupDb = -12 + levelAmount * 14 + sustainAmount * 2;
     this.setAudioParam(this.makeupGain.gain, dbToGain(makeupDb), smooth ? 0.018 : 0);
   }
 

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { writeLocal } from './safeStorage';
 import { Pedal, createDefaultPedals, normalizePedals } from '../audio/types';
 
 export const PRESET_STORAGE_KEY = 'web-guitar-pedalboard-presets';
@@ -40,6 +41,7 @@ type PresetStore = {
   savePreset: (name: string, snapshot: PresetSnapshot) => PedalboardPreset;
   updateActivePreset: (snapshot: PresetSnapshot) => PedalboardPreset | null;
   loadPreset: (id: string) => PedalboardPreset | null;
+  restoreSelection: (id: string | null, name: string) => void;
   renamePreset: (id: string, name: string) => void;
   deletePreset: (id: string) => void;
   duplicatePreset: (id: string) => PedalboardPreset | null;
@@ -269,7 +271,7 @@ const PRESET_BLUEPRINTS: PresetBlueprint[] = [
   },
   {
     category: 'Lead',
-    names: ['Blues Velvet Lead', 'Singing Sustain Lead', 'Classic Delay Lead', 'Liquid Fusion Lead', 'Arena Solo Lead', 'Neck Pickup Lead', 'Smooth Legato Lead', 'Vintage Echo Lead', 'Octave Fuzz Lead', 'Texas Bite Lead', 'Glass Slide Lead', 'Modern Lead Cut'],
+    names: ['Blues Velvet Lead', 'Singing Sustain Lead', 'Classic Delay Lead', 'Liquid Fusion Lead', 'Arena Solo Lead', 'Neck Pickup Lead', 'Smooth Legato Lead', 'Vintage Echo Lead', 'Driven Fuzz Lead', 'Texas Bite Lead', 'Glass Slide Lead', 'Modern Lead Cut'],
     tags: ['lead', 'solo', 'delay'],
     tempoBase: 104,
     masterVolume: 0.38,
@@ -278,7 +280,7 @@ const PRESET_BLUEPRINTS: PresetBlueprint[] = [
   },
   {
     category: 'Crunch',
-    names: ['Classic Crunch Stack', 'Brit Rhythm Crunch', 'Open Chord Crunch', 'Garage Combo Crunch', 'Roots Rock Crunch', 'Edge Breakup Crunch', 'Indie Rhythm Crunch', 'Plexi Mid Push', 'Tweed Hair Crunch', 'Alt Rock Crunch', 'Power Pop Crunch', 'Bluesbreaker Bite'],
+    names: ['Classic Crunch Stack', 'Brit Rhythm Crunch', 'Open Chord Crunch', 'Garage Combo Crunch', 'Roots Rock Crunch', 'Edge Breakup Crunch', 'Indie Rhythm Crunch', 'Classic Mid Push', 'Warm Hair Crunch', 'Alt Rock Crunch', 'Power Pop Crunch', 'Blues Crunch Bite'],
     tags: ['crunch', 'rhythm', 'rock'],
     tempoBase: 116,
     masterVolume: 0.37,
@@ -287,7 +289,7 @@ const PRESET_BLUEPRINTS: PresetBlueprint[] = [
   },
   {
     category: 'High Gain',
-    names: ['Modern Tight Gain', 'Scooped Metal Wall', 'Djent Gate Stack', 'High Gain Lead', 'Drop Tune Rhythm', 'Thrash Cut', 'Doom Saturation', 'Prog Metal Focus', 'Hardcore Bite', 'Liquid Shred Gain', 'Dark Mesa Style', 'Bright 4x12 Fire'],
+    names: ['Modern Tight Gain', 'Scooped Metal Wall', 'Djent Gate Stack', 'High Gain Lead', 'Drop Tune Rhythm', 'Thrash Cut', 'Doom Saturation', 'Prog Metal Focus', 'Hardcore Bite', 'Liquid Shred Gain', 'Dark High Gain', 'Bright 4x12 Fire'],
     tags: ['metal', 'gain', 'gate'],
     tempoBase: 132,
     masterVolume: 0.34,
@@ -314,7 +316,7 @@ const PRESET_BLUEPRINTS: PresetBlueprint[] = [
   },
   {
     category: 'FX',
-    names: ['Robot Gate Pulse', 'Filter Telephone', 'Lo-Fi Cabinet FX', 'Ping Pong Warp', 'Spring Crash Echo', 'Trem Delay Chop', 'Fuzz Octave Texture', 'Ghost Slap Machine', 'Ringless Sci-Fi', 'Dub Feedback Throw', 'Broken Tape Deck', 'Glitch Rhythm Bed'],
+    names: ['Robot Gate Pulse', 'Filter Telephone', 'Lo-Fi Cabinet FX', 'Ping Pong Warp', 'Spring Crash Echo', 'Trem Delay Chop', 'Fuzz Texture', 'Ghost Slap Machine', 'Ringless Sci-Fi', 'Dub Feedback Throw', 'Broken Tape Deck', 'Glitch Rhythm Bed'],
     tags: ['fx', 'creative', 'sound design'],
     tempoBase: 110,
     masterVolume: 0.32,
@@ -367,7 +369,7 @@ const clonePreset = (preset: PedalboardPreset): PedalboardPreset => ({
 });
 
 const writePresets = (presets: PedalboardPreset[]) => {
-  window.localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify({ version: 2, presets }));
+  writeLocal(PRESET_STORAGE_KEY, JSON.stringify({ version: 3, presets: presets.filter((preset) => preset.origin !== 'factory' && !FACTORY_IDS.has(preset.id)) }));
 };
 
 const readPresets = () => {
@@ -441,10 +443,18 @@ const normalizePreset = (value: unknown, fallbackOrigin: PresetOrigin): Pedalboa
 };
 
 const mergeWithFactoryLibrary = (storedPresets: PedalboardPreset[] | null) => {
-  const storedById = new Map((storedPresets ?? []).map((preset) => [preset.id, preset]));
-  const factoryPresets = DEFAULT_PRESETS.map((factoryPreset) => clonePreset(storedById.get(factoryPreset.id) ?? factoryPreset));
-  const userPresets = (storedPresets ?? []).filter((preset) => !FACTORY_IDS.has(preset.id) && !LEGACY_FACTORY_IDS.has(preset.id));
-  return [...factoryPresets, ...userPresets.map(clonePreset)];
+  const factoryPresets = DEFAULT_PRESETS.map(clonePreset);
+  // Old versions let users overwrite or rename factory presets. Preserve those edits
+  // as separate user presets while always loading the current factory library.
+  const userPresets = (storedPresets ?? []).flatMap((preset) => {
+    const hadFactoryId = preset.id.startsWith('factory-') || LEGACY_FACTORY_IDS.has(preset.id);
+    if (hadFactoryId) {
+      if (preset.origin === 'factory' && preset.updatedAt === FACTORY_CREATED_AT) return [];
+      return [{ ...clonePreset(preset), id: `migrated-${preset.id}`, origin: 'user' as const, category: 'User Presets', name: `${preset.name} (이전 사용자 설정)` }];
+    }
+    return preset.origin === 'factory' ? [] : [clonePreset(preset)];
+  });
+  return [...factoryPresets, ...userPresets];
 };
 
 export const usePresetStore = create<PresetStore>((set, get) => ({
@@ -486,6 +496,10 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
       return null;
     }
 
+    if (sourcePreset.origin === 'factory') {
+      return get().savePreset(`${sourcePreset.name} 사용자 설정`, snapshot);
+    }
+
     const updatedPreset = buildPreset(sourcePreset.id, sourcePreset.name, snapshot, sourcePreset.createdAt, nowIso(), {
       category: sourcePreset.category,
       origin: sourcePreset.origin,
@@ -497,6 +511,7 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
     set({ presets, currentPresetName: updatedPreset.name });
     return clonePreset(updatedPreset);
   },
+  restoreSelection: (id, name) => set({ activePresetId: id, currentPresetName: name }),
   loadPreset: (id) => {
     const preset = get().presets.find((candidate) => candidate.id === id) ?? null;
     if (!preset) {
@@ -507,6 +522,7 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
     return clonePreset(preset);
   },
   renamePreset: (id, name) => {
+    if (get().presets.find((preset) => preset.id === id)?.origin === 'factory') return;
     const presets = get().presets.map((preset) =>
       preset.id === id ? { ...preset, name: sanitizeName(name, preset.name), origin: preset.origin === 'factory' ? 'user' : preset.origin, category: preset.origin === 'factory' ? 'User Presets' : preset.category, updatedAt: nowIso() } : preset,
     );
@@ -555,11 +571,11 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
         : [parsed];
     const imported = values.map((preset) => normalizePreset(preset, 'imported')).filter(Boolean) as PedalboardPreset[];
     const existingIds = new Set(get().presets.map((preset) => preset.id));
-    const uniqueImported = imported.map((preset) =>
-      existingIds.has(preset.id)
-        ? { ...preset, id: createId('imported'), name: `${preset.name} Imported`, origin: 'imported' as const }
-        : { ...preset, origin: preset.origin === 'factory' ? ('imported' as const) : preset.origin },
-    );
+    const uniqueImported = imported.filter((preset) => {
+      if (preset.origin === 'factory' || preset.id.startsWith('factory-') || existingIds.has(preset.id)) return false;
+      existingIds.add(preset.id);
+      return true;
+    }).map((preset) => ({ ...preset, origin: 'imported' as const }));
     const presets = [...uniqueImported, ...get().presets];
     writePresets(presets);
     set({
@@ -569,5 +585,5 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
     });
     return { imported: uniqueImported.length, skipped: values.length - uniqueImported.length };
   },
-  exportPresets: () => JSON.stringify({ version: 2, presets: get().presets.map(clonePreset) }, null, 2),
+  exportPresets: () => JSON.stringify({ version: 3, presets: get().presets.filter((preset) => preset.origin !== 'factory').map(clonePreset) }, null, 2),
 }));

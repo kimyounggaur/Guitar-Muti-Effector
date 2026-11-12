@@ -124,7 +124,7 @@ function DelayPedal({
           label="Feedback"
           value={params.feedback}
           min={0}
-          max={0.95}
+          max={0.85}
           step={0.01}
           onChange={(value) => setParam('feedback', value)}
         />
@@ -202,7 +202,7 @@ function DelaySlider({ label, value, min, max, step = 1, suffix = '', disabled =
 const readDelayParams = (params: Pedal['params'], tempoBpm: number): DelayParams => ({
   mode: readMode(params.mode),
   timeMs: readNumber(params.timeMs, 420, 20, 2000),
-  feedback: readNumber(params.feedback, 0.32, 0, 0.95),
+  feedback: readNumber(params.feedback, 0.32, 0, 0.85),
   mix: readPercent(params.mix, 28),
   tone: readNumber(params.tone, 62, 0, 100),
   sync: params.sync === true,

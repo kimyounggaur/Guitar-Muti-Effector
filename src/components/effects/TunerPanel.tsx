@@ -4,6 +4,7 @@ import { emptyTunerReading, subscribeTuner, TunerReading } from '../../audio/nod
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { isTunerMode, midiToFrequency, STANDARD_TUNINGS, TunerMode } from '../../audio/utils/pitch';
 import KnobControl from '../controls/KnobControl';
+import { useElementVisible } from '../../hooks/useElementVisible';
 
 type TunerPanelProps = {
   pedal: Pedal;
@@ -29,17 +30,25 @@ function TunerPanel({
   onParamChange,
 }: TunerPanelProps) {
   const [reading, setReading] = useState<TunerReading>(emptyTunerReading);
+  const [panelRef, visible] = useElementVisible<HTMLElement>();
   const params = useMemo(() => readTunerParams(pedal.params), [pedal.params]);
   const cents = Math.max(-50, Math.min(50, reading.cents));
   const stateLabel = getTuningState(reading);
   const strobeBars = useMemo(() => createStrobeBars(cents, reading.signalLow), [cents, reading.signalLow]);
 
-  useEffect(() => subscribeTuner(pedal.id, setReading), [pedal.id]);
+  useEffect(() => {
+    if (!visible) {
+      setReading(emptyTunerReading);
+      return;
+    }
+    return subscribeTuner(pedal.id, setReading);
+  }, [pedal.id, visible]);
 
   const setParam = (name: string, value: PedalParamValue) => onParamChange(pedal.id, name, value);
 
   return (
     <article
+      ref={panelRef}
       className={`pedal-card tuner-pedal rack-tuner-module ${selected ? 'is-selected' : ''} ${
         pedal.enabled ? 'is-on' : 'is-off'
       } ${
@@ -74,10 +83,10 @@ function TunerPanel({
 
           <div className="rack-tuner-mini-controls">
             <button type="button" onClick={() => setParam('referenceA4', params.referenceA4 === 440 ? 442 : 440)}>
-              CALIB
+              A4 {params.referenceA4 === 440 ? '442' : '440'} Hz
             </button>
             <button type="button" onClick={() => setParam('sensitivity', params.sensitivity >= 80 ? 55 : 82)}>
-              DISPLAY
+              감도 {params.sensitivity >= 80 ? '55' : '82'}
             </button>
           </div>
         </div>
@@ -110,14 +119,14 @@ function TunerPanel({
 
         <div className="rack-tuner-right">
           <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-            MUTE
+            {pedal.enabled ? 'TUNER ON' : 'TUNER OFF'}
           </button>
           <button
             type="button"
             className={pedal.bypassed ? 'is-bypassed' : ''}
             onClick={() => onBypass(pedal.id, !pedal.bypassed)}
           >
-            POWER
+            {pedal.bypassed ? 'BYPASS ON' : 'BYPASS OFF'}
           </button>
           <div className="rack-tuner-jacks" aria-hidden="true">
             <span>CABLE CHECK</span>

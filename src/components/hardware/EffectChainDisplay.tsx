@@ -126,6 +126,7 @@ function EffectChainDisplay({
                   key={pedal.id}
                   pedal={pedal}
                   selected={pedal.id === selectedPedalId}
+                  onSelect={onSelectPedal}
                   onToggle={handleEffectClick}
                 />
               ))}
@@ -145,10 +146,11 @@ function EffectChainDisplay({
 type SortableEffectBlockProps = {
   pedal: Pedal;
   selected: boolean;
+  onSelect: (id: string) => void;
   onToggle: (id: string) => void;
 };
 
-function SortableEffectBlock({ pedal, selected, onToggle }: SortableEffectBlockProps) {
+function SortableEffectBlock({ pedal, selected, onSelect, onToggle }: SortableEffectBlockProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pedal.id });
   const palette = effectPalette[pedal.type];
   const active = pedal.enabled && !pedal.bypassed;
@@ -173,9 +175,9 @@ function SortableEffectBlock({ pedal, selected, onToggle }: SortableEffectBlockP
       <button
         type="button"
         className="chain-effect-main chain-effect-svg-button"
-        aria-pressed={active}
-        aria-label={`${pedal.name} ${active ? 'active' : pedal.enabled ? 'bypassed' : 'off'}`}
-        onClick={() => onToggle(pedal.id)}
+        aria-pressed={selected}
+        aria-label={`${pedal.name} 설정 선택`}
+        onClick={() => onSelect(pedal.id)}
       >
         <EffectBlockSvg pedal={pedal} palette={palette} selected={selected} />
       </button>

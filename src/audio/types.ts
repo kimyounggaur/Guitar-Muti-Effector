@@ -111,7 +111,7 @@ export const createDefaultPedals = (): Pedal[] => [
     name: 'Noise Gate',
     enabled: true,
     bypassed: false,
-    params: { thresholdDb: -48, releaseMs: 180 },
+    params: { thresholdDb: -48, attackMs: 8, holdMs: 80, releaseMs: 180 },
   },
   {
     id: 'compressor',

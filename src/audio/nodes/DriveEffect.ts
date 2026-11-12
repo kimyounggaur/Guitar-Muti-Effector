@@ -13,6 +13,7 @@ const smoothParam = (context: AudioContext, param: AudioParam, value: number, se
 export class DriveEffect extends BaseEffect {
   private readonly preGain: GainNode;
   private readonly shaper: WaveShaperNode;
+  private readonly dcBlocker: BiquadFilterNode;
   private readonly midFocus: BiquadFilterNode;
   private readonly toneFilter: BiquadFilterNode;
   private readonly outputGain: GainNode;
@@ -26,6 +27,10 @@ export class DriveEffect extends BaseEffect {
     super(context, id, 'drive');
     this.preGain = context.createGain();
     this.shaper = context.createWaveShaper();
+    this.dcBlocker = context.createBiquadFilter();
+    this.dcBlocker.type = 'highpass';
+    this.dcBlocker.frequency.value = 20;
+    this.dcBlocker.Q.value = 0.5;
     this.midFocus = context.createBiquadFilter();
     this.toneFilter = context.createBiquadFilter();
     this.outputGain = context.createGain();
@@ -36,7 +41,7 @@ export class DriveEffect extends BaseEffect {
     this.midFocus.Q.value = 0.95;
     this.toneFilter.type = 'lowpass';
 
-    this.connectWet(this.preGain, this.shaper, this.midFocus, this.toneFilter, this.outputGain);
+    this.connectWet(this.preGain, this.shaper, this.dcBlocker, this.midFocus, this.toneFilter, this.outputGain);
     this.setMix(1);
     this.applyAll(false);
 
@@ -82,7 +87,7 @@ export class DriveEffect extends BaseEffect {
       distortion: 2.65,
       fuzz: 3.45,
     }[this.mode];
-    const target = 1 + amount * 16 * modeGain;
+    const target = 0.5 + amount * 1.5 * modeGain;
     this.setAudioParam(this.preGain.gain, target, smooth ? 0.018 : 0);
     this.updateCurve();
   }
@@ -106,7 +111,7 @@ export class DriveEffect extends BaseEffect {
       distortion: 0.72,
       fuzz: 0.62,
     }[this.mode];
-    const target = (0.02 + amount * 1.6) * compensation;
+    const target = (amount * 1.0) * compensation;
     this.setAudioParam(this.outputGain.gain, target, smooth ? 0.018 : 0);
   }
 

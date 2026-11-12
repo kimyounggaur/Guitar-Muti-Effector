@@ -1,4 +1,4 @@
-import { MeterReading } from '../../audio/nodes/MeterNode';
+import { useAudioStore } from '../../store/audioStore';
 
 type PatchHeaderProps = {
   bank: string;
@@ -6,11 +6,11 @@ type PatchHeaderProps = {
   patchName: string;
   bpm: number;
   isAudioReady: boolean;
-  inputMeter: MeterReading;
-  outputMeter: MeterReading;
 };
 
-function PatchHeader({ bank, patch, patchName, bpm, isAudioReady, inputMeter, outputMeter }: PatchHeaderProps) {
+function PatchHeader({ bank, patch, patchName, bpm, isAudioReady }: PatchHeaderProps) {
+  const inputMeter = useAudioStore((state) => state.inputMeter);
+  const outputMeter = useAudioStore((state) => state.outputMeter);
   return (
     <header className="patch-header">
       <div className="patch-identity">

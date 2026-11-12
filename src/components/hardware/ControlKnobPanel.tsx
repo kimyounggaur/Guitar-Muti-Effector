@@ -106,7 +106,7 @@ const controlMap: Partial<Record<PedalType, ControlConfig[]>> = {
   ],
   delay: [
     { name: 'timeMs', label: 'Time', min: 20, max: 2000, step: 10, suffix: 'ms' },
-    { name: 'feedback', label: 'Feedback', min: 0, max: 0.95, step: 0.01 },
+    { name: 'feedback', label: 'Feedback', min: 0, max: 0.85, step: 0.01 },
     { name: 'mix', label: 'Mix', min: 0, max: 100, step: 1 },
     { name: 'tone', label: 'Tone', min: 0, max: 100, step: 1 },
   ],

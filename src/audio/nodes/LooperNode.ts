@@ -1,4 +1,5 @@
 import { EffectNodeWrapper, PedalParamValue, PedalType } from '../types';
+import { getTempoBpm } from '../../store/tempoStore';
 import looperProcessorUrl from '../worklets/looper-processor.ts?worker&url';
 
 export type LooperState = 'idle' | 'recording' | 'playing' | 'overdubbing' | 'stopped' | 'loading' | 'error';
@@ -18,6 +19,7 @@ export type LooperReading = {
 type LooperListener = (reading: LooperReading) => void;
 
 const listenersById = new Map<string, Set<LooperListener>>();
+const readingsById = new Map<string, LooperReading>();
 const workletReadyByContext = new WeakMap<AudioContext, Promise<void>>();
 
 export const emptyLooperReading: LooperReading = {
@@ -36,6 +38,7 @@ export const subscribeLooper = (id: string, listener: LooperListener) => {
   const listeners = listenersById.get(id) ?? new Set<LooperListener>();
   listeners.add(listener);
   listenersById.set(id, listeners);
+  listener(readingsById.get(id) ?? emptyLooperReading);
 
   return () => {
     listeners.delete(listener);
@@ -58,6 +61,9 @@ export class LooperNode implements EffectNodeWrapper {
   private pendingParams = new Map<string, PedalParamValue>();
 
   constructor(private readonly context: AudioContext, readonly id: string) {
+    this.pendingParams.set('bpm', getTempoBpm());
+    // Browser output latency is an estimate; input interface latency is not exposed.
+    this.pendingParams.set('latencyMs', Math.max(0, (context.baseLatency + (context.outputLatency || 0)) * 1000));
     this.input = context.createGain();
     this.output = context.createGain();
     this.dryGain = context.createGain();
@@ -84,11 +90,11 @@ export class LooperNode implements EffectNodeWrapper {
     }
 
     if (name === 'level') {
-      smoothParam(this.context, this.loopGain.gain, percentToUnit(value, 85), 0.015);
+      smoothParam(this.context, this.loopGain.gain, this.bypassed ? 0 : percentToUnit(value, 85), 0.015);
     }
 
     this.pendingParams.set(name, value);
-    this.postParam(name, value);
+    if (name !== 'level') this.postParam(name, value);
   }
 
   setBypass(bypassed: boolean) {
@@ -105,7 +111,8 @@ export class LooperNode implements EffectNodeWrapper {
     safeDisconnect(this.dryGain);
     safeDisconnect(this.loopGain);
     safeDisconnect(this.workletNode);
-    listenersById.delete(this.id);
+    this.publish({ ...emptyLooperReading, state: 'loading' });
+    readingsById.delete(this.id);
   }
 
   private async initialize() {
@@ -124,7 +131,7 @@ export class LooperNode implements EffectNodeWrapper {
       this.workletNode.port.onmessage = (event) => this.handleWorkletMessage(event.data);
       this.input.connect(this.workletNode);
       this.workletNode.connect(this.loopGain);
-      this.pendingParams.forEach((value, name) => this.postParam(name, value));
+      this.pendingParams.forEach((value, name) => { if (name !== 'level') this.postParam(name, value); });
       this.publish({ ...emptyLooperReading, state: 'idle' });
     } catch {
       this.publish({ ...emptyLooperReading, state: 'error' });
@@ -163,6 +170,7 @@ export class LooperNode implements EffectNodeWrapper {
   }
 
   private publish(reading: LooperReading) {
+    readingsById.set(this.id, reading);
     const listeners = listenersById.get(this.id);
     listeners?.forEach((listener) => listener(reading));
   }

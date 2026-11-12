@@ -19,6 +19,8 @@ type CabinetLane = {
 };
 
 const customIRs = new Map<string, CustomIR>();
+// Decode once per AudioContext and asset, including failed loads.
+const factoryIRs = new WeakMap<AudioContext, Map<string, Promise<AudioBuffer | null>>>();
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -57,7 +59,7 @@ export class CabinetIREffect extends BaseEffect {
   private level = 72;
   private activeLane: CabinetLane;
   private loadToken = 0;
-  private crossfadeTimer = 0;
+  private pendingLanes = new Set<CabinetLane>();
 
   constructor(context: AudioContext, id: string) {
     super(context, id, 'cabinetIR');
@@ -101,7 +103,9 @@ export class CabinetIREffect extends BaseEffect {
   }
 
   override dispose() {
-    window.clearTimeout(this.crossfadeTimer);
+    ++this.loadToken;
+    this.pendingLanes.forEach((lane) => this.disposeLane(lane));
+    this.pendingLanes.clear();
     this.disposeLane(this.activeLane);
     super.dispose();
   }
@@ -128,22 +132,22 @@ export class CabinetIREffect extends BaseEffect {
       }
     }
 
-    const url = cabinetTypeToUrl(this.cabinetType);
-    if (!url) {
-      return createSyntheticCabinetImpulse(this.context, this.cabinetType, this.mic);
-    }
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`IR not found: ${url}`);
+    if (this.cabinetType === '4x12' && (this.mic === 'dynamic' || this.mic === 'mixed')) {
+      const path = `${import.meta.env.BASE_URL}irs/cab_4x12_${this.mic}.wav`;
+      let cache = factoryIRs.get(this.context);
+      if (!cache) { cache = new Map(); factoryIRs.set(this.context, cache); }
+      let pending = cache.get(path);
+      if (!pending) {
+        pending = fetch(path).then((response) => {
+          if (!response.ok) throw new Error('Cabinet IR unavailable');
+          return response.arrayBuffer();
+        }).then((data) => this.context.decodeAudioData(data)).catch(() => null);
+        cache.set(path, pending);
       }
-
-      const data = await response.arrayBuffer();
-      return await this.context.decodeAudioData(data);
-    } catch {
-      return createSyntheticCabinetImpulse(this.context, this.cabinetType, this.mic);
+      const recorded = await pending;
+      if (recorded) return recorded;
     }
+    return createSyntheticCabinetImpulse(this.context, this.cabinetType, this.mic);
   }
 
   private crossfadeTo(buffer: AudioBuffer) {
@@ -160,8 +164,8 @@ export class CabinetIREffect extends BaseEffect {
     previousLane.laneGain.gain.linearRampToValueAtTime(0, now + 0.045);
     nextLane.laneGain.gain.linearRampToValueAtTime(1, now + 0.045);
 
-    window.clearTimeout(this.crossfadeTimer);
-    this.crossfadeTimer = window.setTimeout(() => this.disposeLane(previousLane), 70);
+    this.pendingLanes.add(previousLane);
+    window.setTimeout(() => { this.disposeLane(previousLane); this.pendingLanes.delete(previousLane); }, 70);
   }
 
   private createLane(buffer: AudioBuffer, gain: number): CabinetLane {
@@ -210,6 +214,7 @@ export class CabinetIREffect extends BaseEffect {
   }
 
   private disposeLane(lane: CabinetLane) {
+    try { this.wetInput.disconnect(lane.lowCut); } catch { /* already detached */ }
     safeDisconnect(lane.lowCut);
     safeDisconnect(lane.convolver);
     safeDisconnect(lane.highCut);
@@ -217,24 +222,6 @@ export class CabinetIREffect extends BaseEffect {
     safeDisconnect(lane.laneGain);
   }
 }
-
-const cabinetTypeToUrl = (cabinetType: CabinetType) => {
-  const baseUrl = import.meta.env.BASE_URL || '/';
-
-  if (cabinetType === '1x12') {
-    return `${baseUrl}irs/cab_1x12.wav`;
-  }
-
-  if (cabinetType === '2x12') {
-    return `${baseUrl}irs/cab_2x12.wav`;
-  }
-
-  if (cabinetType === '4x12') {
-    return `${baseUrl}irs/cab_4x12.wav`;
-  }
-
-  return null;
-};
 
 const readCabinetType = (value: PedalParamValue): CabinetType => {
   if (value === '1x12' || value === '2x12' || value === '4x12' || value === 'openBack' || value === 'custom') {
@@ -268,7 +255,13 @@ const readMic = (value: PedalParamValue): CabinetMic => {
   return 'dynamic';
 };
 
+const cabinetCache = new WeakMap<AudioContext, Map<string, AudioBuffer>>();
 const createSyntheticCabinetImpulse = (context: AudioContext, cabinetType: CabinetType, mic: CabinetMic) => {
+  let entries = cabinetCache.get(context);
+  if (!entries) { entries = new Map(); cabinetCache.set(context, entries); }
+  const key = `${cabinetType}:${mic}`;
+  const existing = entries.get(key);
+  if (existing) return existing;
   const sampleRate = context.sampleRate;
   const length = Math.floor(sampleRate * syntheticLengthSeconds(cabinetType));
   const buffer = context.createBuffer(2, length, sampleRate);
@@ -290,6 +283,7 @@ const createSyntheticCabinetImpulse = (context: AudioContext, cabinetType: Cabin
     }
   }
 
+  entries.set(key, buffer);
   return buffer;
 };
 

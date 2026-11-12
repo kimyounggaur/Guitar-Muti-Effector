@@ -34,6 +34,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
   const [presetName, setPresetName] = useState('New Preset');
   const [selectedCategory, setSelectedCategory] = useState(ALL_PRESETS);
   const [searchQuery, setSearchQuery] = useState('');
+  const [saveStatus, setSaveStatus] = useState('');
 
   useEffect(() => {
     hydratePresets();
@@ -96,10 +97,17 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
     const preset = savePreset(presetName, createSnapshot());
     setPresetName(`${preset.name} Copy`);
     setSelectedCategory(USER_PRESETS);
+    setSaveStatus('사용자 프리셋을 저장했습니다.');
   };
 
   const handleUpdateActive = () => {
+    if (!activePreset || activePreset.origin === 'factory') {
+      setSaveStatus('공장 프리셋은 직접 덮어쓸 수 없습니다. 새 프리셋으로 저장해 주세요.');
+      return;
+    }
+    if (!window.confirm('현재 사용자 프리셋을 덮어쓰시겠습니까?')) return;
     updateActivePreset(createSnapshot());
+    setSaveStatus('현재 프리셋을 저장했습니다.');
   };
 
   const handleLoad = (preset: PedalboardPreset) => {
@@ -119,7 +127,8 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
 
   return (
     <section className="preset-section preset-library-section" aria-label="Preset library">
-      <div className="preset-browser-frame">
+      <details className="preset-browser-frame">
+        <summary>프리셋 라이브러리 열기 · {presets.length}개</summary>
         <header className="preset-browser-topline">
           <span>LIBRARY STORE</span>
           <span>PRESETS</span>
@@ -152,25 +161,14 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
                 <button type="button" onClick={handleSavePreset}>
                   Save
                 </button>
-                <button type="button" onClick={handleUpdateActive} disabled={!activePresetId}>
+                <button type="button" onClick={handleUpdateActive} disabled={!activePresetId || activePreset?.origin === 'factory'}>
                   Save Current
                 </button>
               </div>
+              <p role="status">{saveStatus}</p>
               <ImportExportPreset compact />
             </div>
 
-            <div className="preset-output-panel">
-              <span>Output</span>
-              <strong>OK</strong>
-              <div>
-                <small>PEAK</small>
-                <i style={{ width: `${Math.round(masterVolume * 100)}%` }} />
-              </div>
-              <div>
-                <small>RMS</small>
-                <i style={{ width: `${Math.round(Math.min(100, tempoBpm / 2.4))}%` }} />
-              </div>
-            </div>
           </aside>
 
           <div className="preset-browser-main">
@@ -214,7 +212,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
             </div>
           </div>
         </div>
-      </div>
+      </details>
     </section>
   );
 }

@@ -95,6 +95,7 @@ export class DelayEffect extends BaseEffect {
     this.paramHandlers.set('mode', (value) => {
       this.mode = readDelayMode(value);
       this.applyMode();
+      this.applyFeedback();
       this.applyTime();
       this.applyTone();
       this.applyFlutter();
@@ -104,7 +105,7 @@ export class DelayEffect extends BaseEffect {
       this.applyTime();
     });
     this.paramHandlers.set('feedback', (value) => {
-      this.feedback = clamp(asNumber(value, 0.32), 0, 0.95);
+      this.feedback = clamp(asNumber(value, 0.32), 0, 0.85);
       this.applyFeedback();
     });
     this.paramHandlers.set('mix', (value) => {
@@ -147,14 +148,29 @@ export class DelayEffect extends BaseEffect {
     [this.monoTone, this.leftTone, this.rightTone].forEach((filter) => {
       filter.type = 'lowpass';
       filter.frequency.value = 6800;
-      filter.Q.value = 0.72;
+      filter.Q.value = 0.5;
     });
   }
 
   private connectDelayLines() {
     this.wetInput.connect(this.monoDelay);
     this.monoDelay.connect(this.monoTone);
-    this.monoTone.connect(this.monoFeedback);
+    const feedbackLimit = () => {
+      const limiter = this.context.createWaveShaper();
+      const curve = new Float32Array(2049);
+      for (let i = 0; i < curve.length; i += 1) {
+        const x = (i / (curve.length - 1)) * 2 - 1;
+        curve[i] = Math.max(-0.8, Math.min(0.8, x));
+      }
+      limiter.curve = curve;
+      this.nodes.push(limiter);
+      return limiter;
+    };
+    const monoLimit = feedbackLimit();
+    const leftLimit = feedbackLimit();
+    const rightLimit = feedbackLimit();
+    this.monoTone.connect(monoLimit);
+    monoLimit.connect(this.monoFeedback);
     this.monoFeedback.connect(this.monoDelay);
     this.monoTone.connect(this.monoModeGain);
     this.monoModeGain.connect(this.wetOutput);
@@ -163,12 +179,14 @@ export class DelayEffect extends BaseEffect {
     this.leftDelay.connect(this.leftTone);
     this.leftTone.connect(this.leftOutput);
     this.leftOutput.connect(this.merger, 0, 0);
-    this.leftTone.connect(this.rightFeedback);
+    this.leftTone.connect(rightLimit);
+    rightLimit.connect(this.rightFeedback);
     this.rightFeedback.connect(this.rightDelay);
     this.rightDelay.connect(this.rightTone);
     this.rightTone.connect(this.rightOutput);
     this.rightOutput.connect(this.merger, 0, 1);
-    this.rightTone.connect(this.leftFeedback);
+    this.rightTone.connect(leftLimit);
+    leftLimit.connect(this.leftFeedback);
     this.leftFeedback.connect(this.leftDelay);
     this.merger.connect(this.pingPongModeGain);
     this.pingPongModeGain.connect(this.wetOutput);
@@ -197,7 +215,7 @@ export class DelayEffect extends BaseEffect {
 
   private applyFeedback(smooth = true) {
     const modeScale = this.mode === 'slapback' ? 0.38 : this.mode === 'analog' ? 0.92 : 1;
-    const feedback = clamp(this.feedback * modeScale, 0, 0.95);
+    const feedback = clamp(this.feedback * modeScale, 0, 0.85);
     this.setAudioParam(this.monoFeedback.gain, feedback, smooth ? 0.018 : 0);
     this.setAudioParam(this.leftFeedback.gain, feedback, smooth ? 0.018 : 0);
     this.setAudioParam(this.rightFeedback.gain, feedback, smooth ? 0.018 : 0);
@@ -210,13 +228,14 @@ export class DelayEffect extends BaseEffect {
     const frequency = modeFloor + amount ** 1.35 * (modeCeiling - modeFloor);
     [this.monoTone, this.leftTone, this.rightTone].forEach((filter) => {
       this.setAudioParam(filter.frequency, frequency, smooth ? 0.018 : 0);
-      this.setAudioParam(filter.Q, this.mode === 'tape' ? 0.9 : 0.72, smooth ? 0.018 : 0);
+      this.setAudioParam(filter.Q, 0.5, smooth ? 0.018 : 0);
     });
   }
 
   private applyFlutter(smooth = true) {
     const flutterAmount = this.mode === 'tape' ? percentToUnit(this.flutter, 0) : 0;
-    const depth = flutterAmount * 0.0065;
+    // Keep tape flutter subtle even at the highest LFO rate.
+    const depth = flutterAmount * 0.00008;
     const rate = 3.5 + flutterAmount * 4.5;
     this.setAudioParam(this.lfoDepth.gain, depth, smooth ? 0.025 : 0);
     this.setAudioParam(this.lfo.frequency, rate, smooth ? 0.025 : 0);
