@@ -31,7 +31,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
   const renamePreset = usePresetStore((state) => state.renamePreset);
   const deletePreset = usePresetStore((state) => state.deletePreset);
   const duplicatePreset = usePresetStore((state) => state.duplicatePreset);
-  const [presetName, setPresetName] = useState('New Preset');
+  const [presetName, setPresetName] = useState('새 프리셋');
   const [selectedCategory, setSelectedCategory] = useState(ALL_PRESETS);
   const [searchQuery, setSearchQuery] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
@@ -43,6 +43,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
   const createSnapshot = (): PresetSnapshot => ({
     pedals,
     masterVolume,
+    outputTrimDb: useAudioStore.getState().presetTrimDb,
     tempoBpm,
   });
 
@@ -95,7 +96,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
 
   const handleSavePreset = () => {
     const preset = savePreset(presetName, createSnapshot());
-    setPresetName(`${preset.name} Copy`);
+    setPresetName(`${preset.name} 복사`);
     setSelectedCategory(USER_PRESETS);
     setSaveStatus('사용자 프리셋을 저장했습니다.');
   };
@@ -126,17 +127,17 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
   };
 
   return (
-    <section className="preset-section preset-library-section" aria-label="Preset library">
+    <section className="preset-section preset-library-section" aria-label="프리셋 라이브러리">
       <details className="preset-browser-frame">
         <summary>프리셋 라이브러리 열기 · {presets.length}개</summary>
         <header className="preset-browser-topline">
-          <span>LIBRARY STORE</span>
-          <span>PRESETS</span>
+          <span>프리셋 라이브러리</span>
+          <span>전체</span>
           <strong>{presets.length}</strong>
         </header>
 
         <div className="preset-browser-grid">
-          <aside className="preset-library-sidebar" aria-label="Preset library categories">
+          <aside className="preset-library-sidebar" aria-label="프리셋 분류">
             <div className="preset-category-list">
               {libraryCategories.map((category) => (
                 <button
@@ -152,17 +153,17 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
             </div>
 
             <div className="preset-tools-panel">
-              <span>Preset Tools</span>
+              <span>프리셋 도구</span>
               <label>
-                <small>Preset name</small>
+                <small>프리셋 이름</small>
                 <input type="text" value={presetName} onChange={(event) => setPresetName(event.target.value)} />
               </label>
               <div className="preset-tool-buttons">
                 <button type="button" onClick={handleSavePreset}>
-                  Save
+                  새로 저장
                 </button>
                 <button type="button" onClick={handleUpdateActive} disabled={!activePresetId || activePreset?.origin === 'factory'}>
-                  Save Current
+                  현재 설정 저장
                 </button>
               </div>
               <p role="status">{saveStatus}</p>
@@ -176,20 +177,20 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
               <div>
                 <h2>{selectedCategory}</h2>
                 <span>
-                  {filteredPresets.length} sounds
-                  {activePreset ? ` · Current: ${activePreset.name}` : ''}
+                  {filteredPresets.length}개
+                  {activePreset ? ` · 현재: ${activePreset.name}` : ''}
                 </span>
               </div>
               <strong>{Math.round(masterVolume * 100)}% · {tempoBpm} BPM</strong>
             </div>
 
             <label className="preset-search-box">
-              <span>Search presets</span>
+              <span>프리셋 검색</span>
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search presets"
+                placeholder="프리셋 검색"
               />
             </label>
 
@@ -207,7 +208,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
                   />
                 ))
               ) : (
-                <div className="preset-empty-state">No presets match this filter.</div>
+                <div className="preset-empty-state">검색 조건에 맞는 프리셋이 없습니다.</div>
               )}
             </div>
           </div>

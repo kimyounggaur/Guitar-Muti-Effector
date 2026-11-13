@@ -12,6 +12,7 @@ type ConnectGuitarPanelProps = {
   onConnect: () => void;
   onStop: () => void;
   onDeviceChange: (deviceId: string) => void;
+  onOutputDeviceChange: (deviceId: string) => Promise<void>;
 };
 
 function ConnectGuitarPanel({
@@ -23,10 +24,18 @@ function ConnectGuitarPanel({
   onConnect,
   onStop,
   onDeviceChange,
+  onOutputDeviceChange,
 }: ConnectGuitarPanelProps) {
   const inputChannel = useAudioStore((state) => state.inputChannel);
   const setInputChannel = useAudioStore((state) => state.setInputChannel);
   const setInputDevices = useAudioStore((state) => state.setInputDevices);
+  const outputDevices = useAudioStore((state) => state.outputDevices);
+  const selectedOutputDeviceId = useAudioStore((state) => state.selectedOutputDeviceId);
+  const setOutputDevices = useAudioStore((state) => state.setOutputDevices);
+  const setSelectedOutputDeviceId = useAudioStore((state) => state.setSelectedOutputDeviceId);
+  const [outputNotice, setOutputNotice] = useState('');
+  const [outputChanging, setOutputChanging] = useState(false);
+  const outputSupported = typeof AudioContext !== 'undefined' && 'setSinkId' in AudioContext.prototype;
   const [deviceNotice, setDeviceNotice] = useState('');
   const stopRef = useRef(onStop);
   stopRef.current = onStop;
@@ -56,6 +65,29 @@ function ConnectGuitarPanel({
     media.addEventListener('devicechange', onDeviceListChange);
     return () => { cancelled = true; media.removeEventListener('devicechange', onDeviceListChange); };
   }, [isAudioReady, selectedDeviceId, inputDevices, setInputDevices]);
+
+  useEffect(() => {
+    const media = navigator.mediaDevices;
+    if (!media?.enumerateDevices) return;
+    let cancelled = false;
+    const refresh = () => { void media.enumerateDevices().then((devices) => {
+      if (!cancelled) setOutputDevices(devices.filter((device) => device.kind === 'audiooutput'));
+    }).catch(() => { if (!cancelled) setOutputDevices([]); }); };
+    refresh();
+    media.addEventListener?.('devicechange', refresh);
+    return () => { cancelled = true; media.removeEventListener?.('devicechange', refresh); };
+  }, [isAudioReady, setOutputDevices]);
+
+  const changeOutput = async (id: string) => {
+    setOutputChanging(true);
+    setOutputNotice('');
+    try {
+      await onOutputDeviceChange(id);
+      setSelectedOutputDeviceId(id);
+    } catch (error) {
+      setOutputNotice(audioErrorHelp(error));
+    } finally { setOutputChanging(false); }
+  };
 
   useEffect(() => { if (isConnecting) setDeviceNotice(''); }, [isConnecting]);
   return (
@@ -91,6 +123,19 @@ function ConnectGuitarPanel({
           </select>
         </label>
 
+        <label className="device-selector" htmlFor="audio-output-device">
+          <span>소리 출력 장치</span>
+          <select id="audio-output-device" value={selectedOutputDeviceId}
+            disabled={!isAudioReady || isConnecting || outputChanging || !outputSupported}
+            onChange={(event) => void changeOutput(event.target.value)}>
+            <option value="">시스템 기본 출력</option>
+            {outputDevices.filter((device) => device.deviceId && device.deviceId !== 'default').map((device, index) => (
+              <option key={device.deviceId} value={device.deviceId}>{device.label || `출력 장치 ${index + 1}`}</option>
+            ))}
+          </select>
+          {!outputSupported && <small>이 브라우저에서는 시스템 소리 설정에서 출력 장치를 변경해 주세요.</small>}
+        </label>
+
         <div className="safety-card">
           <strong>안전하게 시작하기</strong>
           <ul>
@@ -103,9 +148,23 @@ function ConnectGuitarPanel({
 
       <InputSafetyNotice isAudioReady={isAudioReady} />
       {deviceNotice ? <p role="status" className="error-message">{deviceNotice}</p> : null}
-      {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
+      {outputNotice ? <p role="alert" className="error-message">{outputNotice}</p> : null}
+      {errorMessage ? <p role="alert" className="error-message">{audioErrorHelp(errorMessage)}</p> : null}
     </section>
   );
+}
+
+export function audioErrorHelp(error: unknown): string {
+  const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error ?? '');
+  if (/NotAllowedError|Permission denied|permission.*denied|not allowed/i.test(message))
+    return '마이크 또는 출력 장치 권한이 거부되었습니다. 브라우저 주소창의 사이트 권한을 허용한 뒤 다시 연결해 주세요.';
+  if (/NotFoundError|Requested device not found|device.*not found/i.test(message))
+    return '선택한 오디오 장치를 찾을 수 없습니다. 장치 연결을 확인하고 다시 선택해 주세요.';
+  if (/NotReadableError|Could not start audio source|device.*busy/i.test(message))
+    return '오디오 장치에 접근할 수 없습니다. 다른 앱에서 장치를 사용 중인지 확인해 주세요.';
+  if (/OverconstrainedError/i.test(message)) return '선택한 장치를 사용할 수 없습니다. 다른 입력 장치를 선택해 주세요.';
+  if (/AbortError/i.test(message)) return '오디오 연결이 취소되었습니다. 필요하면 다시 연결해 주세요.';
+  return message || '오디오 설정을 변경하지 못했습니다. 장치 연결과 브라우저 권한을 확인해 주세요.';
 }
 
 // Subscribe separately so meter updates do not redraw device selection controls.

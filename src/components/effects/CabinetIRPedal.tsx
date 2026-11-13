@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CabinetMic, CabinetType, registerCustomCabinetIR } from '../../audio/nodes/CabinetIREffect';
+import { CabinetMic, CabinetType, hasCustomCabinetIR, registerCustomCabinetIR } from '../../audio/nodes/CabinetIREffect';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import KnobControl from '../controls/KnobControl';
 
@@ -38,6 +38,7 @@ function CabinetIRPedal({
 }: CabinetIRPedalProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [uploadName, setUploadName] = useState('');
+  const [uploadStatus, setUploadStatus] = useState('');
   const params = useMemo(() => readCabinetIRParams(pedal.params), [pedal.params]);
 
   useEffect(() => {
@@ -56,11 +57,20 @@ function CabinetIRPedal({
       return;
     }
 
-    const data = await file.arrayBuffer();
-    const token = registerCustomCabinetIR(pedal.id, file.name, data);
-    setUploadName(file.name);
-    setParam('cabinetType', 'custom');
-    setParam('customIRName', token);
+    try {
+      if (file.size > 10 * 1024 * 1024) throw new Error('IR 파일은 10MB 이하여야 합니다.');
+      const data = await file.arrayBuffer();
+      const decoder = new OfflineAudioContext(1, 1, 44100);
+      const decoded = await decoder.decodeAudioData(data.slice(0));
+      if (!decoded.length || decoded.duration > 10) throw new Error('IR 길이는 10초 이하여야 합니다.');
+      const token = registerCustomCabinetIR(pedal.id, file.name, data);
+      setUploadName(file.name);
+      setParam('cabinetType', 'custom');
+      setParam('customIRName', token);
+      setUploadStatus('사용자 IR을 적용했습니다. 새로고침하면 다시 선택해 주세요.');
+    } catch (error) {
+      setUploadStatus(error instanceof Error && error.message.includes('IR ') ? error.message : 'WAV 파일을 읽을 수 없습니다. 올바른 오디오 파일을 선택해 주세요.');
+    }
   };
 
   return (
@@ -70,7 +80,7 @@ function CabinetIRPedal({
       } ${isDragging ? 'is-dragging' : ''}`}
     >
       <div className="pedal-top">
-        <button
+        {dragListeners ? (<button
           type="button"
           className="drag-handle"
           aria-label={`Move ${pedal.name}`}
@@ -78,29 +88,29 @@ function CabinetIRPedal({
           {...dragListeners}
         >
           ≡
-        </button>
+        </button>) : null}
         <button type="button" className="pedal-select cabinet-display" onClick={() => onSelect(pedal.id)}>
-          <span>Speaker cabinet</span>
+          <span>스피커 캐비닛</span>
           <strong>CAB IR</strong>
           <em>{formatCabinetLabel(params)}</em>
         </button>
       </div>
 
-      <canvas ref={canvasRef} className="cabinet-curve-canvas" width="580" height="146" aria-label="Cabinet filter curve" />
+      <canvas ref={canvasRef} className="cabinet-curve-canvas" width="580" height="146" aria-label="캐비닛 필터 예상 곡선" />
 
       <div className="cabinet-row">
         <label className="cabinet-control is-wide">
-          <span>Cabinet</span>
+          <span>캐비닛</span>
           <select value={params.cabinetType} onChange={(event) => setParam('cabinetType', event.target.value)}>
             <option value="1x12">1x12</option>
             <option value="2x12">2x12</option>
             <option value="4x12">4x12</option>
             <option value="openBack">Open Back</option>
-            <option value="custom">Custom</option>
+            <option value="custom" disabled={!hasCustomCabinetIR(pedal.id) && params.cabinetType !== 'custom'}>사용자 IR</option>
           </select>
         </label>
         <label className="cabinet-control is-wide">
-          <span>Mic</span>
+          <span>마이크</span>
           <select value={params.mic} onChange={(event) => setParam('mic', event.target.value)}>
             <option value="dynamic">Dynamic</option>
             <option value="ribbon">Ribbon</option>
@@ -111,15 +121,16 @@ function CabinetIRPedal({
       </div>
 
       <label className="ir-upload">
-        <span>IR File</span>
+        <span>사용자 IR 파일 (WAV)</span>
         <input
           type="file"
           accept="audio/wav,audio/wave,.wav"
           onChange={(event) => void handleIRUpload(event.target.files?.[0])}
         />
-        <strong>{uploadName || params.customIRName.split(':')[0] || 'Synthetic / bundled'}</strong>
+        <strong>{uploadName || (hasCustomCabinetIR(pedal.id) ? params.customIRName.split(':')[0] : '파일 선택')}</strong>
       </label>
 
+      <p role="status">{uploadStatus || (params.cabinetType === 'custom' && !hasCustomCabinetIR(pedal.id) ? '사용자 IR이 없습니다. 다시 선택해 주세요. 현재 합성 캐비닛을 사용합니다.' : '사용자 IR은 현재 브라우저 탭에서만 유지됩니다.')}</p>
       <div className="cabinet-controls">
         <CabSlider
           label="LowCut"
@@ -139,19 +150,19 @@ function CabinetIRPedal({
           onChange={(value) => setParam('highCut', value)}
         />
         <CabSlider label="Mix" value={params.mix} min={0} max={100} onChange={(value) => setParam('mix', value)} />
-        <CabSlider label="Level" value={params.level} min={0} max={100} onChange={(value) => setParam('level', value)} />
+        <CabSlider label="출력 음량" value={params.level} min={0} max={100} onChange={(value) => setParam('level', value)} />
       </div>
 
       <div className="pedal-switches">
         <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-          {pedal.enabled ? 'On' : 'Off'}
+          {pedal.enabled ? '켜짐' : '꺼짐'}
         </button>
         <button
           type="button"
           className={pedal.bypassed ? 'is-bypassed' : ''}
           onClick={() => onBypass(pedal.id, !pedal.bypassed)}
         >
-          {pedal.bypassed ? 'Bypassed' : 'Bypass'}
+          {pedal.bypassed ? '바이패스 해제' : '바이패스'}
         </button>
       </div>
     </article>

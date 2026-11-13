@@ -42,15 +42,15 @@ function FootSwitchPanel({
   const switchCount = Math.max(categories.length, effectPedals.length);
 
   return (
-    <section className={`foot-switch-panel preset-stomp-panel is-${mode}-mode`} aria-label="Stomp switches">
-      <div className="stomp-mode-toggle-row" aria-label="Stomp switch mode">
+    <section className={`foot-switch-panel preset-stomp-panel is-${mode}-mode`} aria-label="풋스위치">
+      <div className="stomp-mode-toggle-row" aria-label="풋스위치 모드">
         <button
           type="button"
           className={mode === 'effects' ? 'is-active' : ''}
           onClick={() => onModeChanged('effects')}
           aria-pressed={mode === 'effects'}
         >
-          Effects
+          이펙트
         </button>
         <button
           type="button"
@@ -58,7 +58,7 @@ function FootSwitchPanel({
           onClick={() => onModeChanged('presets')}
           aria-pressed={mode === 'presets'}
         >
-          Presets
+          프리셋
         </button>
       </div>
 
@@ -74,11 +74,11 @@ function FootSwitchPanel({
           ? pedal
             ? pedal.enabled
               ? pedal.bypassed
-                ? 'bypass'
-                : 'active'
-              : 'off'
-            : 'unmapped'
-          : `${categoryCounts[category] ?? 0} presets`;
+                ? '바이패스'
+                : '켜짐'
+              : '꺼짐'
+            : '할당 없음'
+          : `${categoryCounts[category] ?? 0}개 프리셋`;
         const handleClick = () => {
           if (isEffectMode) {
             if (pedal) {

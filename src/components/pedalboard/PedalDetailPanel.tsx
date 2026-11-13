@@ -8,6 +8,8 @@ import KnobControl from '../controls/KnobControl';
 import AmpEQPedal from '../effects/AmpEQPedal';
 import TunerPanel from '../effects/TunerPanel';
 import LooperPanel from '../effects/LooperPanel';
+import CabinetIRPedal from '../effects/CabinetIRPedal';
+import RhythmPanel from '../effects/RhythmPanel';
 
 type PedalDetailPanelProps = {
   onPedalToggled?: (pedals: Pedal[]) => void;
@@ -141,8 +143,8 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
   if (!selectedPedal) {
     return (
-      <section className="detail-section" aria-label="Pedal detail">
-        <div className="detail-empty">Select a pedal to edit.</div>
+      <section className="detail-section" aria-label="페달 상세 설정">
+        <div className="detail-empty">설정할 페달을 선택해 주세요.</div>
       </section>
     );
   }
@@ -175,6 +177,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
   };
 
   const handleReset = () => {
+    if (!window.confirm('모든 페달 설정을 초기화하시겠습니까?')) return;
     resetPedals();
     window.requestAnimationFrame(() => onPedalToggled?.(usePedalStore.getState().pedals));
   };
@@ -200,6 +203,25 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
     );
   }
 
+  if (selectedPedal.type === 'cabinetIR' || selectedPedal.type === 'rhythm') {
+    const Panel = selectedPedal.type === 'cabinetIR' ? CabinetIRPedal : RhythmPanel;
+    return (
+      <section className="detail-section" aria-label={selectedPedal.type === 'cabinetIR' ? '캐비닛 IR 설정' : '리듬 설정'}>
+        <Panel
+          pedal={selectedPedal}
+          selected
+          onSelect={setSelectedPedal}
+          onToggle={() => handleToggle()}
+          onBypass={(_, bypassed) => {
+            setPedalBypass(selectedPedal.id, bypassed);
+            onPedalBypassChanged?.(selectedPedal.id, bypassed);
+          }}
+          onParamChange={(_, name, value) => handleParamChange(name, value)}
+        />
+      </section>
+    );
+  }
+
   if (selectedPedal.type === 'ampEQ') {
     return (
       <section className="detail-section amp-eq-detail-section" aria-label="Amp EQ detail">
@@ -217,13 +239,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions amp-eq-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('tuner')}>
-            Tuner
+            튜너
           </button>
         </div>
       </section>
@@ -247,10 +269,10 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions tuner-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('ampEQ')}>
             Amp EQ
@@ -272,13 +294,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions noise-gate-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('tuner')}>
-            Tuner
+            튜너
           </button>
         </div>
       </section>
@@ -297,13 +319,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions compressor-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('tuner')}>
-            Tuner
+            튜너
           </button>
         </div>
       </section>
@@ -322,13 +344,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions drive-rack-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('tuner')}>
-            Tuner
+            튜너
           </button>
         </div>
       </section>
@@ -339,19 +361,19 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
     <section className="detail-section" aria-label="Selected pedal detail">
       <div className="detail-header">
         <div>
-          <span className="eyebrow">Detail panel</span>
+          <span className="eyebrow">상세 설정</span>
           <h2>{selectedPedal.name}</h2>
           <p>
-            {formatPedalType(selectedPedal.type)} · {selectedPedal.enabled ? 'On' : 'Off'} ·{' '}
-            {selectedPedal.bypassed ? 'Bypassed' : 'Signal in line'}
+            {formatPedalType(selectedPedal.type)} · {selectedPedal.enabled ? '켜짐' : '꺼짐'} ·{' '}
+            {selectedPedal.bypassed ? '바이패스 중' : '신호 처리 중'}
           </p>
         </div>
         <div className="detail-status">
           <button type="button" className={selectedPedal.enabled ? 'is-active' : ''} onClick={handleToggle}>
-            {selectedPedal.enabled ? 'On' : 'Off'}
+            {selectedPedal.enabled ? '켜짐' : '꺼짐'}
           </button>
           <button type="button" className={selectedPedal.bypassed ? 'is-bypassed' : ''} onClick={handleBypass}>
-            {selectedPedal.bypassed ? 'Bypass' : 'In Line'}
+            {selectedPedal.bypassed ? '바이패스 해제' : '바이패스'}
           </button>
         </div>
       </div>
@@ -373,13 +395,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
       <div className="detail-actions">
         <button type="button" onClick={savePedalsToStorage}>
-          Save Chain
+          페달 설정 저장
         </button>
         <button type="button" onClick={handleReset}>
-          Reset Board
+          전체 초기화
         </button>
         <button type="button" onClick={() => setSelectedPedal('tuner')}>
-          Tuner
+          튜너
         </button>
       </div>
     </section>

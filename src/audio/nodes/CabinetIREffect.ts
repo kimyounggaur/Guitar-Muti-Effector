@@ -45,6 +45,8 @@ const safeDisconnect = (node: AudioNode) => {
   }
 };
 
+export const hasCustomCabinetIR = (id: string) => customIRs.has(id);
+
 export const registerCustomCabinetIR = (id: string, name: string, data: ArrayBuffer) => {
   const version = Date.now();
   customIRs.set(id, { name, data, version });
@@ -81,8 +83,7 @@ export class CabinetIREffect extends BaseEffect {
       void this.loadCabinetBuffer();
     });
     this.paramHandlers.set('customIRName', () => {
-      this.cabinetType = 'custom';
-      void this.loadCabinetBuffer();
+      if (this.cabinetType === 'custom') void this.loadCabinetBuffer();
     });
     this.paramHandlers.set('lowCut', (value) => {
       this.lowCutFrequency = clamp(asNumber(value, 80), 40, 200);

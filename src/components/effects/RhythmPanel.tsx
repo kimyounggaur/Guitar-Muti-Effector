@@ -8,6 +8,7 @@ import {
 } from '../../audio/nodes/RhythmNode';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { useTempoStore } from '../../store/tempoStore';
+import { useAudioStore } from '../../store/audioStore';
 import KnobControl from '../controls/KnobControl';
 
 type RhythmParams = {
@@ -45,8 +46,9 @@ function RhythmPanel({
   const setTempoBpm = useTempoStore((state) => state.setBpm);
   const tapTempo = useTempoStore((state) => state.tapTempo);
   const [reading, setReading] = useState<RhythmReading>(emptyRhythmReading);
+  const audioReady = useAudioStore((state) => state.isAudioReady);
   const params = useMemo(() => readRhythmParams(pedal.params, tempoBpm), [pedal.params, tempoBpm]);
-  const isPlaying = reading.isPlaying || params.playing;
+  const isPlaying = audioReady && reading.isPlaying;
 
   useEffect(() => subscribeRhythm(pedal.id, setReading), [pedal.id]);
 
@@ -79,7 +81,7 @@ function RhythmPanel({
       }`}
     >
       <div className="pedal-top">
-        <button
+        {dragListeners ? (<button
           type="button"
           className="drag-handle"
           aria-label={`Move ${pedal.name}`}
@@ -87,9 +89,9 @@ function RhythmPanel({
           {...dragListeners}
         >
           ≡
-        </button>
+        </button>) : null}
         <button type="button" className="pedal-select rhythm-display" onClick={() => onSelect(pedal.id)}>
-          <span>Practice rhythm</span>
+          <span>연습용 리듬</span>
           <strong>RHYTHM</strong>
           <em>{getRhythmPatternName(params.pattern)}</em>
         </button>
@@ -99,7 +101,7 @@ function RhythmPanel({
         <div>
           <span>BPM</span>
           <strong>{Math.round(params.bpm)}</strong>
-          <small>{isPlaying ? 'Playing' : tapCount > 1 ? 'Tap ready' : 'Stopped'}</small>
+          <small>{isPlaying ? '재생 중' : tapCount > 1 ? '탭 입력됨' : '정지'}</small>
         </div>
         <div className="beat-leds" aria-label="Beat indicator">
           {Array.from({ length: reading.beatCount || 4 }).map((_, index) => (
@@ -119,14 +121,15 @@ function RhythmPanel({
       </div>
 
       <div className="rhythm-transport">
-        <button type="button" className={isPlaying ? 'is-playing' : ''} onClick={togglePlay}>
-          {isPlaying ? 'STOP' : 'PLAY'}
+        <button type="button" className={isPlaying ? 'is-playing' : ''} onClick={togglePlay} disabled={!audioReady || !pedal.enabled || pedal.bypassed}>
+          {isPlaying ? '정지' : '재생'}
         </button>
         <button type="button" onClick={handleTap}>
           TAP
         </button>
       </div>
 
+      {!audioReady ? <p role="status">리듬을 재생하려면 오디오를 먼저 연결해 주세요.</p> : !pedal.enabled || pedal.bypassed ? <p role="status">리듬 페달을 켜 주세요.</p> : null}
       <div className="rhythm-controls">
         <label className="rhythm-control">
           <span>BPM</span>
@@ -139,31 +142,31 @@ function RhythmPanel({
           />
         </label>
         <label className="rhythm-control is-wide">
-          <span>Pattern</span>
+          <span>리듬 패턴</span>
           <select value={params.pattern} onChange={(event) => setParam('pattern', event.target.value)}>
-            <option value="metronome">Metronome 4/4</option>
+            <option value="metronome">메트로놈 4/4</option>
             <option value="rock1">Rock 1</option>
             <option value="rock2">Rock 2</option>
-            <option value="bluesShuffle">Blues Shuffle</option>
+            <option value="bluesShuffle">블루스 셔플</option>
             <option value="funk">Funk</option>
-            <option value="ballad">Ballad</option>
+            <option value="ballad">발라드</option>
             <option value="sixEight">6/8</option>
             <option value="pop">Pop</option>
           </select>
         </label>
-        <RhythmSlider label="Volume" value={params.volume} min={0} max={100} onChange={(value) => setParam('volume', value)} />
+        <RhythmSlider label="리듬 음량" value={params.volume} min={0} max={100} onChange={(value) => setParam('volume', value)} />
       </div>
 
       <div className="pedal-switches">
         <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-          {pedal.enabled ? 'On' : 'Off'}
+          {pedal.enabled ? '켜짐' : '꺼짐'}
         </button>
         <button
           type="button"
           className={pedal.bypassed ? 'is-bypassed' : ''}
           onClick={() => onBypass(pedal.id, !pedal.bypassed)}
         >
-          {pedal.bypassed ? 'Bypassed' : 'Bypass'}
+          {pedal.bypassed ? '바이패스 해제' : '바이패스'}
         </button>
       </div>
     </article>

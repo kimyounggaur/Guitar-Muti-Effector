@@ -42,6 +42,16 @@ function EffectChainDisplay({
   const reorderPedals = usePedalStore((state) => state.reorderPedals);
   const [updated, setUpdated] = useState(false);
   const pedalIds = useMemo(() => pedals.map((pedal) => pedal.id), [pedals]);
+  const selectedIndex = pedals.findIndex((pedal) => pedal.id === selectedPedalId);
+  const selectedName = pedals[selectedIndex]?.name ?? '';
+  const moveSelected = (offset: number) => {
+    const target = selectedIndex + offset;
+    if (selectedIndex < 0 || target < 0 || target >= pedals.length) return;
+    reorderPedals(selectedIndex, target);
+    onChainReordered?.(usePedalStore.getState().pedals);
+    setUpdated(true);
+    window.setTimeout(() => setUpdated(false), 1300);
+  };
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
@@ -138,7 +148,12 @@ function EffectChainDisplay({
           <i />
         </span>
       </div>
-      <span className={`lcd-chain-toast ${updated ? 'is-visible' : ''}`}>Signal Chain Updated</span>
+      <div className="chain-order-controls" aria-label="선택한 이펙트 순서 변경">
+        <span>{selectedName ? `${selectedName} 순서` : '이펙트를 선택하세요'}</span>
+        <button type="button" disabled={selectedIndex <= 0} onClick={() => moveSelected(-1)} aria-label={`${selectedName} 앞쪽으로 이동`}>← 앞</button>
+        <button type="button" disabled={selectedIndex < 0 || selectedIndex >= pedals.length - 1} onClick={() => moveSelected(1)} aria-label={`${selectedName} 뒤쪽으로 이동`}>뒤 →</button>
+      </div>
+      <span className={`lcd-chain-toast ${updated ? 'is-visible' : ''}`} role="status">Signal Chain Updated</span>
     </div>
   );
 }

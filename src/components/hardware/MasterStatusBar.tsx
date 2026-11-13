@@ -20,15 +20,15 @@ function MasterStatusBar({
   onPanic,
 }: MasterStatusBarProps) {
   return (
-    <section className="master-status-bar" aria-label="Master status">
-      <StatusItem label="Audio" value={isConnecting ? 'Connecting' : isAudioReady ? 'Connected' : 'Disconnected'} live={isAudioReady} />
-      <StatusItem label="Input" value={inputDeviceName} />
-      <StatusItem label="Sample" value={sampleRate > 0 ? `${sampleRate} Hz` : '--'} />
-      <StatusItem label="Latency" value={latencyHint} />
-      <StatusItem label="Master" value={`${Math.round(masterVolume * 100)}%`} />
+    <section className="master-status-bar" aria-label="오디오 상태">
+      <StatusItem label="오디오" value={isConnecting ? '연결 중' : isAudioReady ? '연결됨' : '연결 안 됨'} live={isAudioReady} />
+      <StatusItem label="입력" value={inputDeviceName} />
+      <StatusItem label="샘플레이트" value={sampleRate > 0 ? `${sampleRate} Hz` : '--'} />
+      <StatusItem label="출력 지연" value={latencyHint} />
+      <StatusItem label="마스터" value={`${Math.round(masterVolume * 100)}%`} />
       {errorMessage ? <strong className="status-error">{errorMessage}</strong> : null}
       <button type="button" className="status-panic-button" onClick={onPanic}>
-        PANIC
+        긴급 정지
       </button>
     </section>
   );

@@ -26,7 +26,7 @@ function CentralScreen({
   const isBrowsingPresets = Boolean(presetBrowser);
 
   return (
-    <section className="central-screen" aria-label="LCD touchscreen">
+    <section className="central-screen" aria-label="페달 화면">
       <div className="screen-bezel">
         <div className={`screen-glass ${isBrowsingPresets ? 'is-preset-browser' : ''}`}>
           <PatchHeader
@@ -48,8 +48,8 @@ function CentralScreen({
                 ))
               ) : (
                 <div className="screen-param-cell is-empty">
-                  <span>Selected</span>
-                  <strong>None</strong>
+                  <span>선택한 페달</span>
+                  <strong>없음</strong>
                 </div>
               )}
             </div>
@@ -93,7 +93,7 @@ const formatParamName = (name: string) =>
 
 const formatParamValue = (value: PedalParamValue) => {
   if (typeof value === 'boolean') {
-    return value ? 'On' : 'Off';
+    return value ? '켜짐' : '꺼짐';
   }
 
   if (typeof value === 'number') {

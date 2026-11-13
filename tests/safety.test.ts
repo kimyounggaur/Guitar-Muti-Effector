@@ -129,3 +129,122 @@ test('effect toggles keep an unchanged signal graph and tails intact', () => {
   assert.deepEqual(calls, [true]);
   assert.equal(engine.pendingRebuildTimer, 0);
 });
+
+test('synthetic reverb cache reuses buffers for a context and bounds retention', async () => {
+  const { createSyntheticReverbImpulse } = await import('../src/audio/utils/impulse');
+  let allocations = 0;
+  const context = {
+    sampleRate: 8000,
+    createBuffer(channels: number, length: number) {
+      allocations++;
+      const data = Array.from({ length: channels }, () => new Float32Array(length));
+      return { numberOfChannels: channels, getChannelData: (channel: number) => data[channel] };
+    },
+  } as unknown as AudioContext;
+  const first = createSyntheticReverbImpulse(context, 'room', 0.91);
+  assert.equal(createSyntheticReverbImpulse(context, 'room', 0.89), first);
+  assert.equal(allocations, 1);
+  for (const mode of ['hall', 'plate', 'spring', 'ambient'] as const) createSyntheticReverbImpulse(context, mode, 0.9);
+  createSyntheticReverbImpulse(context, 'room', 1.1);
+  createSyntheticReverbImpulse(context, 'room', 1.2);
+  assert.notEqual(createSyntheticReverbImpulse(context, 'room', 0.9), first);
+});
+
+test('input track end panics once and intentional stop does not report unplug', async () => {
+  let end: (() => void) | null = null;
+  let notices = 0;
+  let stops = 0;
+  const track = { addEventListener(_event: string, fn: () => void) { end = fn; }, removeEventListener() { end = null; }, stop() { stops++; } };
+  const stream = { getTracks: () => [track], getAudioTracks: () => [track] };
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { mediaDevices: { getUserMedia: async () => stream } } });
+  (globalThis as any).window = { clearTimeout() {} };
+  const engine = new AudioEngine() as any;
+  engine.audioContext = { currentTime: 0, createMediaStreamSource: () => new FakeNode() };
+  engine.setInputEndedHandler(() => { notices++; });
+  await engine.replaceStream('', engine.operationGeneration);
+  assert.ok(end);
+  const fire = end as () => void;
+  fire();
+  fire();
+  assert.equal(notices, 1);
+  assert.equal(stops, 1);
+  assert.equal(engine.currentMasterVolume, 0);
+  assert.equal(engine.stream, null);
+  await engine.replaceStream('', engine.operationGeneration);
+  engine.stopTracks();
+  assert.equal(notices, 1);
+});
+
+test('output selection checks context and rejects stale operations', async () => {
+  const engine = new AudioEngine() as any;
+  await assert.rejects(engine.setOutputDevice('abc'));
+  let selected = '';
+  engine.audioContext = { state: 'running', async setSinkId(id: string) { selected = id; } };
+  await engine.setOutputDevice('headphones');
+  assert.equal(selected, 'headphones');
+  let release!: () => void;
+  engine.audioContext = { state: 'running', setSinkId: () => new Promise<void>(resolve => { release = resolve; }) };
+  const request = engine.setOutputDevice('speaker');
+  engine.operationGeneration++;
+  release();
+  await assert.rejects(request, (error: any) => error.name === 'AbortError');
+});
+
+test('preset trim only attenuates and survives context-independent changes', () => {
+  const engine = new AudioEngine() as any;
+  engine.setPresetTrimDb(12);
+  assert.equal(engine.presetTrimDb, 0);
+  engine.setPresetTrimDb(-100);
+  assert.equal(engine.presetTrimDb, -36);
+  const gain = new Parameter();
+  engine.audioContext = { currentTime: 0 };
+  engine.presetTrimGain = { gain };
+  engine.setPresetTrimDb(-6);
+  assert.ok(Math.abs(gain.value - Math.pow(10, -6 / 20)) < 1e-9);
+});
+
+test('factory presets retain 108 measured, non-boosting trims and reflect active effects', async () => {
+  const { usePresetStore } = await import('../src/store/presetStore');
+  const { factoryMeasurement } = await import('../src/store/factoryCalibration');
+  const presets = usePresetStore.getState().presets.filter(preset => preset.origin === 'factory');
+  assert.equal(presets.length, 108);
+  assert.equal(new Set(presets.map(preset => preset.id)).size, 108);
+  assert.ok(Object.values(factoryMeasurement).every(rows => rows.length === 12));
+  assert.equal(Object.values(factoryMeasurement).reduce((total, rows) => total + rows.length, 0), 108);
+  const categoryPositions = new Map<string, number>();
+  let nearTarget = 0;
+  for (const preset of presets) {
+    const index = categoryPositions.get(preset.category) ?? 0;
+    categoryPositions.set(preset.category, index + 1);
+    const [rms, peak] = factoryMeasurement[preset.category][index];
+    if (Math.abs(rms + preset.outputTrimDb + 45) <= 3) nearTarget++;
+    assert.ok(peak + preset.outputTrimDb <= -8 + 0.001);
+    assert.ok(Number.isFinite(preset.outputTrimDb) && preset.outputTrimDb >= -36 && preset.outputTrimDb <= 0);
+    const drive = preset.pedals.find(pedal => pedal.type === 'drive');
+    if (drive && drive.enabled && !drive.bypassed && Number(drive.params.mix) !== 0) {
+      assert.ok(preset.name.toLowerCase().includes(String(drive.params.mode).toLowerCase()));
+    } else assert.ok(preset.name.includes('Clean'));
+    const cab = preset.pedals.find(pedal => pedal.type === 'cabinetIR');
+    assert.notEqual(cab?.params.cabinetType, 'custom');
+    assert.ok(Math.abs(Number(drive?.params.bias || 0)) <= (preset.category === 'Experimental' ? .251 : 1));
+  }
+  assert.equal(nearTarget, 86);
+});
+
+test('every final output passes trim, limiter and master before the output meter', () => {
+  const engine = new AudioEngine() as any;
+  const bus = new FakeNode(), trim = new FakeNode(), limiter = new FakeNode();
+  const master = new FakeNode(), meter = new FakeNode(), destination = new FakeNode();
+  engine.audioContext = { destination };
+  engine.chainOutput = bus;
+  engine.presetTrimGain = trim;
+  engine.safetyLimiter = limiter;
+  engine.masterGain = master;
+  engine.outputMeter = { input: meter, output: meter };
+  engine.connectSafeOutput();
+  assert.deepEqual(bus.outputs, [trim]);
+  assert.deepEqual(trim.outputs, [limiter]);
+  assert.deepEqual(limiter.outputs, [master]);
+  assert.deepEqual(master.outputs, [meter]);
+  assert.deepEqual(meter.outputs, [destination]);
+});

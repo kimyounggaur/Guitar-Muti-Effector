@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { writeLocal } from './safeStorage';
+import { factoryTrimDb } from './factoryCalibration';
 import { Pedal, createDefaultPedals, normalizePedals } from '../audio/types';
 
 export const PRESET_STORAGE_KEY = 'web-guitar-pedalboard-presets';
@@ -15,6 +16,7 @@ export type PedalboardPreset = {
   tags: string[];
   pedals: Pedal[];
   masterVolume: number;
+  outputTrimDb: number;
   tempoBpm: number;
   createdAt: string;
   updatedAt: string;
@@ -23,6 +25,7 @@ export type PedalboardPreset = {
 export type PresetSnapshot = {
   pedals: Pedal[];
   masterVolume: number;
+  outputTrimDb: number;
   tempoBpm: number;
 };
 
@@ -101,6 +104,7 @@ const buildPreset = (
   tags: sanitizeTags(metadata.tags),
   pedals: clonePedals(snapshot.pedals),
   masterVolume: clamp(snapshot.masterVolume, 0, 1),
+  outputTrimDb: Number.isFinite(snapshot.outputTrimDb) ? clamp(snapshot.outputTrimDb, -36, 0) : 0,
   tempoBpm: Math.round(clamp(snapshot.tempoBpm, 40, 240)),
   createdAt,
   updatedAt,
@@ -131,7 +135,7 @@ const makeSnapshot = (masterVolume: number, tempoBpm: number, patches: Array<[st
     pedals = withPedal(pedals, id, patch);
   });
 
-  return { pedals, masterVolume, tempoBpm };
+  return { pedals, masterVolume, outputTrimDb: 0, tempoBpm };
 };
 
 const pick = <T,>(values: T[], index: number) => values[index % values.length];
@@ -241,13 +245,13 @@ const fxBlueprint = (index: number): Array<[string, Partial<Pedal>]> => [
 
 const experimentalBlueprint = (index: number): Array<[string, Partial<Pedal>]> => [
   ['noise-gate', { params: { thresholdDb: -46 + (index % 8) * 2, releaseMs: 35 + (index % 8) * 28 } }],
-  ['compressor', { params: { sustain: 58 + (index % 7) * 6, ratio: 8 + (index % 8), attack: 0.002 + (index % 4) * 0.004, release: 0.12 + (index % 6) * 0.08, mix: 70, level: 70 } }],
-  ['drive', { params: { mode: pick(['fuzz', 'distortion', 'crunch', 'overdrive'], index), drive: 50 + (index % 9) * 5, tone: 24 + (index % 10) * 7, level: 58 + (index % 7) * 3, mix: 76 + (index % 5) * 6, bias: -0.8 + (index % 12) * 0.15 } }],
-  ['amp-eq', { params: { lowCut: 40 + (index % 8) * 18, bass: -8 + (index % 12) * 1.7, mid: -9 + (index % 12) * 1.6, midFreq: 250 + (index % 10) * 125, midQ: 0.4 + (index % 8) * 0.4, treble: -8 + (index % 12) * 1.6, presence: -5 + (index % 11) * 1.4 } }],
-  ['cabinet-ir', { params: { cabinetType: pick(['custom', 'openBack', '4x12', '1x12'], index), mic: pick(['mixed', 'ribbon', 'condenser', 'dynamic'], index), lowCut: 50 + (index % 8) * 16, highCut: 3000 + (index % 9) * 900, mix: 70 + (index % 5) * 6 } }],
-  ['modulation', { bypassed: false, params: { mode: pick(['vibrato', 'flanger', 'phaser', 'tremolo', 'chorus'], index), rate: 0.05 + (index % 11) * 1.7, depth: 55 + (index % 7) * 6, feedback: 0.2 + (index % 8) * 0.08, mix: 45 + (index % 8) * 5, tone: 42, stereoWidth: 82 } }],
-  ['delay', { params: { mode: pick(['tape', 'pingpong', 'digital', 'analog'], index), timeMs: 40 + (index % 11) * 175, feedback: 0.28 + (index % 8) * 0.08, mix: 26 + (index % 9) * 5, tone: 28 + (index % 9) * 7, flutter: 38 + (index % 7) * 8, sync: index % 4 === 0, division: pick(['1/4', '1/8', 'dotted1/8', '1/16'], index) } }],
-  ['reverb', { params: { mode: pick(['ambient', 'spring', 'hall', 'plate'], index), decay: 2 + (index % 10) * 0.8, preDelay: (index % 8) * 24, lowCut: 60 + (index % 8) * 30, highCut: 2400 + (index % 10) * 850, mix: 28 + (index % 9) * 5 } }],
+  ['compressor', { params: { sustain: 38 + (index % 7) * 4, ratio: 3.5 + (index % 8) * 0.5, attack: 0.002 + (index % 4) * 0.004, release: 0.12 + (index % 6) * 0.08, mix: 60, level: 70 } }],
+  ['drive', { params: { mode: pick(['fuzz', 'distortion', 'crunch', 'overdrive'], index), drive: 50 + (index % 9) * 5, tone: 24 + (index % 10) * 7, level: 58 + (index % 7) * 3, mix: 76 + (index % 5) * 6, bias: -0.22 + (index % 12) * 0.04 } }],
+  ['amp-eq', { params: { lowCut: 40 + (index % 8) * 18, bass: -3 + (index % 12) * 0.55, mid: -3 + (index % 12) * 0.55, midFreq: 250 + (index % 10) * 125, midQ: 0.4 + (index % 8) * 0.4, treble: -3 + (index % 12) * 0.55, presence: -2 + (index % 11) * 0.5 } }],
+  ['cabinet-ir', { params: { cabinetType: pick(['2x12', 'openBack', '4x12', '1x12'], index), mic: pick(['mixed', 'ribbon', 'condenser', 'dynamic'], index), lowCut: 50 + (index % 8) * 16, highCut: 3000 + (index % 9) * 900, mix: 70 + (index % 5) * 6 } }],
+  ['modulation', { bypassed: false, params: { mode: pick(['vibrato', 'flanger', 'phaser', 'tremolo', 'chorus'], index), rate: 0.05 + (index % 11) * 1.7, depth: 55 + (index % 7) * 6, feedback: 0.2 + (index % 8) * 0.08, mix: 25 + (index % 8) * 4, tone: 42, stereoWidth: 82 } }],
+  ['delay', { params: { mode: pick(['tape', 'pingpong', 'digital', 'analog'], index), timeMs: 40 + (index % 11) * 175, feedback: 0.28 + (index % 8) * 0.08, mix: 20 + (index % 9) * 3, tone: 28 + (index % 9) * 7, flutter: 38 + (index % 7) * 8, sync: index % 4 === 0, division: pick(['1/4', '1/8', 'dotted1/8', '1/16'], index) } }],
+  ['reverb', { params: { mode: pick(['ambient', 'spring', 'hall', 'plate'], index), decay: 2 + (index % 10) * 0.8, preDelay: (index % 8) * 24, lowCut: 60 + (index % 8) * 30, highCut: 2400 + (index % 10) * 850, mix: 18 + (index % 9) * 3 } }],
 ];
 
 const PRESET_BLUEPRINTS: PresetBlueprint[] = [
@@ -340,22 +344,44 @@ const slug = (value: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 
+// Names describe actual enabled effects rather than suggesting unavailable features.
+const describeFactoryEffects = (pedals: Pedal[]) => {
+  const activeMode = (type: Pedal['type']) => {
+    const pedal = pedals.find((item) => item.type === type);
+    if (!pedal || !pedal.enabled || pedal.bypassed || Number(pedal.params.mix) === 0) return null;
+    const mode = pedal.params.mode;
+    return typeof mode === 'string' ? mode : null;
+  };
+  const drive = activeMode('drive');
+  const mod = activeMode('modulation');
+  const delay = activeMode('delay');
+  const reverb = activeMode('reverb');
+  const title = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+  const sound = drive ? title(drive) : 'Clean';
+  const additions = [mod && `${title(mod)} mod`, delay && `${title(delay)} delay`, reverb && `${title(reverb)} reverb`].filter(Boolean) as string[];
+  return { name: [sound, ...additions.slice(0, 2)].join(' / '), description: [sound, ...additions].join(' · ') };
+};
+
 const DEFAULT_PRESETS: PedalboardPreset[] = PRESET_BLUEPRINTS.flatMap((blueprint) =>
-  blueprint.names.map((name, index) =>
-    buildPreset(
-      `factory-${slug(blueprint.category)}-${String(index + 1).padStart(2, '0')}-${slug(name)}`,
-      name,
-      makeSnapshot(blueprint.masterVolume, blueprint.tempoBase + index * 2, blueprint.makePatches(index)),
+  blueprint.names.map((legacyName, index) => {
+    const snapshot = makeSnapshot(blueprint.masterVolume, blueprint.tempoBase + index * 2, blueprint.makePatches(index));
+    snapshot.outputTrimDb = factoryTrimDb(blueprint.category, index);
+    const effects = describeFactoryEffects(snapshot.pedals);
+    return buildPreset(
+      // Keep the previous ID stable so saved sessions and references still resolve.
+      `factory-${slug(blueprint.category)}-${String(index + 1).padStart(2, '0')}-${slug(legacyName)}`,
+      `${blueprint.category} ${String(index + 1).padStart(2, '0')} · ${effects.name}`,
+      snapshot,
       FACTORY_CREATED_AT,
       FACTORY_CREATED_AT,
       {
         category: blueprint.category,
         origin: 'factory',
-        description: blueprint.describe(name, index),
-        tags: [...blueprint.tags, slug(name)],
+        description: effects.description,
+        tags: [...blueprint.tags, slug(legacyName)],
       },
-    ),
-  ),
+    );
+  }),
 );
 
 const FACTORY_IDS = new Set(DEFAULT_PRESETS.map((preset) => preset.id));
@@ -429,6 +455,7 @@ const normalizePreset = (value: unknown, fallbackOrigin: PresetOrigin): Pedalboa
     {
       pedals: normalizePedals(candidate.pedals),
       masterVolume: typeof candidate.masterVolume === 'number' ? candidate.masterVolume : 0.35,
+      outputTrimDb: typeof candidate.outputTrimDb === 'number' && Number.isFinite(candidate.outputTrimDb) ? candidate.outputTrimDb : 0,
       tempoBpm: typeof candidate.tempoBpm === 'number' ? candidate.tempoBpm : 120,
     },
     typeof candidate.createdAt === 'string' ? candidate.createdAt : nowIso(),

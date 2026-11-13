@@ -1,7 +1,7 @@
 import { PassthroughEffect } from './nodes/BaseEffect';
 import { AmpEQEffect } from './nodes/AmpEQEffect';
 import { CabinetIREffect } from './nodes/CabinetIREffect';
-import { CompressorEffect } from './nodes/CompressorEffect';
+import { CompressorEffect, prepareCompressor } from './nodes/CompressorEffect';
 import { DelayEffect } from './nodes/DelayEffect';
 import { DriveEffect } from './nodes/DriveEffect';
 import { LooperNode } from './nodes/LooperNode';
@@ -10,6 +10,7 @@ import { ModulationEffect } from './nodes/ModulationEffect';
 import { NoiseGateEffect, prepareNoiseGate } from './nodes/NoiseGateEffect';
 import { ReverbEffect } from './nodes/ReverbEffect';
 import { RhythmNode } from './nodes/RhythmNode';
+import { createSafetyLimiter, prepareSafetyLimiter } from './nodes/SafetyLimiterEffect';
 import { TunerNode } from './nodes/TunerNode';
 import { EffectNodeWrapper, Pedal, PedalParamValue, PedalType } from './types';
 
@@ -41,8 +42,10 @@ export class AudioEngine {
   private mediaElement: HTMLMediaElement | null = null;
   private mediaElementSource: MediaElementAudioSourceNode | null = null;
   private masterGain: GainNode | null = null;
-  private safetyCompressor: DynamicsCompressorNode | null = null;
-  private safetyClipper: WaveShaperNode | null = null;
+  private presetTrimGain: GainNode | null = null;
+  private presetTrimDb = 0;
+  private safetyLimiter: AudioWorkletNode | null = null;
+  private chainOutput: GainNode | null = null;
   private inputMeter: MeterNode | null = null;
   private outputMeter: MeterNode | null = null;
   private effectMap = new Map<string, EffectNodeWrapper>();
@@ -50,6 +53,8 @@ export class AudioEngine {
   private currentPedalParams = new Map<string, Record<string, PedalParamValue>>();
   private currentMasterVolume = 0.35;
   private errorHandler: ((message: string) => void) | null = null;
+  private inputEndedHandler: (() => void) | null = null;
+  private trackListeners: Array<{ track: MediaStreamTrack; handler: () => void }> = [];
   private pendingRebuildTimer = 0;
   private operationGeneration = 0;
   private readonly latencyHint: AudioContextLatencyCategory = 'interactive';
@@ -141,6 +146,16 @@ export class AudioEngine {
     this.masterGain.gain.setTargetAtTime(volume, now, 0.015);
   }
 
+  setPresetTrimDb(db: number) {
+    this.presetTrimDb = Number.isFinite(db) ? Math.max(-36, Math.min(0, db)) : 0;
+    if (this.presetTrimGain && this.audioContext) {
+      const gain = this.presetTrimGain.gain;
+      const now = this.audioContext.currentTime;
+      gain.cancelScheduledValues(now);
+      gain.setTargetAtTime(10 ** (this.presetTrimDb / 20), now, 0.015);
+    }
+  }
+
   setInputChannel(channel: InputChannel) {
     this.inputChannel = channel;
     if (!this.audioContext || !this.inputLeft || !this.inputRight) return;
@@ -163,6 +178,21 @@ export class AudioEngine {
 
   setErrorHandler(handler: ((message: string) => void) | null) {
     this.errorHandler = handler;
+  }
+
+  setInputEndedHandler(handler: (() => void) | null) {
+    this.inputEndedHandler = handler;
+  }
+
+  async setOutputDevice(deviceId: string): Promise<void> {
+    const context = this.audioContext;
+    if (!context || context.state === 'closed') throw new Error('먼저 기타 또는 오디오 파일을 연결해 주세요.');
+    const setSinkId = (context as AudioContext & { setSinkId?: (id: string) => Promise<void> }).setSinkId;
+    if (!setSinkId) throw new Error('이 브라우저는 앱에서 출력 장치 선택을 지원하지 않습니다. 운영체제의 소리 설정에서 변경해 주세요.');
+    const generation = this.operationGeneration;
+    await setSinkId.call(context, deviceId || '');
+    this.assertCurrent(generation);
+    if (this.audioContext !== context) throw new DOMException('오디오 연결이 취소되었습니다.', 'AbortError');
   }
 
   rebuildChain(pedals: Pedal[]) {
@@ -213,7 +243,7 @@ export class AudioEngine {
         });
         this.currentChainKey = chainKey;
 
-        previousNode.connect(this.outputMeter.input);
+        if (this.chainOutput) previousNode.connect(this.chainOutput);
         this.connectSafeOutput();
         this.fadeMaster(this.currentMasterVolume, 0.02);
       } catch (error) {
@@ -269,8 +299,9 @@ export class AudioEngine {
     const oldContext = this.audioContext;
     this.audioContext = null;
     this.masterGain = null;
-    this.safetyCompressor = null;
-    this.safetyClipper = null;
+    this.presetTrimGain = null;
+    this.safetyLimiter = null;
+    this.chainOutput = null;
     this.inputMeter = null;
     this.outputMeter = null;
     this.inputSplitter = null;
@@ -297,7 +328,7 @@ export class AudioEngine {
     const context = new AudioContextConstructor({ latencyHint: this.latencyHint });
     this.audioContext = context;
     try {
-      await prepareNoiseGate(context);
+      await Promise.all([prepareNoiseGate(context), prepareCompressor(context), prepareSafetyLimiter(context)]);
       this.assertCurrent(generation);
       if (this.audioContext !== context) throw new DOMException('오디오 연결이 취소되었습니다.', 'AbortError');
     } catch (error) {
@@ -306,20 +337,10 @@ export class AudioEngine {
       throw error;
     }
     this.masterGain = this.audioContext.createGain();
-    this.safetyCompressor = this.audioContext.createDynamicsCompressor();
-    this.safetyCompressor.threshold.value = -6;
-    this.safetyCompressor.knee.value = 0;
-    this.safetyCompressor.ratio.value = 20;
-    this.safetyCompressor.attack.value = 0;
-    this.safetyCompressor.release.value = 0.1;
-    this.safetyClipper = this.audioContext.createWaveShaper();
-    const curve = new Float32Array(65537);
-    for (let i = 0; i < curve.length; i++) {
-      const x = 2 * i / (curve.length - 1) - 1;
-      curve[i] = Math.max(-0.8, Math.min(0.8, x));
-    }
-    this.safetyClipper.curve = curve;
-    this.safetyClipper.oversample = '4x';
+    this.presetTrimGain = this.audioContext.createGain();
+    this.presetTrimGain.gain.value = 10 ** (this.presetTrimDb / 20);
+    this.safetyLimiter = createSafetyLimiter(this.audioContext);
+    this.chainOutput = this.audioContext.createGain();
     this.inputMeter = new MeterNode(this.audioContext);
     this.outputMeter = new MeterNode(this.audioContext);
     this.inputSplitter = this.audioContext.createChannelSplitter(2);
@@ -351,6 +372,16 @@ export class AudioEngine {
     }
     this.stream = stream;
     this.source = context.createMediaStreamSource(stream);
+    for (const track of stream.getAudioTracks()) {
+      const handler = () => {
+        // Ignore events from obsolete streams and stops initiated by the app.
+        if (this.stream !== stream) return;
+        this.panicDisconnect();
+        this.inputEndedHandler?.();
+      };
+      track.addEventListener('ended', handler);
+      this.trackListeners.push({ track, handler });
+    }
   }
 
   private rebuildPassThrough(masterVolume: number) {
@@ -361,19 +392,22 @@ export class AudioEngine {
     this.currentMasterVolume = masterVolume;
     this.masterGain.gain.setValueAtTime(masterVolume, this.audioContext.currentTime);
     this.connectInputSources();
-    this.inputMeter.output.connect(this.outputMeter.input);
+    if (this.chainOutput) this.inputMeter.output.connect(this.chainOutput);
     this.connectSafeOutput();
   }
 
   private connectSafeOutput() {
-    if (!this.outputMeter || !this.safetyCompressor || !this.safetyClipper || !this.masterGain || !this.audioContext) return;
-    this.outputMeter.output.connect(this.safetyCompressor);
-    this.safetyCompressor.connect(this.safetyClipper);
-    this.safetyClipper.connect(this.masterGain);
-    this.masterGain.connect(this.audioContext.destination);
+    if (!this.chainOutput || !this.outputMeter || !this.presetTrimGain || !this.safetyLimiter || !this.masterGain || !this.audioContext) return;
+    this.chainOutput.connect(this.presetTrimGain);
+    this.presetTrimGain.connect(this.safetyLimiter);
+    this.safetyLimiter.connect(this.masterGain);
+    this.masterGain.connect(this.outputMeter.input);
+    this.outputMeter.output.connect(this.audioContext.destination);
   }
 
   private stopTracks() {
+    for (const { track, handler } of this.trackListeners) track.removeEventListener('ended', handler);
+    this.trackListeners = [];
     this.stream?.getTracks().forEach((track) => track.stop());
     this.stream = null;
   }
@@ -391,8 +425,9 @@ export class AudioEngine {
     safeDisconnect(this.mediaElementSource);
     safeDisconnect(this.inputMeter?.input ?? null);
     safeDisconnect(this.outputMeter?.input ?? null);
-    safeDisconnect(this.safetyCompressor);
-    safeDisconnect(this.safetyClipper);
+    safeDisconnect(this.presetTrimGain);
+    safeDisconnect(this.safetyLimiter);
+    safeDisconnect(this.chainOutput);
     safeDisconnect(this.masterGain);
     this.effectMap.forEach((effect) => effect.disconnect());
   }

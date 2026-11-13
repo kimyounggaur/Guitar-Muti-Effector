@@ -66,8 +66,14 @@ function App() {
   );
   const selectedInputName = useMemo(() => {
     const selectedDevice = inputDevices.find((device) => device.deviceId === selectedDeviceId);
-    return selectedDevice?.label || (selectedDeviceId ? 'Selected input' : 'Default input');
+    return selectedDevice?.label || (selectedDeviceId ? '선택한 입력' : '기본 입력');
   }, [inputDevices, selectedDeviceId]);
+  const patchAddress = useMemo(() => {
+    const factoryIndex = presets.filter((preset) => preset.origin === 'factory').findIndex((preset) => preset.id === activePresetId);
+    return factoryIndex >= 0
+      ? { bank: 'A', patch: String(factoryIndex + 1).padStart(3, '0') }
+      : { bank: activePresetId ? 'USER' : 'EDIT', patch: '—' };
+  }, [activePresetId, presets]);
   const presetCategoryCounts = useMemo(
     () =>
       STOMP_PRESET_CATEGORIES.reduce<Record<string, number>>((counts, category) => {
@@ -102,6 +108,7 @@ function App() {
         }
         if (typeof session.tempoBpm === 'number' && Number.isFinite(session.tempoBpm)) useTempoStore.getState().setBpm(session.tempoBpm);
         const existing = usePresetStore.getState().presets.find((p) => p.id === session.activePresetId);
+        useAudioStore.getState().setPresetTrimDb(typeof session.outputTrimDb === 'number' ? session.outputTrimDb : existing?.outputTrimDb ?? 0);
         usePresetStore.getState().restoreSelection(existing?.id ?? null, existing?.name ?? '사용자 설정');
         restored = true;
       }
@@ -121,6 +128,7 @@ function App() {
       const first = usePresetStore.getState().presets[0];
       if (first) {
         usePedalStore.getState().setPedals(first.pedals);
+        useAudioStore.getState().setPresetTrimDb(first.outputTrimDb);
         useTempoStore.getState().setBpm(first.tempoBpm);
       }
     }
@@ -130,12 +138,12 @@ function App() {
       timer = window.setTimeout(() => {
         const audio = useAudioStore.getState();
         const preset = usePresetStore.getState();
-        writeLocal(SESSION_KEY, JSON.stringify({ pedals: usePedalStore.getState().pedals, masterVolume: audio.masterVolume, tempoBpm: useTempoStore.getState().bpm, activePresetId: preset.activePresetId }));
+        writeLocal(SESSION_KEY, JSON.stringify({ pedals: usePedalStore.getState().pedals, masterVolume: audio.masterVolume, outputTrimDb: audio.presetTrimDb, tempoBpm: useTempoStore.getState().bpm, activePresetId: preset.activePresetId }));
       }, 300);
     };
-    writeLocal(SESSION_KEY, JSON.stringify({ pedals: usePedalStore.getState().pedals, masterVolume: useAudioStore.getState().masterVolume, tempoBpm: useTempoStore.getState().bpm, activePresetId: usePresetStore.getState().activePresetId }));
+    writeLocal(SESSION_KEY, JSON.stringify({ pedals: usePedalStore.getState().pedals, masterVolume: useAudioStore.getState().masterVolume, outputTrimDb: useAudioStore.getState().presetTrimDb, tempoBpm: useTempoStore.getState().bpm, activePresetId: usePresetStore.getState().activePresetId }));
     const unsubPedals = usePedalStore.subscribe((state, previous) => { if (state.pedals !== previous.pedals) save(); });
-    const unsubAudio = useAudioStore.subscribe((state, previous) => { if (state.masterVolume !== previous.masterVolume) save(); });
+    const unsubAudio = useAudioStore.subscribe((state, previous) => { if (state.masterVolume !== previous.masterVolume || state.presetTrimDb !== previous.presetTrimDb) save(); });
     const unsubTempo = useTempoStore.subscribe((state, previous) => { if (state.bpm !== previous.bpm) save(); });
     const unsubPreset = usePresetStore.subscribe((state, previous) => { if (state.activePresetId !== previous.activePresetId) save(); });
     return () => { window.clearTimeout(timer); unsubPedals(); unsubAudio(); unsubTempo(); unsubPreset(); window.removeEventListener('pedalboard-storage-error', onStorageError); };
@@ -153,6 +161,17 @@ function App() {
   }, [setErrorMessage]);
 
   useEffect(() => {
+    const engine = audioEngineRef.current;
+    engine.setInputEndedHandler(() => {
+      ++audioOperationRef.current;
+      resetAudioState();
+      setMasterVolume(0);
+      setErrorMessage('입력 장치 연결이 끊겨 오디오를 정지했습니다. 장치를 확인하고 다시 연결해 주세요.');
+    });
+    return () => engine.setInputEndedHandler(null);
+  }, [resetAudioState, setErrorMessage, setMasterVolume]);
+
+  useEffect(() => {
     const syncTempo = (bpm: number) => {
       const syncedPedals = usePedalStore.getState().pedals.filter(
         (pedal) => pedal.type === 'rhythm' || pedal.type === 'looper' || ((pedal.type === 'delay' || pedal.type === 'modulation') && pedal.params.sync === true),
@@ -167,8 +186,10 @@ function App() {
   }, []);
 
   useEffect(() => {
+    audioEngineRef.current.setPresetTrimDb(useAudioStore.getState().presetTrimDb);
     audioEngineRef.current.setInputChannel(useAudioStore.getState().inputChannel);
     return useAudioStore.subscribe((state, previous) => {
+      if (state.presetTrimDb !== previous.presetTrimDb) audioEngineRef.current.setPresetTrimDb(state.presetTrimDb);
       if (state.inputChannel !== previous.inputChannel) audioEngineRef.current.setInputChannel(state.inputChannel);
     });
   }, []);
@@ -179,9 +200,13 @@ function App() {
     }
 
     let frameId = 0;
+    let lastUpdate = 0;
 
-    const updateMeters = () => {
-      setMeters(audioEngineRef.current.readInputMeter(), audioEngineRef.current.readOutputMeter());
+    const updateMeters = (time: number) => {
+      if (document.visibilityState === 'visible' && time - lastUpdate >= 33) {
+        lastUpdate = time;
+        setMeters(audioEngineRef.current.readInputMeter(), audioEngineRef.current.readOutputMeter());
+      }
       frameId = window.requestAnimationFrame(updateMeters);
     };
 
@@ -196,7 +221,7 @@ function App() {
 
   const handleConnect = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
-      setErrorMessage('This browser does not support audio input permissions.');
+      setErrorMessage('이 브라우저는 오디오 입력을 지원하지 않습니다. HTTPS 주소에서 최신 Chrome 또는 Safari로 다시 열어 주세요.');
       return;
     }
 
@@ -292,6 +317,8 @@ function App() {
 
   const handleTunerQuick = useCallback(() => {
     usePedalStore.getState().setSelectedPedal('tuner');
+    setActivePresetCategory(null);
+    window.requestAnimationFrame(() => document.querySelector('.tuner-detail-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   }, []);
 
   const handleTapTempo = useCallback(() => {
@@ -386,6 +413,7 @@ function App() {
 
   const handleLoadPreset = useCallback(
     (preset: PedalboardPreset) => {
+      useAudioStore.getState().setPresetTrimDb(preset.outputTrimDb);
       usePedalStore.getState().setPedals(preset.pedals);
       useTempoStore.getState().setBpm(preset.tempoBpm);
       usePedalStore.getState().pedals.forEach((pedal) => {
@@ -440,16 +468,17 @@ function App() {
           onConnect={handleConnect}
           onStop={handleStop}
           onDeviceChange={handleDeviceChange}
+          onOutputDeviceChange={(id) => audioEngineRef.current.setOutputDevice(id)}
         />
         <button type="button" className="panic-button" onClick={handlePanic}>긴급 음소거 · PANIC</button>
       </div>
       <HardwareFrame
-        leftPanel={<LeftModePanel />}
+        leftPanel={<LeftModePanel onOpenBoard={() => setActivePresetCategory(null)} />}
         centralScreen={
           <CentralScreen
             patchName={currentPresetName}
-            bank="A"
-            patch="001"
+            bank={patchAddress.bank}
+            patch={patchAddress.patch}
             bpm={tempoBpm}
             isAudioReady={isAudioReady}
             selectedPedal={selectedPedal}
@@ -524,12 +553,12 @@ function App() {
 
       <div className="hardware-support-panels">
 
-        <AudioFilePlayerPanel isEffectChainReady={isAudioReady} onPreparePlayback={handlePrepareUploadedAudio} />
         <PedalDetailPanel
           onPedalToggled={handleChainRebuild}
           onPedalBypassChanged={handlePedalBypass}
           onPedalParamChanged={handlePedalParam}
         />
+        <AudioFilePlayerPanel isEffectChainReady={isAudioReady} onPreparePlayback={handlePrepareUploadedAudio} />
         <PresetPanel onLoadPreset={handleLoadPreset} />
       </div>
     </main>
