@@ -275,7 +275,7 @@ export class ModulationEffect extends BaseEffect {
     const vibratoBase = this.mode === 'vibrato' ? 0.0075 : 0.006;
 
     this.setAudioParam(this.chorusDelay.delayTime, chorusBase, smooth ? 0.018 : 0);
-    this.setAudioParam(this.chorusDepth.gain, 0.001 + unit * 0.011, smooth ? 0.018 : 0);
+    this.setAudioParam(this.chorusDepth.gain, 0.00015 + unit * 0.0015, smooth ? 0.018 : 0);
     this.setAudioParam(this.flangerDelay.delayTime, flangerBase, smooth ? 0.018 : 0);
     this.setAudioParam(this.flangerDepth.gain, 0.0001 + unit * 0.0058, smooth ? 0.018 : 0);
     this.setAudioParam(this.vibratoDelay.delayTime, vibratoBase, smooth ? 0.018 : 0);

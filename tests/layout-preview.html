@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>Responsive layout check</title>
+<style>body{font:16px system-ui;background:#ddd;margin:1rem}button{padding:.7rem;margin:.2rem}iframe{display:block;border:2px solid #333;height:800px;max-width:none}#result{padding:1rem;font-weight:bold}</style></head><body>
+<h1>Responsive layout check</h1>
+<button type="button" data-width="390">390px</button><button type="button" data-width="820">820px</button><button type="button" data-width="1280">1280px</button>
+<div id="result" role="status">화면을 선택하세요.</div><iframe title="앱 반응형 검사" src="/" width="390"></iframe>
+<script>
+const frame = document.querySelector('iframe');
+const result = document.querySelector('#result');
+function measure() {
+ try {
+  const root = frame.contentDocument.documentElement;
+  const viewport = frame.contentWindow.innerWidth;
+  const width = root.scrollWidth;
+  result.textContent = `화면 ${viewport}px, 문서 ${width}px: ${width > viewport + 1 ? '가로 넘침 있음' : '가로 넘침 없음'}`;
+ } catch(e) { result.textContent = '검사 실패: '+e.message; }
+}
+document.querySelectorAll('button[data-width]').forEach(button => button.addEventListener('click', () => { frame.width=button.dataset.width; requestAnimationFrame(() => requestAnimationFrame(measure)); }));
+frame.addEventListener('load',measure);
+</script></body></html>

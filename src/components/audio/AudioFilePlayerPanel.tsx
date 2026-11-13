@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
+import { playPreparedAudio } from './playPreparedAudio';
 
 type UploadedTrack = {
   name: string;
@@ -68,9 +69,9 @@ function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFi
       return;
     }
 
+    const audio = audioRef.current;
     try {
-      await onPreparePlayback(audioRef.current);
-      await audioRef.current.play();
+      if (!await playPreparedAudio(audio, () => audioRef.current, onPreparePlayback)) return;
       setIsPlaying(true);
       setErrorMessage('');
     } catch (error) {

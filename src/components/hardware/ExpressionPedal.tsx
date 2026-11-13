@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { CSSProperties, PointerEvent } from 'react';
+import { useRef, useState } from 'react';
+import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 
 type ExpressionPedalProps = {
   value: number;
@@ -11,18 +11,36 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 
 function ExpressionPedal({ value, targetLabel = 'MASTER', onChange }: ExpressionPedalProps) {
   const [dragging, setDragging] = useState(false);
+  const dragOrigin = useRef<{ y: number; value: number } | null>(null);
   const safeValue = clamp(value, 0, 100);
 
   const updateFromPointer = (event: PointerEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const ratio = clamp(1 - (event.clientY - rect.top) / rect.height, 0, 1);
-    onChange(Math.round(ratio * 100));
+    const origin = dragOrigin.current;
+    if (!origin) return;
+    const distance = Math.max(event.currentTarget.getBoundingClientRect().height, 160);
+    onChange(Math.round(clamp(origin.value + ((origin.y - event.clientY) / distance) * 100, 0, 100)));
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    dragOrigin.current = { y: event.clientY, value: safeValue };
     event.currentTarget.setPointerCapture(event.pointerId);
     setDragging(true);
-    updateFromPointer(event);
+  };
+
+  const endDrag = () => {
+    dragOrigin.current = null;
+    setDragging(false);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      onChange(Math.min(100, safeValue + 1));
+    } else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
+      event.preventDefault();
+      onChange(Math.max(0, safeValue - 1));
+    }
   };
 
   return (
@@ -38,8 +56,10 @@ function ExpressionPedal({ value, targetLabel = 'MASTER', onChange }: Expression
         style={{ '--expression-value': `${safeValue}%` } as CSSProperties}
         onPointerDown={handlePointerDown}
         onPointerMove={(event) => dragging && updateFromPointer(event)}
-        onPointerUp={() => setDragging(false)}
-        onPointerCancel={() => setDragging(false)}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onLostPointerCapture={endDrag}
+        onKeyDown={handleKeyDown}
       >
         <i aria-hidden="true" />
       </div>

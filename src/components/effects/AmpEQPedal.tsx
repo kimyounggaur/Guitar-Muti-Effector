@@ -123,7 +123,7 @@ function AmpEQPedal({
       <span className="classic-eq-slot is-bottom-right" aria-hidden="true" />
 
       <div className="classic-eq-header">
-        <button
+        {dragListeners ? (<button
           type="button"
           className="drag-handle classic-eq-drag"
           aria-label={`Move ${pedal.name}`}
@@ -131,16 +131,16 @@ function AmpEQPedal({
           {...dragListeners}
         >
           ≡
-        </button>
+        </button>) : null}
         <button type="button" className="pedal-select amp-eq-display classic-eq-title" onClick={() => onSelect(pedal.id)}>
           <span>AMP MODULE</span>
           <strong>CLASSIC EQ</strong>
           <em>{formatToneLabel(params)}</em>
         </button>
         <label className="classic-eq-preset">
-          <span>Preset</span>
+          <span>이퀄라이저 프리셋</span>
           <select value={matchedPreset} onChange={(event) => applyPreset(event.target.value)}>
-            <option value="custom">Custom</option>
+            <option value="custom">직접 설정</option>
             {AMP_EQ_PRESETS.map((preset) => (
               <option key={preset.id} value={preset.id}>
                 {preset.name}
@@ -154,20 +154,13 @@ function AmpEQPedal({
         <div className="classic-eq-toggle-stack">
           <span className="classic-eq-lamp is-reset" aria-hidden="true" />
           <button type="button" className="classic-eq-metal-toggle" onClick={resetEQ}>
-            Reset
+            초기화
           </button>
-          <div className="classic-eq-mode-pad" aria-label="Channel mode">
-            <button type="button">L</button>
-            <button type="button" className="is-active">
-              L/R
-            </button>
-            <button type="button">R</button>
-            <button type="button">M/S</button>
-          </div>
+          <p>양쪽 채널에 동일하게 적용</p>
         </div>
 
         <div className="classic-eq-graph-wrap">
-          <canvas ref={canvasRef} className="eq-curve-canvas" width="760" height="186" aria-label="Amp EQ curve graph" />
+          <canvas ref={canvasRef} className="eq-curve-canvas" width="760" height="186" aria-label="이퀄라이저 예상 곡선" />
           <div className="classic-eq-graph-labels" aria-hidden="true">
             <span>20Hz</span>
             <span>200Hz</span>
@@ -273,14 +266,14 @@ function AmpEQPedal({
 
       <div className="pedal-switches">
         <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-          {pedal.enabled ? 'Module On' : 'Module Off'}
+          {pedal.enabled ? '이퀄라이저 켜짐' : '이퀄라이저 꺼짐'}
         </button>
         <button
           type="button"
           className={pedal.bypassed ? 'is-bypassed' : ''}
           onClick={() => onBypass(pedal.id, !pedal.bypassed)}
         >
-          {pedal.bypassed ? 'Bypassed' : 'Bypass'}
+          {pedal.bypassed ? '바이패스 해제' : '바이패스'}
         </button>
       </div>
     </article>

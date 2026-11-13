@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { writeLocal } from './safeStorage';
+import { factoryTrimDb } from './factoryCalibration';
 import { Pedal, createDefaultPedals, normalizePedals } from '../audio/types';
 
 export const PRESET_STORAGE_KEY = 'web-guitar-pedalboard-presets';
@@ -14,6 +16,7 @@ export type PedalboardPreset = {
   tags: string[];
   pedals: Pedal[];
   masterVolume: number;
+  outputTrimDb: number;
   tempoBpm: number;
   createdAt: string;
   updatedAt: string;
@@ -22,6 +25,7 @@ export type PedalboardPreset = {
 export type PresetSnapshot = {
   pedals: Pedal[];
   masterVolume: number;
+  outputTrimDb: number;
   tempoBpm: number;
 };
 
@@ -40,6 +44,7 @@ type PresetStore = {
   savePreset: (name: string, snapshot: PresetSnapshot) => PedalboardPreset;
   updateActivePreset: (snapshot: PresetSnapshot) => PedalboardPreset | null;
   loadPreset: (id: string) => PedalboardPreset | null;
+  restoreSelection: (id: string | null, name: string) => void;
   renamePreset: (id: string, name: string) => void;
   deletePreset: (id: string) => void;
   duplicatePreset: (id: string) => PedalboardPreset | null;
@@ -99,6 +104,7 @@ const buildPreset = (
   tags: sanitizeTags(metadata.tags),
   pedals: clonePedals(snapshot.pedals),
   masterVolume: clamp(snapshot.masterVolume, 0, 1),
+  outputTrimDb: Number.isFinite(snapshot.outputTrimDb) ? clamp(snapshot.outputTrimDb, -36, 0) : 0,
   tempoBpm: Math.round(clamp(snapshot.tempoBpm, 40, 240)),
   createdAt,
   updatedAt,
@@ -129,7 +135,7 @@ const makeSnapshot = (masterVolume: number, tempoBpm: number, patches: Array<[st
     pedals = withPedal(pedals, id, patch);
   });
 
-  return { pedals, masterVolume, tempoBpm };
+  return { pedals, masterVolume, outputTrimDb: 0, tempoBpm };
 };
 
 const pick = <T,>(values: T[], index: number) => values[index % values.length];
@@ -239,13 +245,13 @@ const fxBlueprint = (index: number): Array<[string, Partial<Pedal>]> => [
 
 const experimentalBlueprint = (index: number): Array<[string, Partial<Pedal>]> => [
   ['noise-gate', { params: { thresholdDb: -46 + (index % 8) * 2, releaseMs: 35 + (index % 8) * 28 } }],
-  ['compressor', { params: { sustain: 58 + (index % 7) * 6, ratio: 8 + (index % 8), attack: 0.002 + (index % 4) * 0.004, release: 0.12 + (index % 6) * 0.08, mix: 70, level: 70 } }],
-  ['drive', { params: { mode: pick(['fuzz', 'distortion', 'crunch', 'overdrive'], index), drive: 50 + (index % 9) * 5, tone: 24 + (index % 10) * 7, level: 58 + (index % 7) * 3, mix: 76 + (index % 5) * 6, bias: -0.8 + (index % 12) * 0.15 } }],
-  ['amp-eq', { params: { lowCut: 40 + (index % 8) * 18, bass: -8 + (index % 12) * 1.7, mid: -9 + (index % 12) * 1.6, midFreq: 250 + (index % 10) * 125, midQ: 0.4 + (index % 8) * 0.4, treble: -8 + (index % 12) * 1.6, presence: -5 + (index % 11) * 1.4 } }],
-  ['cabinet-ir', { params: { cabinetType: pick(['custom', 'openBack', '4x12', '1x12'], index), mic: pick(['mixed', 'ribbon', 'condenser', 'dynamic'], index), lowCut: 50 + (index % 8) * 16, highCut: 3000 + (index % 9) * 900, mix: 70 + (index % 5) * 6 } }],
-  ['modulation', { bypassed: false, params: { mode: pick(['vibrato', 'flanger', 'phaser', 'tremolo', 'chorus'], index), rate: 0.05 + (index % 11) * 1.7, depth: 55 + (index % 7) * 6, feedback: 0.2 + (index % 8) * 0.08, mix: 45 + (index % 8) * 5, tone: 42, stereoWidth: 82 } }],
-  ['delay', { params: { mode: pick(['tape', 'pingpong', 'digital', 'analog'], index), timeMs: 40 + (index % 11) * 175, feedback: 0.28 + (index % 8) * 0.08, mix: 26 + (index % 9) * 5, tone: 28 + (index % 9) * 7, flutter: 38 + (index % 7) * 8, sync: index % 4 === 0, division: pick(['1/4', '1/8', 'dotted1/8', '1/16'], index) } }],
-  ['reverb', { params: { mode: pick(['ambient', 'spring', 'hall', 'plate'], index), decay: 2 + (index % 10) * 0.8, preDelay: (index % 8) * 24, lowCut: 60 + (index % 8) * 30, highCut: 2400 + (index % 10) * 850, mix: 28 + (index % 9) * 5 } }],
+  ['compressor', { params: { sustain: 38 + (index % 7) * 4, ratio: 3.5 + (index % 8) * 0.5, attack: 0.002 + (index % 4) * 0.004, release: 0.12 + (index % 6) * 0.08, mix: 60, level: 70 } }],
+  ['drive', { params: { mode: pick(['fuzz', 'distortion', 'crunch', 'overdrive'], index), drive: 50 + (index % 9) * 5, tone: 24 + (index % 10) * 7, level: 58 + (index % 7) * 3, mix: 76 + (index % 5) * 6, bias: -0.22 + (index % 12) * 0.04 } }],
+  ['amp-eq', { params: { lowCut: 40 + (index % 8) * 18, bass: -3 + (index % 12) * 0.55, mid: -3 + (index % 12) * 0.55, midFreq: 250 + (index % 10) * 125, midQ: 0.4 + (index % 8) * 0.4, treble: -3 + (index % 12) * 0.55, presence: -2 + (index % 11) * 0.5 } }],
+  ['cabinet-ir', { params: { cabinetType: pick(['2x12', 'openBack', '4x12', '1x12'], index), mic: pick(['mixed', 'ribbon', 'condenser', 'dynamic'], index), lowCut: 50 + (index % 8) * 16, highCut: 3000 + (index % 9) * 900, mix: 70 + (index % 5) * 6 } }],
+  ['modulation', { bypassed: false, params: { mode: pick(['vibrato', 'flanger', 'phaser', 'tremolo', 'chorus'], index), rate: 0.05 + (index % 11) * 1.7, depth: 55 + (index % 7) * 6, feedback: 0.2 + (index % 8) * 0.08, mix: 25 + (index % 8) * 4, tone: 42, stereoWidth: 82 } }],
+  ['delay', { params: { mode: pick(['tape', 'pingpong', 'digital', 'analog'], index), timeMs: 40 + (index % 11) * 175, feedback: 0.28 + (index % 8) * 0.08, mix: 20 + (index % 9) * 3, tone: 28 + (index % 9) * 7, flutter: 38 + (index % 7) * 8, sync: index % 4 === 0, division: pick(['1/4', '1/8', 'dotted1/8', '1/16'], index) } }],
+  ['reverb', { params: { mode: pick(['ambient', 'spring', 'hall', 'plate'], index), decay: 2 + (index % 10) * 0.8, preDelay: (index % 8) * 24, lowCut: 60 + (index % 8) * 30, highCut: 2400 + (index % 10) * 850, mix: 18 + (index % 9) * 3 } }],
 ];
 
 const PRESET_BLUEPRINTS: PresetBlueprint[] = [
@@ -269,7 +275,7 @@ const PRESET_BLUEPRINTS: PresetBlueprint[] = [
   },
   {
     category: 'Lead',
-    names: ['Blues Velvet Lead', 'Singing Sustain Lead', 'Classic Delay Lead', 'Liquid Fusion Lead', 'Arena Solo Lead', 'Neck Pickup Lead', 'Smooth Legato Lead', 'Vintage Echo Lead', 'Octave Fuzz Lead', 'Texas Bite Lead', 'Glass Slide Lead', 'Modern Lead Cut'],
+    names: ['Blues Velvet Lead', 'Singing Sustain Lead', 'Classic Delay Lead', 'Liquid Fusion Lead', 'Arena Solo Lead', 'Neck Pickup Lead', 'Smooth Legato Lead', 'Vintage Echo Lead', 'Driven Fuzz Lead', 'Texas Bite Lead', 'Glass Slide Lead', 'Modern Lead Cut'],
     tags: ['lead', 'solo', 'delay'],
     tempoBase: 104,
     masterVolume: 0.38,
@@ -278,7 +284,7 @@ const PRESET_BLUEPRINTS: PresetBlueprint[] = [
   },
   {
     category: 'Crunch',
-    names: ['Classic Crunch Stack', 'Brit Rhythm Crunch', 'Open Chord Crunch', 'Garage Combo Crunch', 'Roots Rock Crunch', 'Edge Breakup Crunch', 'Indie Rhythm Crunch', 'Plexi Mid Push', 'Tweed Hair Crunch', 'Alt Rock Crunch', 'Power Pop Crunch', 'Bluesbreaker Bite'],
+    names: ['Classic Crunch Stack', 'Brit Rhythm Crunch', 'Open Chord Crunch', 'Garage Combo Crunch', 'Roots Rock Crunch', 'Edge Breakup Crunch', 'Indie Rhythm Crunch', 'Classic Mid Push', 'Warm Hair Crunch', 'Alt Rock Crunch', 'Power Pop Crunch', 'Blues Crunch Bite'],
     tags: ['crunch', 'rhythm', 'rock'],
     tempoBase: 116,
     masterVolume: 0.37,
@@ -287,7 +293,7 @@ const PRESET_BLUEPRINTS: PresetBlueprint[] = [
   },
   {
     category: 'High Gain',
-    names: ['Modern Tight Gain', 'Scooped Metal Wall', 'Djent Gate Stack', 'High Gain Lead', 'Drop Tune Rhythm', 'Thrash Cut', 'Doom Saturation', 'Prog Metal Focus', 'Hardcore Bite', 'Liquid Shred Gain', 'Dark Mesa Style', 'Bright 4x12 Fire'],
+    names: ['Modern Tight Gain', 'Scooped Metal Wall', 'Djent Gate Stack', 'High Gain Lead', 'Drop Tune Rhythm', 'Thrash Cut', 'Doom Saturation', 'Prog Metal Focus', 'Hardcore Bite', 'Liquid Shred Gain', 'Dark High Gain', 'Bright 4x12 Fire'],
     tags: ['metal', 'gain', 'gate'],
     tempoBase: 132,
     masterVolume: 0.34,
@@ -314,7 +320,7 @@ const PRESET_BLUEPRINTS: PresetBlueprint[] = [
   },
   {
     category: 'FX',
-    names: ['Robot Gate Pulse', 'Filter Telephone', 'Lo-Fi Cabinet FX', 'Ping Pong Warp', 'Spring Crash Echo', 'Trem Delay Chop', 'Fuzz Octave Texture', 'Ghost Slap Machine', 'Ringless Sci-Fi', 'Dub Feedback Throw', 'Broken Tape Deck', 'Glitch Rhythm Bed'],
+    names: ['Robot Gate Pulse', 'Filter Telephone', 'Lo-Fi Cabinet FX', 'Ping Pong Warp', 'Spring Crash Echo', 'Trem Delay Chop', 'Fuzz Texture', 'Ghost Slap Machine', 'Ringless Sci-Fi', 'Dub Feedback Throw', 'Broken Tape Deck', 'Glitch Rhythm Bed'],
     tags: ['fx', 'creative', 'sound design'],
     tempoBase: 110,
     masterVolume: 0.32,
@@ -338,22 +344,44 @@ const slug = (value: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 
+// Names describe actual enabled effects rather than suggesting unavailable features.
+const describeFactoryEffects = (pedals: Pedal[]) => {
+  const activeMode = (type: Pedal['type']) => {
+    const pedal = pedals.find((item) => item.type === type);
+    if (!pedal || !pedal.enabled || pedal.bypassed || Number(pedal.params.mix) === 0) return null;
+    const mode = pedal.params.mode;
+    return typeof mode === 'string' ? mode : null;
+  };
+  const drive = activeMode('drive');
+  const mod = activeMode('modulation');
+  const delay = activeMode('delay');
+  const reverb = activeMode('reverb');
+  const title = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+  const sound = drive ? title(drive) : 'Clean';
+  const additions = [mod && `${title(mod)} mod`, delay && `${title(delay)} delay`, reverb && `${title(reverb)} reverb`].filter(Boolean) as string[];
+  return { name: [sound, ...additions.slice(0, 2)].join(' / '), description: [sound, ...additions].join(' · ') };
+};
+
 const DEFAULT_PRESETS: PedalboardPreset[] = PRESET_BLUEPRINTS.flatMap((blueprint) =>
-  blueprint.names.map((name, index) =>
-    buildPreset(
-      `factory-${slug(blueprint.category)}-${String(index + 1).padStart(2, '0')}-${slug(name)}`,
-      name,
-      makeSnapshot(blueprint.masterVolume, blueprint.tempoBase + index * 2, blueprint.makePatches(index)),
+  blueprint.names.map((legacyName, index) => {
+    const snapshot = makeSnapshot(blueprint.masterVolume, blueprint.tempoBase + index * 2, blueprint.makePatches(index));
+    snapshot.outputTrimDb = factoryTrimDb(blueprint.category, index);
+    const effects = describeFactoryEffects(snapshot.pedals);
+    return buildPreset(
+      // Keep the previous ID stable so saved sessions and references still resolve.
+      `factory-${slug(blueprint.category)}-${String(index + 1).padStart(2, '0')}-${slug(legacyName)}`,
+      `${blueprint.category} ${String(index + 1).padStart(2, '0')} · ${effects.name}`,
+      snapshot,
       FACTORY_CREATED_AT,
       FACTORY_CREATED_AT,
       {
         category: blueprint.category,
         origin: 'factory',
-        description: blueprint.describe(name, index),
-        tags: [...blueprint.tags, slug(name)],
+        description: effects.description,
+        tags: [...blueprint.tags, slug(legacyName)],
       },
-    ),
-  ),
+    );
+  }),
 );
 
 const FACTORY_IDS = new Set(DEFAULT_PRESETS.map((preset) => preset.id));
@@ -367,7 +395,7 @@ const clonePreset = (preset: PedalboardPreset): PedalboardPreset => ({
 });
 
 const writePresets = (presets: PedalboardPreset[]) => {
-  window.localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify({ version: 2, presets }));
+  writeLocal(PRESET_STORAGE_KEY, JSON.stringify({ version: 3, presets: presets.filter((preset) => preset.origin !== 'factory' && !FACTORY_IDS.has(preset.id)) }));
 };
 
 const readPresets = () => {
@@ -427,6 +455,7 @@ const normalizePreset = (value: unknown, fallbackOrigin: PresetOrigin): Pedalboa
     {
       pedals: normalizePedals(candidate.pedals),
       masterVolume: typeof candidate.masterVolume === 'number' ? candidate.masterVolume : 0.35,
+      outputTrimDb: typeof candidate.outputTrimDb === 'number' && Number.isFinite(candidate.outputTrimDb) ? candidate.outputTrimDb : 0,
       tempoBpm: typeof candidate.tempoBpm === 'number' ? candidate.tempoBpm : 120,
     },
     typeof candidate.createdAt === 'string' ? candidate.createdAt : nowIso(),
@@ -441,10 +470,18 @@ const normalizePreset = (value: unknown, fallbackOrigin: PresetOrigin): Pedalboa
 };
 
 const mergeWithFactoryLibrary = (storedPresets: PedalboardPreset[] | null) => {
-  const storedById = new Map((storedPresets ?? []).map((preset) => [preset.id, preset]));
-  const factoryPresets = DEFAULT_PRESETS.map((factoryPreset) => clonePreset(storedById.get(factoryPreset.id) ?? factoryPreset));
-  const userPresets = (storedPresets ?? []).filter((preset) => !FACTORY_IDS.has(preset.id) && !LEGACY_FACTORY_IDS.has(preset.id));
-  return [...factoryPresets, ...userPresets.map(clonePreset)];
+  const factoryPresets = DEFAULT_PRESETS.map(clonePreset);
+  // Old versions let users overwrite or rename factory presets. Preserve those edits
+  // as separate user presets while always loading the current factory library.
+  const userPresets = (storedPresets ?? []).flatMap((preset) => {
+    const hadFactoryId = preset.id.startsWith('factory-') || LEGACY_FACTORY_IDS.has(preset.id);
+    if (hadFactoryId) {
+      if (preset.origin === 'factory' && preset.updatedAt === FACTORY_CREATED_AT) return [];
+      return [{ ...clonePreset(preset), id: `migrated-${preset.id}`, origin: 'user' as const, category: 'User Presets', name: `${preset.name} (이전 사용자 설정)` }];
+    }
+    return preset.origin === 'factory' ? [] : [clonePreset(preset)];
+  });
+  return [...factoryPresets, ...userPresets];
 };
 
 export const usePresetStore = create<PresetStore>((set, get) => ({
@@ -486,6 +523,10 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
       return null;
     }
 
+    if (sourcePreset.origin === 'factory') {
+      return get().savePreset(`${sourcePreset.name} 사용자 설정`, snapshot);
+    }
+
     const updatedPreset = buildPreset(sourcePreset.id, sourcePreset.name, snapshot, sourcePreset.createdAt, nowIso(), {
       category: sourcePreset.category,
       origin: sourcePreset.origin,
@@ -497,6 +538,7 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
     set({ presets, currentPresetName: updatedPreset.name });
     return clonePreset(updatedPreset);
   },
+  restoreSelection: (id, name) => set({ activePresetId: id, currentPresetName: name }),
   loadPreset: (id) => {
     const preset = get().presets.find((candidate) => candidate.id === id) ?? null;
     if (!preset) {
@@ -507,6 +549,7 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
     return clonePreset(preset);
   },
   renamePreset: (id, name) => {
+    if (get().presets.find((preset) => preset.id === id)?.origin === 'factory') return;
     const presets = get().presets.map((preset) =>
       preset.id === id ? { ...preset, name: sanitizeName(name, preset.name), origin: preset.origin === 'factory' ? 'user' : preset.origin, category: preset.origin === 'factory' ? 'User Presets' : preset.category, updatedAt: nowIso() } : preset,
     );
@@ -555,11 +598,11 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
         : [parsed];
     const imported = values.map((preset) => normalizePreset(preset, 'imported')).filter(Boolean) as PedalboardPreset[];
     const existingIds = new Set(get().presets.map((preset) => preset.id));
-    const uniqueImported = imported.map((preset) =>
-      existingIds.has(preset.id)
-        ? { ...preset, id: createId('imported'), name: `${preset.name} Imported`, origin: 'imported' as const }
-        : { ...preset, origin: preset.origin === 'factory' ? ('imported' as const) : preset.origin },
-    );
+    const uniqueImported = imported.filter((preset) => {
+      if (preset.origin === 'factory' || preset.id.startsWith('factory-') || existingIds.has(preset.id)) return false;
+      existingIds.add(preset.id);
+      return true;
+    }).map((preset) => ({ ...preset, origin: 'imported' as const }));
     const presets = [...uniqueImported, ...get().presets];
     writePresets(presets);
     set({
@@ -569,5 +612,5 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
     });
     return { imported: uniqueImported.length, skipped: values.length - uniqueImported.length };
   },
-  exportPresets: () => JSON.stringify({ version: 2, presets: get().presets.map(clonePreset) }, null, 2),
+  exportPresets: () => JSON.stringify({ version: 3, presets: get().presets.filter((preset) => preset.origin !== 'factory').map(clonePreset) }, null, 2),
 }));

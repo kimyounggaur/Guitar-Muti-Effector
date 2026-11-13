@@ -4,6 +4,7 @@ import { emptyTunerReading, subscribeTuner, TunerReading } from '../../audio/nod
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { isTunerMode, midiToFrequency, STANDARD_TUNINGS, TunerMode } from '../../audio/utils/pitch';
 import KnobControl from '../controls/KnobControl';
+import { useElementVisible } from '../../hooks/useElementVisible';
 
 type TunerPanelProps = {
   pedal: Pedal;
@@ -29,17 +30,25 @@ function TunerPanel({
   onParamChange,
 }: TunerPanelProps) {
   const [reading, setReading] = useState<TunerReading>(emptyTunerReading);
+  const [panelRef, visible] = useElementVisible<HTMLElement>();
   const params = useMemo(() => readTunerParams(pedal.params), [pedal.params]);
   const cents = Math.max(-50, Math.min(50, reading.cents));
   const stateLabel = getTuningState(reading);
   const strobeBars = useMemo(() => createStrobeBars(cents, reading.signalLow), [cents, reading.signalLow]);
 
-  useEffect(() => subscribeTuner(pedal.id, setReading), [pedal.id]);
+  useEffect(() => {
+    if (!visible) {
+      setReading(emptyTunerReading);
+      return;
+    }
+    return subscribeTuner(pedal.id, setReading);
+  }, [pedal.id, visible]);
 
   const setParam = (name: string, value: PedalParamValue) => onParamChange(pedal.id, name, value);
 
   return (
     <article
+      ref={panelRef}
       className={`pedal-card tuner-pedal rack-tuner-module ${selected ? 'is-selected' : ''} ${
         pedal.enabled ? 'is-on' : 'is-off'
       } ${
@@ -57,7 +66,7 @@ function TunerPanel({
 
       <div className="rack-tuner-shell">
         <div className="rack-tuner-left">
-          <button
+          {dragListeners ? (<button
             type="button"
             className="drag-handle rack-tuner-drag"
             aria-label={`Move ${pedal.name}`}
@@ -65,7 +74,7 @@ function TunerPanel({
             {...dragListeners}
           >
             ≡
-          </button>
+          </button>) : null}
           <button type="button" className="pedal-select tuner-display rack-tuner-brand" onClick={() => onSelect(pedal.id)}>
             <span>Rackmount Chromatic</span>
             <strong>STROBE TUNER</strong>
@@ -74,23 +83,23 @@ function TunerPanel({
 
           <div className="rack-tuner-mini-controls">
             <button type="button" onClick={() => setParam('referenceA4', params.referenceA4 === 440 ? 442 : 440)}>
-              CALIB
+              A4 {params.referenceA4 === 440 ? '442' : '440'} Hz
             </button>
             <button type="button" onClick={() => setParam('sensitivity', params.sensitivity >= 80 ? 55 : 82)}>
-              DISPLAY
+              감도 {params.sensitivity >= 80 ? '55' : '82'}
             </button>
           </div>
         </div>
 
         <div className="rack-tuner-note-display">
           <SevenSegmentNote noteName={reading.note?.noteName ?? ''} signalLow={reading.signalLow} />
-          <span>{reading.signalLow ? 'NO SIGNAL' : `${reading.frequency?.toFixed(2) ?? '--'} Hz`}</span>
+          <span>{reading.signalLow ? '신호 없음' : `${reading.frequency?.toFixed(2) ?? '--'} Hz`}</span>
         </div>
 
         <div className="rack-tuner-strobe" aria-label="Rack strobe cents meter">
           <div className="rack-tuner-scale">
             <span>FLAT</span>
-            <strong>{reading.signalLow ? 'SIGNAL LOW' : stateLabel}</strong>
+            <strong>{reading.signalLow ? '신호 약함' : stateLabel}</strong>
             <span>SHARP</span>
           </div>
           <div className={`rack-strobe-bars ${Math.abs(cents) <= 3 && !reading.signalLow ? 'is-in-tune' : ''}`}>
@@ -104,38 +113,34 @@ function TunerPanel({
           </div>
           <div className="rack-tuner-cents">
             <span>{reading.signalLow ? '--' : `${reading.cents > 0 ? '+' : ''}${reading.cents.toFixed(1)} cents`}</span>
-            <b>{reading.note?.targetLabel ?? 'Target --'}</b>
+            <b>{reading.note?.targetLabel ?? '목표 음 --'}</b>
           </div>
         </div>
 
         <div className="rack-tuner-right">
           <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-            MUTE
+            {pedal.enabled ? '튜너 켜짐' : '튜너 꺼짐'}
           </button>
           <button
             type="button"
             className={pedal.bypassed ? 'is-bypassed' : ''}
             onClick={() => onBypass(pedal.id, !pedal.bypassed)}
           >
-            POWER
+            {pedal.bypassed ? '바이패스 해제' : '바이패스'}
           </button>
-          <div className="rack-tuner-jacks" aria-hidden="true">
-            <span>CABLE CHECK</span>
-            <span>OUTPUT</span>
-            <span>INPUT</span>
-          </div>
+
         </div>
       </div>
 
       <div className="rack-tuner-control-deck">
         <div className="tuner-controls rack-tuner-controls">
           <label className="tuner-control is-wide rack-tuner-select">
-            <span>Mode</span>
+            <span>악기</span>
             <select value={params.mode} onChange={(event) => setParam('mode', event.target.value)}>
-              <option value="chromatic">Chromatic</option>
-              <option value="guitar">Guitar</option>
-              <option value="bass">Bass</option>
-              <option value="ukulele">Ukulele</option>
+              <option value="chromatic">반음계</option>
+              <option value="guitar">기타</option>
+              <option value="bass">베이스</option>
+              <option value="ukulele">우쿨렐레</option>
             </select>
           </label>
           <TunerSlider
@@ -147,14 +152,14 @@ function TunerPanel({
             onChange={(value) => setParam('referenceA4', value)}
           />
           <TunerSlider
-            label="Sense"
+            label="감도"
             value={params.sensitivity}
             min={0}
             max={100}
             onChange={(value) => setParam('sensitivity', value)}
           />
           <TunerSlider
-            label="Smooth"
+            label="표시 부드럽게"
             value={params.smoothing}
             min={0}
             max={100}
@@ -163,7 +168,7 @@ function TunerPanel({
         </div>
 
         <div className="tuning-guide rack-tuning-guide">
-          <span>Standard Guitar</span>
+          <span>기타 표준 조율</span>
           <div>
             {STANDARD_TUNINGS.guitar.map((string) => (
               <strong key={string.label} className={reading.note?.targetLabel === string.label ? 'is-target' : ''}>
@@ -244,11 +249,11 @@ const createStrobeBars = (cents: number, signalLow: boolean) => {
 
 const getTuningState = (reading: TunerReading) => {
   if (reading.signalLow) {
-    return 'Signal Low';
+    return '신호 약함';
   }
 
   if (Math.abs(reading.cents) <= 3) {
-    return 'In Tune';
+    return '정확함';
   }
 
   return reading.cents < 0 ? 'Low' : 'High';

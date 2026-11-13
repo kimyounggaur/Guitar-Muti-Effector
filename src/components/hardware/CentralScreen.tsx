@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { Pedal, PedalParamValue } from '../../audio/types';
-import { MeterReading } from '../../audio/nodes/MeterNode';
 import PatchHeader from './PatchHeader';
 
 type CentralScreenProps = {
@@ -9,8 +8,6 @@ type CentralScreenProps = {
   patch: string;
   bpm: number;
   isAudioReady: boolean;
-  inputMeter: MeterReading;
-  outputMeter: MeterReading;
   selectedPedal: Pedal | null;
   effectChain: ReactNode;
   presetBrowser?: ReactNode;
@@ -22,8 +19,6 @@ function CentralScreen({
   patch,
   bpm,
   isAudioReady,
-  inputMeter,
-  outputMeter,
   selectedPedal,
   effectChain,
   presetBrowser,
@@ -31,7 +26,7 @@ function CentralScreen({
   const isBrowsingPresets = Boolean(presetBrowser);
 
   return (
-    <section className="central-screen" aria-label="LCD touchscreen">
+    <section className="central-screen" aria-label="페달 화면">
       <div className="screen-bezel">
         <div className={`screen-glass ${isBrowsingPresets ? 'is-preset-browser' : ''}`}>
           <PatchHeader
@@ -40,8 +35,6 @@ function CentralScreen({
             patchName={patchName}
             bpm={bpm}
             isAudioReady={isAudioReady}
-            inputMeter={inputMeter}
-            outputMeter={outputMeter}
           />
           <div className="screen-chain-window">{presetBrowser ?? effectChain}</div>
           {!isBrowsingPresets ? (
@@ -55,8 +48,8 @@ function CentralScreen({
                 ))
               ) : (
                 <div className="screen-param-cell is-empty">
-                  <span>Selected</span>
-                  <strong>None</strong>
+                  <span>선택한 페달</span>
+                  <strong>없음</strong>
                 </div>
               )}
             </div>
@@ -100,7 +93,7 @@ const formatParamName = (name: string) =>
 
 const formatParamValue = (value: PedalParamValue) => {
   if (typeof value === 'boolean') {
-    return value ? 'On' : 'Off';
+    return value ? '켜짐' : '꺼짐';
   }
 
   if (typeof value === 'number') {

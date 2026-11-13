@@ -33,7 +33,7 @@ export const createDriveCurve = (mode: DriveMode, drive: number, bias: number, s
   for (let index = 0; index < samples; index += 1) {
     const x = (index / (samples - 1)) * 2 - 1;
     const shifted = x + shapedBias;
-    curve[index] = processDriveSample(mode, shifted, amount) - processDriveSample(mode, shapedBias, amount) * 0.22;
+    curve[index] = processDriveSample(mode, shifted, amount) - processDriveSample(mode, shapedBias, amount);
   }
 
   return curve;
@@ -43,13 +43,13 @@ export const processDriveSample = (mode: DriveMode, sample: number, amount: numb
   const x = clamp(sample, -2.5, 2.5);
 
   if (mode === 'overdrive') {
-    const gain = 1.5 + amount * 7;
+    const gain = 1 + amount * 2;
     const asymmetry = x >= 0 ? 1 + amount * 0.28 : 1 - amount * 0.16;
     return Math.tanh(x * gain * asymmetry) / Math.tanh(gain);
   }
 
   if (mode === 'crunch') {
-    const softGain = 2.2 + amount * 10;
+    const softGain = 1.2 + amount * 3;
     const soft = Math.tanh(x * softGain) / Math.tanh(softGain);
     const threshold = 0.78 - amount * 0.28;
     const hard = clamp(x * (1.2 + amount * 2.4), -threshold, threshold) / threshold;
@@ -57,14 +57,14 @@ export const processDriveSample = (mode: DriveMode, sample: number, amount: numb
   }
 
   if (mode === 'distortion') {
-    const gain = 2.8 + amount * 20;
+    const gain = 1.2 + amount * 4;
     const threshold = 0.66 - amount * 0.36;
     const clipped = clamp(x * gain, -threshold, threshold) / threshold;
     return Math.tanh(clipped * (1.4 + amount * 1.8));
   }
 
-  const gain = 6 + amount * 42;
-  const threshold = 0.28 - amount * 0.14;
+  const gain = 1.5 + amount * 5;
+  const threshold = 0.8 - amount * 0.3;
   const clipped = clamp(x * gain, -threshold, threshold) / threshold;
-  return Math.sign(clipped) * Math.abs(clipped) ** (0.42 - amount * 0.18);
+  return Math.tanh(clipped * (1.4 + amount));
 };

@@ -69,8 +69,12 @@ export class BaseEffect implements EffectNodeWrapper {
 
   setBypass(bypassed: boolean) {
     this.bypassed = bypassed;
-    const wet = bypassed ? 0 : this.mix;
+    // Delay and reverb keep their output open on bypass so existing tails can
+    // decay. Closing their input prevents bypassed playing resurfacing later.
+    const preserveTail = this.type === 'delay' || this.type === 'reverb';
+    const wet = bypassed && !preserveTail ? 0 : this.mix;
     const dry = bypassed ? 1 : 1 - this.mix;
+    smoothParam(this.context, this.wetInput.gain, bypassed && preserveTail ? 0 : 1, 0.005);
     smoothParam(this.context, this.wetGain.gain, wet, 0.01);
     smoothParam(this.context, this.dryGain.gain, dry, 0.01);
   }

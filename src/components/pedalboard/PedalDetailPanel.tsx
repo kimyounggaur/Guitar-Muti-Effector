@@ -1,11 +1,15 @@
 import { type CSSProperties, useEffect, useMemo, useState } from 'react';
 import { Pedal, PedalParamValue, PedalType } from '../../audio/types';
 import { subscribeCompressorReduction } from '../../audio/nodes/CompressorEffect';
+import { useElementVisible } from '../../hooks/useElementVisible';
 import { usePedalStore } from '../../store/pedalStore';
 import { useTempoStore } from '../../store/tempoStore';
 import KnobControl from '../controls/KnobControl';
 import AmpEQPedal from '../effects/AmpEQPedal';
 import TunerPanel from '../effects/TunerPanel';
+import LooperPanel from '../effects/LooperPanel';
+import CabinetIRPedal from '../effects/CabinetIRPedal';
+import RhythmPanel from '../effects/RhythmPanel';
 
 type PedalDetailPanelProps = {
   onPedalToggled?: (pedals: Pedal[]) => void;
@@ -139,8 +143,8 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
   if (!selectedPedal) {
     return (
-      <section className="detail-section" aria-label="Pedal detail">
-        <div className="detail-empty">Select a pedal to edit.</div>
+      <section className="detail-section" aria-label="페달 상세 설정">
+        <div className="detail-empty">설정할 페달을 선택해 주세요.</div>
       </section>
     );
   }
@@ -173,9 +177,50 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
   };
 
   const handleReset = () => {
+    if (!window.confirm('모든 페달 설정을 초기화하시겠습니까?')) return;
     resetPedals();
     window.requestAnimationFrame(() => onPedalToggled?.(usePedalStore.getState().pedals));
   };
+
+  if (selectedPedal.type === 'looper') {
+    return (
+      <section className="detail-section" aria-label="루퍼 조작">
+        <LooperPanel
+          pedal={selectedPedal}
+          selected
+          onSelect={setSelectedPedal}
+          onToggle={handleToggle}
+          onBypass={(_, bypassed) => {
+            setPedalBypass(selectedPedal.id, bypassed);
+            onPedalBypassChanged?.(selectedPedal.id, bypassed);
+          }}
+          onParamChange={(_, name, value) => {
+            if (name === '__looperCommand') onPedalParamChanged?.(selectedPedal.id, name, value);
+            else handleParamChange(name, value);
+          }}
+        />
+      </section>
+    );
+  }
+
+  if (selectedPedal.type === 'cabinetIR' || selectedPedal.type === 'rhythm') {
+    const Panel = selectedPedal.type === 'cabinetIR' ? CabinetIRPedal : RhythmPanel;
+    return (
+      <section className="detail-section" aria-label={selectedPedal.type === 'cabinetIR' ? '캐비닛 IR 설정' : '리듬 설정'}>
+        <Panel
+          pedal={selectedPedal}
+          selected
+          onSelect={setSelectedPedal}
+          onToggle={() => handleToggle()}
+          onBypass={(_, bypassed) => {
+            setPedalBypass(selectedPedal.id, bypassed);
+            onPedalBypassChanged?.(selectedPedal.id, bypassed);
+          }}
+          onParamChange={(_, name, value) => handleParamChange(name, value)}
+        />
+      </section>
+    );
+  }
 
   if (selectedPedal.type === 'ampEQ') {
     return (
@@ -194,13 +239,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions amp-eq-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('tuner')}>
-            Tuner
+            튜너
           </button>
         </div>
       </section>
@@ -224,10 +269,10 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions tuner-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('ampEQ')}>
             Amp EQ
@@ -249,13 +294,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions noise-gate-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('tuner')}>
-            Tuner
+            튜너
           </button>
         </div>
       </section>
@@ -274,13 +319,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions compressor-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('tuner')}>
-            Tuner
+            튜너
           </button>
         </div>
       </section>
@@ -299,13 +344,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
         <div className="detail-actions drive-rack-detail-actions">
           <button type="button" onClick={savePedalsToStorage}>
-            Save Chain
+            페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
-            Reset Board
+            전체 초기화
           </button>
           <button type="button" onClick={() => setSelectedPedal('tuner')}>
-            Tuner
+            튜너
           </button>
         </div>
       </section>
@@ -316,19 +361,19 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
     <section className="detail-section" aria-label="Selected pedal detail">
       <div className="detail-header">
         <div>
-          <span className="eyebrow">Detail panel</span>
+          <span className="eyebrow">상세 설정</span>
           <h2>{selectedPedal.name}</h2>
           <p>
-            {formatPedalType(selectedPedal.type)} · {selectedPedal.enabled ? 'On' : 'Off'} ·{' '}
-            {selectedPedal.bypassed ? 'Bypassed' : 'Signal in line'}
+            {formatPedalType(selectedPedal.type)} · {selectedPedal.enabled ? '켜짐' : '꺼짐'} ·{' '}
+            {selectedPedal.bypassed ? '바이패스 중' : '신호 처리 중'}
           </p>
         </div>
         <div className="detail-status">
           <button type="button" className={selectedPedal.enabled ? 'is-active' : ''} onClick={handleToggle}>
-            {selectedPedal.enabled ? 'On' : 'Off'}
+            {selectedPedal.enabled ? '켜짐' : '꺼짐'}
           </button>
           <button type="button" className={selectedPedal.bypassed ? 'is-bypassed' : ''} onClick={handleBypass}>
-            {selectedPedal.bypassed ? 'Bypass' : 'In Line'}
+            {selectedPedal.bypassed ? '바이패스 해제' : '바이패스'}
           </button>
         </div>
       </div>
@@ -350,13 +395,13 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
       <div className="detail-actions">
         <button type="button" onClick={savePedalsToStorage}>
-          Save Chain
+          페달 설정 저장
         </button>
         <button type="button" onClick={handleReset}>
-          Reset Board
+          전체 초기화
         </button>
         <button type="button" onClick={() => setSelectedPedal('tuner')}>
-          Tuner
+          튜너
         </button>
       </div>
     </section>
@@ -372,7 +417,7 @@ type DriveAmplitubePanelProps = {
 
 const DRIVE_MODE_OPTIONS = [
   ['overdrive', 'British Tube Lead 1'],
-  ['crunch', 'Brit 800 Crunch'],
+  ['crunch', 'Classic Crunch'],
   ['distortion', 'Modern Hi-Gain'],
   ['fuzz', 'Vintage Fuzz Box'],
 ] as const;
@@ -386,10 +431,6 @@ function DriveAmplitubePanel({ pedal, onToggle, onBypass, onParamChange }: Drive
   const bias = readNumberParam(pedal.params.bias, 0, -1, 1);
   const modeIndex = DRIVE_MODE_OPTIONS.findIndex(([option]) => option === mode);
   const modeLabel = DRIVE_MODE_OPTIONS[Math.max(0, modeIndex)]?.[1] ?? 'British Tube Lead 1';
-  const meterDrive = clampNumber(drive * 0.52 + level * 0.3 + mix * 0.18, 0, 100);
-  const needleAngle = -34 + percentFromRange(meterDrive, 0, 100) * 68;
-  const eqModel = mode === 'fuzz' ? 'Germanium Stack' : mode === 'distortion' ? 'Modern 5 Band' : 'British Tube Lead 1';
-  const ampModel = mode === 'crunch' ? '100W Brit 800' : mode === 'distortion' ? '100W Metal EL34' : mode === 'fuzz' ? 'Vintage 30W Fuzz' : '50W EL34';
 
   const changeModeBy = (offset: number) => {
     const nextIndex = (modeIndex + offset + DRIVE_MODE_OPTIONS.length) % DRIVE_MODE_OPTIONS.length;
@@ -423,12 +464,6 @@ function DriveAmplitubePanel({ pedal, onToggle, onBypass, onParamChange }: Drive
         <Amp5Knob label="Tone" value={tone} min={0} max={100} step={1} onChange={(value) => onParamChange('tone', value)} />
         <Amp5Knob label="Bias" value={bias} min={-1} max={1} step={0.01} onChange={(value) => onParamChange('bias', value)} />
         <Amp5Knob label="Mix" value={mix} min={0} max={100} step={1} onChange={(value) => onParamChange('mix', value)} />
-        <Amp5ModelSlot label="EQ MODEL" value={eqModel} onStepDown={() => onParamChange('tone', Math.max(0, tone - 8))} onStepUp={() => onParamChange('tone', Math.min(100, tone + 8))} />
-      </div>
-
-      <div className="amp5-panel-section amp5-reverb-section">
-        <Amp5Knob label="Blend" value={mix} min={0} max={100} step={1} onChange={(value) => onParamChange('mix', value)} />
-        <span>SPRING REVERB</span>
       </div>
 
       <div className="amp5-panel-section amp5-output-section">
@@ -436,17 +471,10 @@ function DriveAmplitubePanel({ pedal, onToggle, onBypass, onParamChange }: Drive
         <div className="amp5-match-row">
           <button type="button" className={mix >= 98 ? 'is-matched' : ''} onClick={() => onParamChange('mix', mix >= 98 ? 72 : 100)} aria-pressed={mix >= 98}>
             <i aria-hidden="true" />
-            <span>MATCH</span>
+            <span>WET 100%</span>
           </button>
           <span className={mix >= 98 ? 'is-lit' : ''} aria-hidden="true" />
         </div>
-        <Amp5ModelSlot label="AMP MODEL" value={ampModel} onStepDown={() => onParamChange('level', Math.max(0, level - 5))} onStepUp={() => onParamChange('level', Math.min(100, level + 5))} />
-      </div>
-
-      <div className="amp5-vu-meter" aria-label={`Drive output ${Math.round(meterDrive)} percent`}>
-        <span>VU</span>
-        <em>Amplitude</em>
-        <i style={{ '--amp5-needle-angle': `${needleAngle}deg` } as CSSProperties} aria-hidden="true" />
       </div>
 
       <div className="amp5-bottom-rail" aria-hidden="true">
@@ -513,6 +541,7 @@ type CompressorLa2aPanelProps = {
 
 function CompressorLa2aPanel({ pedal, onToggle, onBypass, onParamChange }: CompressorLa2aPanelProps) {
   const [liveReduction, setLiveReduction] = useState(0);
+  const [meterRef, meterVisible] = useElementVisible<HTMLDivElement>();
   const threshold = readNumberParam(pedal.params.threshold, -28, -60, -10);
   const ratio = readNumberParam(pedal.params.ratio, 3.5, 1, 20);
   const attack = readNumberParam(pedal.params.attack, 0.012, 0.001, 0.1);
@@ -522,14 +551,19 @@ function CompressorLa2aPanel({ pedal, onToggle, onBypass, onParamChange }: Compr
   const mix = readNumberParam(pedal.params.mix, 78, 0, 100);
   const level = readNumberParam(pedal.params.level, 72, 0, 100);
   const isLimitMode = ratio >= 8;
-  const estimatedReduction = (sustain / 100) * 14 + percentFromRange(-threshold, 10, 60) * 0.07;
-  const meterReduction = clampNumber(Math.max(Math.abs(liveReduction), estimatedReduction), 0, 24);
+  const meterReduction = clampNumber(Math.abs(liveReduction), 0, 24);
   const needleAngle = -38 + percentFromRange(meterReduction, 0, 24) * 0.76;
 
-  useEffect(() => subscribeCompressorReduction(pedal.id, setLiveReduction), [pedal.id]);
+  useEffect(() => {
+    if (!meterVisible) {
+      setLiveReduction(0);
+      return;
+    }
+    return subscribeCompressorReduction(pedal.id, setLiveReduction);
+  }, [pedal.id, meterVisible]);
 
   return (
-    <div className={`la2a-module ${pedal.enabled && !pedal.bypassed ? 'is-online' : ''}`}>
+    <div ref={meterRef} className={`la2a-module ${pedal.enabled && !pedal.bypassed ? 'is-online' : ''}`}>
       <span className="la2a-rack-ear is-left" aria-hidden="true" />
       <span className="la2a-rack-ear is-right" aria-hidden="true" />
       <span className="la2a-screw is-top-left" aria-hidden="true" />
@@ -538,28 +572,28 @@ function CompressorLa2aPanel({ pedal, onToggle, onBypass, onParamChange }: Compr
       <span className="la2a-screw is-bottom-right" aria-hidden="true" />
 
       <div className="la2a-brand">
-        <strong>TELETRONIX</strong>
+        <strong>ST PLANET</strong>
         <i aria-hidden="true" />
       </div>
 
       <div className="la2a-model-plate">
         <span>LEVELING AMPLIFIER</span>
-        <strong>MODEL LA-2A</strong>
+        <strong>OPTICAL COMP</strong>
       </div>
 
       <La2aKnob label="Gain" value={level} min={0} max={100} step={1} onChange={(value) => onParamChange('level', value)} />
 
       <div className="la2a-vu-meter" aria-label={`Gain reduction ${Math.round(meterReduction)} dB`}>
-        <span>VU</span>
-        <em>VU Level Indicator</em>
+        <span>GR</span>
+        <em>Gain reduction (dB)</em>
         <div className="la2a-vu-scale" aria-hidden="true">
-          <b>-20</b>
-          <b>-10</b>
           <b>0</b>
-          <b>+3</b>
+          <b>−8</b>
+          <b>−16</b>
+          <b>−24</b>
         </div>
         <i className="la2a-vu-needle" style={{ '--la2a-needle-angle': `${needleAngle}deg` } as CSSProperties} aria-hidden="true" />
-        <strong>TELETRONIX</strong>
+        <strong>ST PLANET</strong>
       </div>
 
       <La2aKnob
@@ -572,19 +606,6 @@ function CompressorLa2aPanel({ pedal, onToggle, onBypass, onParamChange }: Compr
       />
 
       <div className="la2a-switch-bank">
-        <div className="la2a-meter-select">
-          <span>GAIN REDUCTION</span>
-          <button type="button" onClick={() => onParamChange('mix', 100)}>
-            GR
-          </button>
-          <button type="button" onClick={() => onParamChange('level', 84)}>
-            +10
-          </button>
-          <button type="button" onClick={() => onParamChange('level', 72)}>
-            +4
-          </button>
-        </div>
-
         <button
           type="button"
           className={`la2a-limit-switch ${isLimitMode ? 'is-limit' : ''}`}
@@ -686,6 +707,8 @@ type NoiseGateRackPanelProps = {
 
 function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamChange }: NoiseGateRackPanelProps) {
   const threshold = readNumberParam(pedal.params.thresholdDb, -48, -60, -10);
+  const attack = readNumberParam(pedal.params.attackMs, 8, 1, 200);
+  const hold = readNumberParam(pedal.params.holdMs, 80, 0, 1000);
   const release = readNumberParam(pedal.params.releaseMs, 180, 20, 500);
   const thresholdPercent = percentFromRange(threshold, -60, -10);
   const sensitivity = Math.round(thresholdPercent);
@@ -755,21 +778,21 @@ function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamChange }: NoiseG
         />
         <RackDial
           label="Attack"
-          value={Math.max(20, Math.round(release * 0.42))}
-          min={20}
-          max={210}
+          value={attack}
+          min={1}
+          max={200}
           step={1}
           suffix="ms"
-          onChange={(value) => onParamChange('releaseMs', Math.min(500, Math.round(value / 0.42)))}
+          onChange={(value) => onParamChange('attackMs', value)}
         />
         <RackDial
           label="Hold"
-          value={Math.max(40, Math.round(release * 0.78))}
-          min={40}
-          max={390}
+          value={hold}
+          min={0}
+          max={1000}
           step={1}
           suffix="ms"
-          onChange={(value) => onParamChange('releaseMs', Math.min(500, Math.round(value / 0.78)))}
+          onChange={(value) => onParamChange('holdMs', value)}
         />
         <RackDial
           label="Decay"
@@ -992,7 +1015,7 @@ const getNumberRange = (type: PedalType, name: string, value: number): NumberRan
   }
 
   if (name === 'feedback') {
-    return value <= 1 ? { min: 0, max: 0.95, step: 0.01 } : { min: 0, max: 100, step: 1 };
+    return type === 'delay' ? { min: 0, max: 0.85, step: 0.01 } : { min: 0, max: 100, step: 1 };
   }
 
   if (name === 'decay') {

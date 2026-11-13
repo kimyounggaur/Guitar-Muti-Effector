@@ -4,7 +4,6 @@ import {
   createSyntheticReverbImpulse,
   defaultDecayForMode,
   readReverbMode,
-  reverbModeToIRUrl,
 } from '../utils/impulse';
 import { BaseEffect } from './BaseEffect';
 
@@ -49,27 +48,27 @@ export class ReverbEffect extends BaseEffect {
   private level = 72;
   private activeLane: ReverbLane;
   private loadToken = 0;
-  private crossfadeTimer = 0;
+  private loadTimer = 0;
+  private pendingLanes = new Set<ReverbLane>();
 
   constructor(context: AudioContext, id: string) {
     super(context, id, 'reverb');
     this.activeLane = this.createLane(createSyntheticReverbImpulse(context, this.mode, this.decay), 1);
     this.setMix(0.24);
     this.applyLaneParams(this.activeLane, false);
-    void this.loadImpulse();
 
     this.paramHandlers.set('mode', (value) => {
       this.mode = readReverbMode(value);
       this.decay = clamp(this.decay || defaultDecayForMode(this.mode), 0.2, 10);
-      void this.loadImpulse();
+      this.scheduleImpulse();
     });
     this.paramHandlers.set('decay', (value) => {
       this.decay = clamp(asNumber(value, defaultDecayForMode(this.mode)), 0.2, 10);
-      void this.loadImpulse();
+      this.scheduleImpulse();
     });
     this.paramHandlers.set('size', (value) => {
       this.decay = clamp(0.2 + clamp(asNumber(value, 0.45), 0, 1) * 5.8, 0.2, 10);
-      void this.loadImpulse();
+      this.scheduleImpulse();
     });
     this.paramHandlers.set('preDelay', (value) => {
       this.preDelayMs = clamp(asNumber(value, 22), 0, 200);
@@ -98,7 +97,10 @@ export class ReverbEffect extends BaseEffect {
   }
 
   override dispose() {
-    window.clearTimeout(this.crossfadeTimer);
+    ++this.loadToken;
+    window.clearTimeout(this.loadTimer);
+    this.pendingLanes.forEach((lane) => this.disposeLane(lane));
+    this.pendingLanes.clear();
     this.disposeLane(this.activeLane);
     super.dispose();
   }
@@ -114,23 +116,12 @@ export class ReverbEffect extends BaseEffect {
     this.crossfadeTo(buffer);
   }
 
+  private scheduleImpulse() {
+    window.clearTimeout(this.loadTimer);
+    this.loadTimer = window.setTimeout(() => void this.loadImpulse(), 120);
+  }
+
   private async resolveImpulse() {
-    const url = reverbModeToIRUrl(this.mode);
-
-    if (url) {
-      try {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`IR not found: ${url}`);
-        }
-
-        const data = await response.arrayBuffer();
-        return await this.context.decodeAudioData(data);
-      } catch {
-        return createSyntheticReverbImpulse(this.context, this.mode, this.decay);
-      }
-    }
-
     return createSyntheticReverbImpulse(this.context, this.mode, this.decay);
   }
 
@@ -148,8 +139,8 @@ export class ReverbEffect extends BaseEffect {
     previousLane.laneGain.gain.linearRampToValueAtTime(0, now + 0.06);
     nextLane.laneGain.gain.linearRampToValueAtTime(1, now + 0.06);
 
-    window.clearTimeout(this.crossfadeTimer);
-    this.crossfadeTimer = window.setTimeout(() => this.disposeLane(previousLane), 90);
+    this.pendingLanes.add(previousLane);
+    window.setTimeout(() => { this.disposeLane(previousLane); this.pendingLanes.delete(previousLane); }, 90);
   }
 
   private createLane(buffer: AudioBuffer, gain: number): ReverbLane {
@@ -201,6 +192,7 @@ export class ReverbEffect extends BaseEffect {
   }
 
   private disposeLane(lane: ReverbLane) {
+    try { this.wetInput.disconnect(lane.preDelay); } catch { /* already detached */ }
     safeDisconnect(lane.preDelay);
     safeDisconnect(lane.lowCut);
     safeDisconnect(lane.convolver);

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 
 type KnobControlProps = {
@@ -29,6 +29,7 @@ function KnobControl({
   onChange,
 }: KnobControlProps) {
   const [dragging, setDragging] = useState(false);
+  const dragOrigin = useRef<{ y: number; value: number } | null>(null);
   const safeValue = clamp(Number.isFinite(value) ? value : min, min, max);
   const ratio = max === min ? 0 : (safeValue - min) / (max - min);
   const angle = -135 + ratio * 270;
@@ -46,24 +47,24 @@ function KnobControl({
     onChange(Number(clamp(stepped, min, max).toFixed(getPrecision(step))));
   };
 
+  // Relative vertical dragging avoids the discontinuity at the bottom of a dial.
+  // Touch users can scroll normally and use the accessible +/- controls below.
   const updateFromPointer = (event: PointerEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const radians = Math.atan2(event.clientY - centerY, event.clientX - centerX);
-    const degrees = radians * (180 / Math.PI);
-    const normalized = clamp((degrees + 225) / 270, 0, 1);
-    commit(min + normalized * (max - min));
+    const origin = dragOrigin.current;
+    if (!origin) return;
+    commit(origin.value + ((origin.y - event.clientY) / 160) * (max - min));
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (disabled) {
-      return;
-    }
-
+    if (disabled || event.pointerType === 'touch' || event.button !== 0) return;
+    dragOrigin.current = { y: event.clientY, value: safeValue };
     event.currentTarget.setPointerCapture(event.pointerId);
     setDragging(true);
-    updateFromPointer(event);
+  };
+
+  const endDrag = () => {
+    dragOrigin.current = null;
+    setDragging(false);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -94,7 +95,7 @@ function KnobControl({
   };
 
   return (
-    <label className={`knob-control ${className} ${disabled ? 'is-disabled' : ''}`}>
+    <div className={`knob-control ${className} ${disabled ? 'is-disabled' : ''}`}>
       <span>{label}</span>
       <div
         className={`knob-face ${dragging ? 'is-dragging' : ''}`}
@@ -108,8 +109,9 @@ function KnobControl({
         style={{ '--knob-angle': `${angle}deg`, '--knob-fill': `${ratio * 100}%` } as CSSProperties}
         onPointerDown={handlePointerDown}
         onPointerMove={(event) => dragging && updateFromPointer(event)}
-        onPointerUp={() => setDragging(false)}
-        onPointerCancel={() => setDragging(false)}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onLostPointerCapture={endDrag}
         onKeyDown={handleKeyDown}
       >
         <i aria-hidden="true" />
@@ -118,7 +120,11 @@ function KnobControl({
         {formattedValue}
         {suffix}
       </strong>
-    </label>
+      <div className="knob-adjust" aria-label={`${label} 값 조절`}>
+        <button type="button" disabled={disabled || safeValue <= min} aria-label={`${label} 줄이기`} onClick={() => commit(safeValue - step)}>−</button>
+        <button type="button" disabled={disabled || safeValue >= max} aria-label={`${label} 늘리기`} onClick={() => commit(safeValue + step)}>+</button>
+      </div>
+    </div>
   );
 }
 

@@ -1,150 +1,92 @@
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
+import processorUrl from '../worklets/compressor-processor.ts?worker&url';
 
 type ReductionListener = (reductionDb: number) => void;
-
 const reductionListeners = new Map<string, Set<ReductionListener>>();
-
+const loadedContexts = new WeakMap<AudioContext, Promise<void>>();
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const asNumber = (value: PedalParamValue, fallback = 0) =>
+  typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+const percentToUnit = (value: number) => clamp(value, 0, 100) / 100;
 
-const asNumber = (value: PedalParamValue, fallback = 0) => (typeof value === 'number' ? value : fallback);
-
-const dbToGain = (db: number) => 10 ** (db / 20);
-
-const percentToUnit = (value: number, fallback = 0) =>
-  clamp(Number.isFinite(value) ? value : fallback, 0, 100) / 100;
-
-const smoothParam = (context: AudioContext, param: AudioParam, value: number, seconds = 0.015) => {
-  const now = context.currentTime;
-  param.cancelScheduledValues(now);
-  param.setTargetAtTime(value, now, seconds);
-};
-
+export function prepareCompressor(context: AudioContext): Promise<void> {
+  let promise = loadedContexts.get(context);
+  if (!promise) {
+    if (!context.audioWorklet) return Promise.reject(new Error('이 브라우저는 컴프레서를 지원하지 않습니다. HTTPS의 최신 브라우저를 사용해 주세요.'));
+    promise = context.audioWorklet.addModule(processorUrl);
+    loadedContexts.set(context, promise);
+  }
+  return promise;
+}
 export const subscribeCompressorReduction = (id: string, listener: ReductionListener) => {
   const listeners = reductionListeners.get(id) ?? new Set<ReductionListener>();
   listeners.add(listener);
   reductionListeners.set(id, listeners);
-
   return () => {
     listeners.delete(listener);
-
-    if (listeners.size === 0) {
-      reductionListeners.delete(id);
-    }
+    if (listeners.size === 0) reductionListeners.delete(id);
   };
 };
 
 export class CompressorEffect extends BaseEffect {
-  private readonly compressor: DynamicsCompressorNode;
+  private readonly compressor: AudioWorkletNode;
   private readonly makeupGain: GainNode;
   private threshold = -28;
   private ratio = 3.5;
-  private attack = 0.012;
-  private release = 0.22;
-  private knee = 18;
   private sustain = 42;
   private level = 72;
-  private reductionRaf = 0;
+  private isBypassed = false;
 
   constructor(context: AudioContext, id: string) {
     super(context, id, 'compressor');
-    this.compressor = context.createDynamicsCompressor();
+    this.compressor = new AudioWorkletNode(context, 'compressor-processor', {
+      numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2],
+    });
     this.makeupGain = context.createGain();
-
     this.connectWet(this.compressor, this.makeupGain);
     this.setMix(0.78);
-    this.applyAll(false);
-    this.startReductionMeter();
-
-    this.paramHandlers.set('threshold', (value) => {
-      this.threshold = clamp(asNumber(value, -28), -60, -10);
-      this.applyCompression();
-    });
-    this.paramHandlers.set('thresholdDb', (value) => {
-      this.threshold = clamp(asNumber(value, -28), -60, -10);
-      this.applyCompression();
-    });
-    this.paramHandlers.set('ratio', (value) => {
-      this.ratio = clamp(asNumber(value, 3.5), 1, 20);
-      this.applyCompression();
-    });
-    this.paramHandlers.set('attack', (value) => {
-      this.attack = clamp(asNumber(value, 0.012), 0.001, 0.1);
-      smoothParam(context, this.compressor.attack, this.attack, 0.01);
-    });
-    this.paramHandlers.set('release', (value) => {
-      this.release = clamp(asNumber(value, 0.22), 0.05, 1);
-      smoothParam(context, this.compressor.release, this.release, 0.018);
-    });
-    this.paramHandlers.set('knee', (value) => {
-      this.knee = clamp(asNumber(value, 18), 0, 40);
-      smoothParam(context, this.compressor.knee, this.knee, 0.018);
-    });
-    this.paramHandlers.set('sustain', (value) => {
-      this.sustain = clamp(asNumber(value, 42), 0, 100);
-      this.applyCompression();
-      this.applyLevel();
-    });
-    this.paramHandlers.set('mix', (value) => this.setMix(percentToUnit(asNumber(value, 78), 78)));
-    this.paramHandlers.set('level', (value) => {
-      this.level = clamp(asNumber(value, 72), 0, 100);
-      this.applyLevel();
-    });
-    this.paramHandlers.set('makeupGainDb', (value) => {
-      const db = clamp(asNumber(value, 0), -24, 18);
-      smoothParam(context, this.makeupGain.gain, dbToGain(db), 0.018);
-    });
+    this.applyCompression();
+    this.applyLevel();
+    this.compressor.port.onmessage = ({ data }: MessageEvent) => {
+      if (data?.type === 'reduction' && typeof data.value === 'number') {
+        reductionListeners.get(this.id)?.forEach((listener) => listener(this.isBypassed ? 0 : data.value));
+      }
+    };
+    this.paramHandlers.set('threshold', (v) => { this.threshold = clamp(asNumber(v, -28), -60, -10); this.applyCompression(); });
+    this.paramHandlers.set('thresholdDb', (v) => { this.threshold = clamp(asNumber(v, -28), -60, -10); this.applyCompression(); });
+    this.paramHandlers.set('ratio', (v) => { this.ratio = clamp(asNumber(v, 3.5), 1, 20); this.applyCompression(); });
+    this.paramHandlers.set('attack', (v) => this.send('attack', clamp(asNumber(v, 0.012), 0.001, 0.1)));
+    this.paramHandlers.set('release', (v) => this.send('release', clamp(asNumber(v, 0.22), 0.05, 1)));
+    this.paramHandlers.set('knee', (v) => this.send('knee', clamp(asNumber(v, 18), 0, 40)));
+    this.paramHandlers.set('sustain', (v) => { this.sustain = clamp(asNumber(v, 42), 0, 100); this.applyCompression(); this.applyLevel(); });
+    this.paramHandlers.set('mix', (v) => this.setMix(percentToUnit(asNumber(v, 78))));
+    this.paramHandlers.set('level', (v) => { this.level = clamp(asNumber(v, 72), 0, 100); this.applyLevel(); });
+    this.paramHandlers.set('makeupGainDb', (v) => this.setGainDb(clamp(asNumber(v, 0), -24, 4)));
   }
-
+  override setBypass(bypassed: boolean) {
+    this.isBypassed = bypassed;
+    super.setBypass(bypassed);
+    if (bypassed) reductionListeners.get(this.id)?.forEach((listener) => listener(0));
+  }
   override dispose() {
-    window.cancelAnimationFrame(this.reductionRaf);
-    reductionListeners.delete(this.id);
+    this.compressor.port.onmessage = null;
+    this.compressor.port.close();
+    reductionListeners.get(this.id)?.forEach((listener) => listener(0));
     super.dispose();
   }
-
-  private applyAll(smooth = true) {
-    this.applyCompression(smooth);
-    this.applyLevel(smooth);
-    this.setAudioParam(this.compressor.attack, this.attack, smooth ? 0.01 : 0);
-    this.setAudioParam(this.compressor.release, this.release, smooth ? 0.018 : 0);
-    this.setAudioParam(this.compressor.knee, this.knee, smooth ? 0.018 : 0);
+  private send(name: string, value: number) { this.compressor.port.postMessage({ name, value }); }
+  private applyCompression() {
+    const sustain = percentToUnit(this.sustain);
+    this.send('threshold', clamp(this.threshold - sustain * 24, -60, -10));
+    this.send('ratio', clamp(this.ratio + sustain * 10.5, 1, 20));
   }
-
-  private applyCompression(smooth = true) {
-    const sustainAmount = percentToUnit(this.sustain, 42);
-    const effectiveThreshold = clamp(this.threshold - sustainAmount * 24, -60, -10);
-    const effectiveRatio = clamp(this.ratio + sustainAmount * 10.5, 1, 20);
-
-    this.setAudioParam(this.compressor.threshold, effectiveThreshold, smooth ? 0.018 : 0);
-    this.setAudioParam(this.compressor.ratio, effectiveRatio, smooth ? 0.018 : 0);
+  private applyLevel() {
+    this.setGainDb(clamp(-12 + percentToUnit(this.level) * 14 + percentToUnit(this.sustain) * 2, -24, 4));
   }
-
-  private applyLevel(smooth = true) {
-    const sustainAmount = percentToUnit(this.sustain, 42);
-    const levelAmount = percentToUnit(this.level, 72);
-    const makeupDb = -10 + levelAmount * 20 + sustainAmount * 5.5;
-    this.setAudioParam(this.makeupGain.gain, dbToGain(makeupDb), smooth ? 0.018 : 0);
-  }
-
-  private setAudioParam(param: AudioParam, value: number, seconds: number) {
-    if (seconds <= 0) {
-      param.setValueAtTime(value, this.context.currentTime);
-      return;
-    }
-
-    smoothParam(this.context, param, value, seconds);
-  }
-
-  private startReductionMeter() {
-    const tick = () => {
-      const listeners = reductionListeners.get(this.id);
-      if (listeners?.size) {
-        listeners.forEach((listener) => listener(this.compressor.reduction));
-      }
-
-      this.reductionRaf = window.requestAnimationFrame(tick);
-    };
-
-    this.reductionRaf = window.requestAnimationFrame(tick);
+  private setGainDb(db: number) {
+    const now = this.context.currentTime;
+    this.makeupGain.gain.cancelScheduledValues(now);
+    this.makeupGain.gain.setTargetAtTime(10 ** (db / 20), now, 0.018);
   }
 }

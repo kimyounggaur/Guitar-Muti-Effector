@@ -21,7 +21,7 @@ function PresetCard({ preset, active, onLoad, onRename, onDelete, onDuplicate }:
   };
 
   const handleDelete = () => {
-    const confirmed = window.confirm(`Delete preset "${preset.name}"?`);
+    const confirmed = window.confirm(`프리셋 "${preset.name}"을 삭제하시겠습니까?`);
     if (confirmed) {
       onDelete(preset.id);
     }
@@ -45,7 +45,7 @@ function PresetCard({ preset, active, onLoad, onRename, onDelete, onDuplicate }:
                 setIsEditing(false);
               }
             }}
-            aria-label="Preset name"
+            aria-label="프리셋 이름"
           />
         ) : (
           <button type="button" className="preset-title-button" onClick={() => onLoad(preset)}>
@@ -55,27 +55,27 @@ function PresetCard({ preset, active, onLoad, onRename, onDelete, onDuplicate }:
             </span>
           </button>
         )}
-        <small>{preset.description || `${preset.pedals.length} pedals · ${preset.tempoBpm} BPM`}</small>
+        <small>{preset.description || `${preset.pedals.length}개 페달 · ${preset.tempoBpm} BPM`}</small>
       </div>
 
       <div className="preset-actions">
         <button type="button" onClick={() => onLoad(preset)}>
-          Load
+          불러오기
         </button>
         {isEditing ? (
           <button type="button" onClick={handleRename}>
-            Save
+            저장
           </button>
         ) : (
-          <button type="button" onClick={() => setIsEditing(true)}>
-            Rename
+          <button type="button" disabled={isFactory} title={isFactory ? '공장 프리셋은 복사 후 이름을 변경할 수 있습니다.' : undefined} onClick={() => setIsEditing(true)}>
+            이름 변경
           </button>
         )}
         <button type="button" onClick={() => onDuplicate(preset.id)}>
-          Copy
+          복사
         </button>
         <button type="button" className="is-danger" onClick={handleDelete} disabled={isFactory}>
-          Delete
+          삭제
         </button>
       </div>
     </article>

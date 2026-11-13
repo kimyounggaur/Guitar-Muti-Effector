@@ -15,12 +15,15 @@ const CHANNELS = 2;
 
 class LooperProcessor extends AudioWorkletProcessor {
   private readonly maxSamples = Math.floor(sampleRate * MAX_SECONDS);
-  private readonly buffer = new Float32Array(this.maxSamples * CHANNELS);
-  private undoBuffer: Float32Array | null = null;
+  // Allocate in small chunks only as recording grows, rather than reserving 180 seconds.
+  private readonly chunkFrames = Math.floor(sampleRate * 2);
+  private chunks: Float32Array[] = [];
+  private undoBuffer: Float32Array[] | null = null;
   private mode: LooperMode = 'idle';
   private loopLength = 0;
   private position = 0;
-  private level = 0.85;
+  private bpm = 120;
+  private latencySamples = 0;
   private overdubLevel = 0.85;
   private feedback = 1;
   private quantize: QuantizeMode = 'off';
@@ -64,14 +67,19 @@ class LooperProcessor extends AudioWorkletProcessor {
       } else if (this.hasLoop() && (this.mode === 'playing' || this.mode === 'overdubbing')) {
         const readPosition = this.reverse ? this.loopLength - 1 - this.position : this.position;
         const sample = this.readInterpolated(readPosition);
-        loopL = sample.left * this.level;
-        loopR = sample.right * this.level;
+        // Crossfade the last few milliseconds into the first sample to soften the seam.
+        const fadeFrames = Math.min(Math.floor(sampleRate * 0.005), Math.floor(this.loopLength / 4));
+        const fade = fadeFrames > 0 ? Math.max(0, (this.position - (this.loopLength - fadeFrames)) / fadeFrames) : 0;
+        const seamPosition = this.reverse ? this.loopLength - 1 : 0;
+        const seam = fade > 0 ? this.readInterpolated(seamPosition) : sample;
+        loopL = lerp(sample.left, seam.left, fade);
+        loopR = lerp(sample.right, seam.right, fade);
 
         if (this.mode === 'overdubbing') {
-          const writeIndex = this.wrapIndex(Math.floor(readPosition));
-          const offset = writeIndex * CHANNELS;
-          this.buffer[offset] = this.buffer[offset] * this.feedback + inL * this.overdubLevel;
-          this.buffer[offset + 1] = this.buffer[offset + 1] * this.feedback + inR * this.overdubLevel;
+          const direction = this.reverse ? -1 : 1;
+          const writeIndex = this.wrapIndex(Math.floor(readPosition - direction * this.latencySamples * (this.halfSpeed ? 0.5 : 1)));
+          const old = this.readFrame(writeIndex);
+          this.writeFrame(writeIndex, old.left * this.feedback + inL * this.overdubLevel, old.right * this.feedback + inR * this.overdubLevel);
         }
 
         this.advancePosition();
@@ -110,8 +118,11 @@ class LooperProcessor extends AudioWorkletProcessor {
   }
 
   private setParam(name: string, value: unknown) {
-    if (name === 'level') {
-      this.level = percentToUnit(value, 85);
+    if (name === 'bpm' && typeof value === 'number' && Number.isFinite(value)) {
+      this.bpm = Math.max(40, Math.min(240, value));
+    }
+    if (name === 'latencyMs' && typeof value === 'number' && Number.isFinite(value)) {
+      this.latencySamples = Math.round(Math.max(0, Math.min(500, value)) * sampleRate / 1000);
     }
 
     if (name === 'overdubLevel') {
@@ -197,7 +208,7 @@ class LooperProcessor extends AudioWorkletProcessor {
       return;
     }
 
-    this.undoBuffer = this.buffer.slice(0, this.loopLength * CHANNELS);
+    this.undoBuffer = this.chunks.map((chunk) => chunk.slice());
     this.hasUndo = true;
     this.mode = 'overdubbing';
   }
@@ -215,7 +226,7 @@ class LooperProcessor extends AudioWorkletProcessor {
   }
 
   private clear(report = true) {
-    this.buffer.fill(0, 0, Math.max(0, this.loopLength * CHANNELS));
+    this.chunks = [];
     this.undoBuffer = null;
     this.hasUndo = false;
     this.loopLength = 0;
@@ -232,7 +243,7 @@ class LooperProcessor extends AudioWorkletProcessor {
       return;
     }
 
-    this.buffer.set(this.undoBuffer, 0);
+    this.chunks = this.undoBuffer;
     this.undoBuffer = null;
     this.hasUndo = false;
     this.mode = 'playing';
@@ -255,26 +266,33 @@ class LooperProcessor extends AudioWorkletProcessor {
     }
 
     const bars = this.quantize === '1bar' ? 1 : this.quantize === '2bar' ? 2 : 4;
-    const barSamples = sampleRate * 2;
-    return Math.min(this.maxSamples, Math.max(1, Math.round(length / (barSamples * bars)) * barSamples * bars));
+    const quantum = Math.round(sampleRate * 60 / this.bpm * 4 * bars);
+    // Never shrink a short take to one sample or pad it with unheard silence.
+    if (length < quantum) return length;
+    return Math.max(quantum, Math.floor(length / quantum) * quantum);
   }
 
   private writeFrame(index: number, left: number, right: number) {
-    const offset = index * CHANNELS;
-    this.buffer[offset] = left;
-    this.buffer[offset + 1] = right;
+    const chunkIndex = Math.floor(index / this.chunkFrames);
+    while (!this.chunks[chunkIndex]) this.chunks.push(new Float32Array(this.chunkFrames * CHANNELS));
+    const offset = (index % this.chunkFrames) * CHANNELS;
+    this.chunks[chunkIndex][offset] = left;
+    this.chunks[chunkIndex][offset + 1] = right;
   }
 
   private readInterpolated(position: number) {
     const baseIndex = this.wrapIndex(Math.floor(position));
     const nextIndex = this.wrapIndex(baseIndex + 1);
     const fraction = position - Math.floor(position);
-    const baseOffset = baseIndex * CHANNELS;
-    const nextOffset = nextIndex * CHANNELS;
-    return {
-      left: lerp(this.buffer[baseOffset], this.buffer[nextOffset], fraction),
-      right: lerp(this.buffer[baseOffset + 1], this.buffer[nextOffset + 1], fraction),
-    };
+    const base = this.readFrame(baseIndex);
+    const next = this.readFrame(nextIndex);
+    return { left: lerp(base.left, next.left, fraction), right: lerp(base.right, next.right, fraction) };
+  }
+
+  private readFrame(index: number) {
+    const chunk = this.chunks[Math.floor(index / this.chunkFrames)];
+    const offset = (index % this.chunkFrames) * CHANNELS;
+    return { left: chunk?.[offset] ?? 0, right: chunk?.[offset + 1] ?? 0 };
   }
 
   private advancePosition() {

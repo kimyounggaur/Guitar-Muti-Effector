@@ -23,9 +23,13 @@ import { useAudioStore } from './store/audioStore';
 import { usePedalStore } from './store/pedalStore';
 import { PedalboardPreset, usePresetStore } from './store/presetStore';
 import { useTempoStore } from './store/tempoStore';
+import { readLocal, writeLocal } from './store/safeStorage';
+
+const SESSION_KEY = 'guitar-multi-effector-session-v2';
 
 function App() {
   const audioEngineRef = useRef(new AudioEngine());
+  const audioOperationRef = useRef(0);
   const [activePresetCategory, setActivePresetCategory] = useState<StompPresetCategory | null>(null);
   const [stompSwitchMode, setStompSwitchMode] = useState<StompSwitchMode>('presets');
   const isAudioReady = useAudioStore((state) => state.isAudioReady);
@@ -36,8 +40,6 @@ function App() {
   const latencyHint = useAudioStore((state) => state.latencyHint);
   const errorMessage = useAudioStore((state) => state.errorMessage);
   const masterVolume = useAudioStore((state) => state.masterVolume);
-  const inputMeter = useAudioStore((state) => state.inputMeter);
-  const outputMeter = useAudioStore((state) => state.outputMeter);
   const presets = usePresetStore((state) => state.presets);
   const activePresetId = usePresetStore((state) => state.activePresetId);
   const currentPresetName = usePresetStore((state) => state.currentPresetName);
@@ -58,15 +60,20 @@ function App() {
   const setMeters = useAudioStore((state) => state.setMeters);
   const resetAudioState = useAudioStore((state) => state.resetAudioState);
   const setSelectedPedal = usePedalStore((state) => state.setSelectedPedal);
-  const loadPedalsFromStorage = usePedalStore((state) => state.loadPedalsFromStorage);
   const selectedPedal = useMemo(
     () => pedals.find((pedal) => pedal.id === selectedPedalId) ?? pedals[0] ?? null,
     [pedals, selectedPedalId],
   );
   const selectedInputName = useMemo(() => {
     const selectedDevice = inputDevices.find((device) => device.deviceId === selectedDeviceId);
-    return selectedDevice?.label || (selectedDeviceId ? 'Selected input' : 'Default input');
+    return selectedDevice?.label || (selectedDeviceId ? '선택한 입력' : '기본 입력');
   }, [inputDevices, selectedDeviceId]);
+  const patchAddress = useMemo(() => {
+    const factoryIndex = presets.filter((preset) => preset.origin === 'factory').findIndex((preset) => preset.id === activePresetId);
+    return factoryIndex >= 0
+      ? { bank: 'A', patch: String(factoryIndex + 1).padStart(3, '0') }
+      : { bank: activePresetId ? 'USER' : 'EDIT', patch: '—' };
+  }, [activePresetId, presets]);
   const presetCategoryCounts = useMemo(
     () =>
       STOMP_PRESET_CATEGORIES.reduce<Record<string, number>>((counts, category) => {
@@ -88,12 +95,59 @@ function App() {
   );
 
   useEffect(() => {
+    const onStorageError = () => setErrorMessage('브라우저 저장 공간을 사용할 수 없습니다. 현재 설정은 새로고침하면 사라질 수 있습니다.');
+    window.addEventListener('pedalboard-storage-error', onStorageError);
     hydratePresets();
-  }, [hydratePresets]);
-
-  useEffect(() => {
-    loadPedalsFromStorage();
-  }, [loadPedalsFromStorage]);
+    let restored = false;
+    try {
+      const session = JSON.parse(readLocal(SESSION_KEY) || 'null');
+      if (session && Array.isArray(session.pedals)) {
+        usePedalStore.getState().setPedals(session.pedals);
+        if (typeof session.masterVolume === 'number' && Number.isFinite(session.masterVolume)) {
+          useAudioStore.getState().setMasterVolume(Math.min(1, Math.max(0, session.masterVolume)));
+        }
+        if (typeof session.tempoBpm === 'number' && Number.isFinite(session.tempoBpm)) useTempoStore.getState().setBpm(session.tempoBpm);
+        const existing = usePresetStore.getState().presets.find((p) => p.id === session.activePresetId);
+        useAudioStore.getState().setPresetTrimDb(typeof session.outputTrimDb === 'number' ? session.outputTrimDb : existing?.outputTrimDb ?? 0);
+        usePresetStore.getState().restoreSelection(existing?.id ?? null, existing?.name ?? '사용자 설정');
+        restored = true;
+      }
+    } catch { /* Invalid saved session falls back to the factory patch. */ }
+    if (!restored) {
+      // Preserve boards from the previous version without falsely labeling them as a factory patch.
+      try {
+        const legacyPedals = JSON.parse(readLocal('guitar-multi-effector-pedals-v1') || 'null');
+        if (Array.isArray(legacyPedals)) {
+          usePedalStore.getState().setPedals(legacyPedals);
+          usePresetStore.getState().restoreSelection(null, '이전 작업 설정');
+          restored = true;
+        }
+      } catch { /* Ignore invalid legacy data. */ }
+    }
+    if (!restored) {
+      const first = usePresetStore.getState().presets[0];
+      if (first) {
+        usePedalStore.getState().setPedals(first.pedals);
+        useAudioStore.getState().setPresetTrimDb(first.outputTrimDb);
+        useTempoStore.getState().setBpm(first.tempoBpm);
+      }
+    }
+    let timer = 0;
+    const save = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const audio = useAudioStore.getState();
+        const preset = usePresetStore.getState();
+        writeLocal(SESSION_KEY, JSON.stringify({ pedals: usePedalStore.getState().pedals, masterVolume: audio.masterVolume, outputTrimDb: audio.presetTrimDb, tempoBpm: useTempoStore.getState().bpm, activePresetId: preset.activePresetId }));
+      }, 300);
+    };
+    writeLocal(SESSION_KEY, JSON.stringify({ pedals: usePedalStore.getState().pedals, masterVolume: useAudioStore.getState().masterVolume, outputTrimDb: useAudioStore.getState().presetTrimDb, tempoBpm: useTempoStore.getState().bpm, activePresetId: usePresetStore.getState().activePresetId }));
+    const unsubPedals = usePedalStore.subscribe((state, previous) => { if (state.pedals !== previous.pedals) save(); });
+    const unsubAudio = useAudioStore.subscribe((state, previous) => { if (state.masterVolume !== previous.masterVolume || state.presetTrimDb !== previous.presetTrimDb) save(); });
+    const unsubTempo = useTempoStore.subscribe((state, previous) => { if (state.bpm !== previous.bpm) save(); });
+    const unsubPreset = usePresetStore.subscribe((state, previous) => { if (state.activePresetId !== previous.activePresetId) save(); });
+    return () => { window.clearTimeout(timer); unsubPedals(); unsubAudio(); unsubTempo(); unsubPreset(); window.removeEventListener('pedalboard-storage-error', onStorageError); };
+  }, [hydratePresets, setErrorMessage]);
 
   useEffect(() => {
     if (!selectedPedalId && pedals[0]) {
@@ -107,17 +161,36 @@ function App() {
   }, [setErrorMessage]);
 
   useEffect(() => {
-    return useTempoStore.subscribe((state) => {
-      const syncedDelayPedals = usePedalStore
-        .getState()
-        .pedals.filter(
-          (pedal) => (pedal.type === 'delay' || pedal.type === 'modulation') && pedal.params.sync === true,
-        );
+    const engine = audioEngineRef.current;
+    engine.setInputEndedHandler(() => {
+      ++audioOperationRef.current;
+      resetAudioState();
+      setMasterVolume(0);
+      setErrorMessage('입력 장치 연결이 끊겨 오디오를 정지했습니다. 장치를 확인하고 다시 연결해 주세요.');
+    });
+    return () => engine.setInputEndedHandler(null);
+  }, [resetAudioState, setErrorMessage, setMasterVolume]);
 
-      syncedDelayPedals.forEach((pedal) => {
-        usePedalStore.getState().updatePedalParam(pedal.id, 'bpm', state.bpm);
-        audioEngineRef.current.setPedalParam(pedal.id, 'bpm', state.bpm);
+  useEffect(() => {
+    const syncTempo = (bpm: number) => {
+      const syncedPedals = usePedalStore.getState().pedals.filter(
+        (pedal) => pedal.type === 'rhythm' || pedal.type === 'looper' || ((pedal.type === 'delay' || pedal.type === 'modulation') && pedal.params.sync === true),
+      );
+      syncedPedals.forEach((pedal) => {
+        if (pedal.params.bpm !== bpm) usePedalStore.getState().updatePedalParam(pedal.id, 'bpm', bpm);
+        audioEngineRef.current.setPedalParam(pedal.id, 'bpm', bpm);
       });
+    };
+    syncTempo(useTempoStore.getState().bpm);
+    return useTempoStore.subscribe((state, previous) => { if (state.bpm !== previous.bpm) syncTempo(state.bpm); });
+  }, []);
+
+  useEffect(() => {
+    audioEngineRef.current.setPresetTrimDb(useAudioStore.getState().presetTrimDb);
+    audioEngineRef.current.setInputChannel(useAudioStore.getState().inputChannel);
+    return useAudioStore.subscribe((state, previous) => {
+      if (state.presetTrimDb !== previous.presetTrimDb) audioEngineRef.current.setPresetTrimDb(state.presetTrimDb);
+      if (state.inputChannel !== previous.inputChannel) audioEngineRef.current.setInputChannel(state.inputChannel);
     });
   }, []);
 
@@ -127,9 +200,13 @@ function App() {
     }
 
     let frameId = 0;
+    let lastUpdate = 0;
 
-    const updateMeters = () => {
-      setMeters(audioEngineRef.current.readInputMeter(), audioEngineRef.current.readOutputMeter());
+    const updateMeters = (time: number) => {
+      if (document.visibilityState === 'visible' && time - lastUpdate >= 33) {
+        lastUpdate = time;
+        setMeters(audioEngineRef.current.readInputMeter(), audioEngineRef.current.readOutputMeter());
+      }
       frameId = window.requestAnimationFrame(updateMeters);
     };
 
@@ -144,28 +221,31 @@ function App() {
 
   const handleConnect = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
-      setErrorMessage('This browser does not support audio input permissions.');
+      setErrorMessage('이 브라우저는 오디오 입력을 지원하지 않습니다. HTTPS 주소에서 최신 Chrome 또는 Safari로 다시 열어 주세요.');
       return;
     }
 
+    const operation = ++audioOperationRef.current;
     setIsConnecting(true);
     setErrorMessage('');
 
     try {
-      const state = await audioEngineRef.current.connect(selectedDeviceId, masterVolume);
+      const state = await audioEngineRef.current.connect(selectedDeviceId, 0);
+      if (operation !== audioOperationRef.current) return;
+      audioEngineRef.current.setMasterVolume(useAudioStore.getState().masterVolume);
       setSampleRate(state.sampleRate);
       setLatencyHint(state.latencyHint);
       setAudioReady(true);
       audioEngineRef.current.rebuildChain(usePedalStore.getState().pedals);
       await refreshInputDevices();
     } catch (error) {
+      if (operation !== audioOperationRef.current) return;
       setAudioReady(false);
       setErrorMessage(error instanceof Error ? error.message : 'Could not connect guitar input.');
     } finally {
-      setIsConnecting(false);
+      if (operation === audioOperationRef.current) setIsConnecting(false);
     }
   }, [
-    masterVolume,
     refreshInputDevices,
     selectedDeviceId,
     setAudioReady,
@@ -183,21 +263,24 @@ function App() {
         return;
       }
 
+      const operation = ++audioOperationRef.current;
       setIsConnecting(true);
       setErrorMessage('');
 
       try {
-        const currentVolume = useAudioStore.getState().masterVolume;
-        const state = await audioEngineRef.current.switchDevice(deviceId, currentVolume);
+        const state = await audioEngineRef.current.switchDevice(deviceId, 0);
+        if (operation !== audioOperationRef.current) return;
+        audioEngineRef.current.setMasterVolume(useAudioStore.getState().masterVolume);
         setSampleRate(state.sampleRate);
         setLatencyHint(state.latencyHint);
         audioEngineRef.current.rebuildChain(usePedalStore.getState().pedals);
         await refreshInputDevices();
       } catch (error) {
+        if (operation !== audioOperationRef.current) return;
         setAudioReady(false);
         setErrorMessage(error instanceof Error ? error.message : 'Could not switch input device.');
       } finally {
-        setIsConnecting(false);
+        if (operation === audioOperationRef.current) setIsConnecting(false);
       }
     },
     [
@@ -219,13 +302,23 @@ function App() {
     [setMasterVolume],
   );
 
-  const handlePanic = useCallback(() => {
+  const handlePanic = useCallback(async () => {
+    const operation = ++audioOperationRef.current;
+    setIsConnecting(true);
     setMasterVolume(0);
+    audioEngineRef.current.setMasterVolume(0);
     audioEngineRef.current.panicDisconnect();
-  }, [setMasterVolume]);
+    resetAudioState();
+    setIsConnecting(true);
+    try { await audioEngineRef.current.stop(); }
+    catch { setErrorMessage('오디오를 정지하는 중 오류가 발생했습니다. 입력 장치를 확인해 주세요.'); }
+    finally { if (operation === audioOperationRef.current) setIsConnecting(false); }
+  }, [resetAudioState, setErrorMessage, setIsConnecting, setMasterVolume]);
 
   const handleTunerQuick = useCallback(() => {
     usePedalStore.getState().setSelectedPedal('tuner');
+    setActivePresetCategory(null);
+    window.requestAnimationFrame(() => document.querySelector('.tuner-detail-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   }, []);
 
   const handleTapTempo = useCallback(() => {
@@ -252,7 +345,8 @@ function App() {
   );
 
   const handlePedalBypass = useCallback((pedalId: string, bypassed: boolean) => {
-    audioEngineRef.current.setPedalBypass(pedalId, bypassed);
+    const pedal = usePedalStore.getState().pedals.find((item) => item.id === pedalId);
+    audioEngineRef.current.setPedalBypass(pedalId, bypassed || !pedal?.enabled);
   }, []);
 
   const handlePedalParam = useCallback((pedalId: string, paramName: string, value: PedalParamValue) => {
@@ -289,25 +383,29 @@ function App() {
 
   const handlePrepareUploadedAudio = useCallback(
     async (audioElement: HTMLAudioElement) => {
+      const operation = ++audioOperationRef.current;
       setIsConnecting(true);
       setErrorMessage('');
 
       try {
         const state = await audioEngineRef.current.connectUploadedAudio(
           audioElement,
-          useAudioStore.getState().masterVolume,
+          0,
           usePedalStore.getState().pedals,
         );
+        if (operation !== audioOperationRef.current) throw new DOMException('오디오 연결이 취소되었습니다.', 'AbortError');
+        audioEngineRef.current.setMasterVolume(useAudioStore.getState().masterVolume);
         setSampleRate(state.sampleRate);
         setLatencyHint(state.latencyHint);
         setAudioReady(true);
       } catch (error) {
+        if (operation !== audioOperationRef.current) throw error;
         const message = error instanceof Error ? error.message : 'Could not route uploaded audio through effects.';
         setAudioReady(false);
         setErrorMessage(message);
         throw new Error(message);
       } finally {
-        setIsConnecting(false);
+        if (operation === audioOperationRef.current) setIsConnecting(false);
       }
     },
     [setAudioReady, setErrorMessage, setIsConnecting, setLatencyHint, setSampleRate],
@@ -315,17 +413,21 @@ function App() {
 
   const handleLoadPreset = useCallback(
     (preset: PedalboardPreset) => {
+      useAudioStore.getState().setPresetTrimDb(preset.outputTrimDb);
       usePedalStore.getState().setPedals(preset.pedals);
       useTempoStore.getState().setBpm(preset.tempoBpm);
-      setMasterVolume(preset.masterVolume);
-      audioEngineRef.current.setMasterVolume(preset.masterVolume);
+      usePedalStore.getState().pedals.forEach((pedal) => {
+        if (pedal.type === 'rhythm' || pedal.type === 'looper' || ((pedal.type === 'delay' || pedal.type === 'modulation') && pedal.params.sync === true)) {
+          usePedalStore.getState().updatePedalParam(pedal.id, 'bpm', preset.tempoBpm);
+        }
+      });
 
       window.requestAnimationFrame(() => {
         const nextPedals = usePedalStore.getState().pedals;
         handleChainRebuild(nextPedals);
       });
     },
-    [handleChainRebuild, setMasterVolume],
+    [handleChainRebuild],
   );
 
   const handleLoadPresetFromLcd = useCallback(
@@ -339,32 +441,46 @@ function App() {
   );
 
   const handleStop = useCallback(async () => {
+    const operation = ++audioOperationRef.current;
     setIsConnecting(true);
     setErrorMessage('');
 
     try {
       await audioEngineRef.current.stop();
+      if (operation !== audioOperationRef.current) return;
       resetAudioState();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Could not stop audio.');
     } finally {
-      setIsConnecting(false);
+      if (operation === audioOperationRef.current) setIsConnecting(false);
     }
   }, [resetAudioState, setErrorMessage, setIsConnecting]);
 
   return (
     <main className="hardware-app">
+      <div className="hardware-support-panels hardware-primary-controls">
+        <ConnectGuitarPanel
+          isAudioReady={isAudioReady}
+          isConnecting={isConnecting}
+          selectedDeviceId={selectedDeviceId}
+          inputDevices={inputDevices}
+          errorMessage={errorMessage}
+          onConnect={handleConnect}
+          onStop={handleStop}
+          onDeviceChange={handleDeviceChange}
+          onOutputDeviceChange={(id) => audioEngineRef.current.setOutputDevice(id)}
+        />
+        <button type="button" className="panic-button" onClick={handlePanic}>긴급 음소거 · PANIC</button>
+      </div>
       <HardwareFrame
-        leftPanel={<LeftModePanel />}
+        leftPanel={<LeftModePanel onOpenBoard={() => setActivePresetCategory(null)} />}
         centralScreen={
           <CentralScreen
             patchName={currentPresetName}
-            bank="A"
-            patch="001"
+            bank={patchAddress.bank}
+            patch={patchAddress.patch}
             bpm={tempoBpm}
             isAudioReady={isAudioReady}
-            inputMeter={inputMeter}
-            outputMeter={outputMeter}
             selectedPedal={selectedPedal}
             effectChain={
               <EffectChainDisplay
@@ -436,22 +552,13 @@ function App() {
       />
 
       <div className="hardware-support-panels">
-        <ConnectGuitarPanel
-          isAudioReady={isAudioReady}
-          isConnecting={isConnecting}
-          selectedDeviceId={selectedDeviceId}
-          inputDevices={inputDevices}
-          errorMessage={errorMessage}
-          onConnect={handleConnect}
-          onStop={handleStop}
-          onDeviceChange={handleDeviceChange}
-        />
-        <AudioFilePlayerPanel isEffectChainReady={isAudioReady} onPreparePlayback={handlePrepareUploadedAudio} />
+
         <PedalDetailPanel
           onPedalToggled={handleChainRebuild}
           onPedalBypassChanged={handlePedalBypass}
           onPedalParamChanged={handlePedalParam}
         />
+        <AudioFilePlayerPanel isEffectChainReady={isAudioReady} onPreparePlayback={handlePrepareUploadedAudio} />
         <PresetPanel onLoadPreset={handleLoadPreset} />
       </div>
     </main>

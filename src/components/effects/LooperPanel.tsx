@@ -42,7 +42,13 @@ function LooperPanel({
   useEffect(() => subscribeLooper(pedal.id, setReading), [pedal.id]);
 
   const setParam = (name: string, value: PedalParamValue) => onParamChange(pedal.id, name, value);
-  const sendCommand = (command: string) => onParamChange(pedal.id, '__looperCommand', command);
+  const unavailable = reading.state === 'loading' || reading.state === 'error' || !pedal.enabled || pedal.bypassed;
+  const sendCommand = (command: string) => {
+    if (unavailable) return;
+    if (command === 'clear' && reading.hasLoop && !window.confirm('녹음된 루프를 지울까요?')) return;
+    if (command === 'record' && reading.hasLoop && reading.state !== 'recording' && !window.confirm('기존 루프를 지우고 새로 녹음할까요?')) return;
+    onParamChange(pedal.id, '__looperCommand', command);
+  };
 
   return (
     <article
@@ -51,7 +57,7 @@ function LooperPanel({
       }`}
     >
       <div className="pedal-top">
-        <button
+        {dragListeners ? (<button
           type="button"
           className="drag-handle"
           aria-label={`Move ${pedal.name}`}
@@ -59,9 +65,9 @@ function LooperPanel({
           {...dragListeners}
         >
           ≡
-        </button>
+        </button>) : null}
         <button type="button" className="pedal-select looper-display" onClick={() => onSelect(pedal.id)}>
-          <span>Phrase looper</span>
+          <span>루프 녹음기</span>
           <strong>LOOPER</strong>
           <em>{formatLooperState(reading.state)}</em>
         </button>
@@ -73,102 +79,107 @@ function LooperPanel({
           style={{ '--progress': `${Math.max(0, Math.min(1, reading.progress)) * 360}deg` } as CSSProperties}
         >
           <strong>{reading.hasLoop ? `${reading.durationSec.toFixed(1)}s` : '--'}</strong>
-          <span>{reading.hasLoop ? `${Math.round(reading.progress * 100)}%` : 'Empty'}</span>
+          <span>{reading.hasLoop ? `${Math.round(reading.progress * 100)}%` : '비어 있음'}</span>
         </div>
         <div className="looper-status">
-          <span>Status</span>
+          <span>상태</span>
           <strong>{formatLooperState(reading.state)}</strong>
           <small>
-            {params.halfSpeed ? 'Half Speed ' : ''}
-            {params.reverse ? 'Reverse' : reading.canUndo ? 'Undo ready' : reading.hasLoop ? 'Loop ready' : 'No loop'}
+            {params.halfSpeed ? '반속 재생 · ' : ''}
+            {params.reverse ? '역방향' : reading.canUndo ? '되돌리기 가능' : reading.hasLoop ? '루프 준비됨' : '녹음 없음'}
           </small>
         </div>
       </div>
 
+      {unavailable && <p role="status">{reading.state === 'error' ? '루퍼를 시작하지 못했습니다. 브라우저와 오디오 연결을 확인해 주세요.' : !pedal.enabled || pedal.bypassed ? '루퍼를 켜고 바이패스를 해제해 주세요.' : '기타 또는 오디오를 연결하면 루퍼를 사용할 수 있습니다.'}</p>}
       <div className="looper-footswitches">
         <button
           type="button"
           className={reading.state === 'recording' ? 'is-recording' : ''}
+          disabled={unavailable}
           onClick={() => sendCommand('record')}
         >
-          REC
+          녹음
         </button>
         <button
           type="button"
           className={reading.state === 'playing' ? 'is-playing' : ''}
+          disabled={unavailable || !reading.hasLoop}
           onClick={() => sendCommand('play')}
         >
-          PLAY
+          재생
         </button>
         <button
           type="button"
           className={reading.state === 'overdubbing' ? 'is-overdubbing' : ''}
+          disabled={unavailable}
           onClick={() => sendCommand('overdub')}
         >
-          OVERDUB
+          겹쳐 녹음
         </button>
       </div>
 
       <div className="looper-actions">
-        <button type="button" onClick={() => sendCommand('stop')}>
-          Stop
+        <button type="button" disabled={unavailable} onClick={() => sendCommand('stop')}>
+          정지
         </button>
-        <button type="button" onClick={() => sendCommand('undo')} disabled={!reading.canUndo}>
-          Undo
+        <button type="button" onClick={() => sendCommand('undo')} disabled={unavailable || !reading.canUndo}>
+          되돌리기
         </button>
-        <button type="button" className="is-danger" onClick={() => sendCommand('clear')}>
-          Clear
+        <button type="button" className="is-danger" disabled={unavailable || !reading.hasLoop} onClick={() => sendCommand('clear')}>
+          지우기
         </button>
       </div>
 
       <div className="looper-controls">
-        <LooperSlider label="Level" value={params.level} min={0} max={100} onChange={(value) => setParam('level', value)} />
+        <LooperSlider label="재생 음량" value={params.level} min={0} max={100} onChange={(value) => setParam('level', value)} />
         <LooperSlider
-          label="Overdub"
+          label="겹침 음량"
           value={params.overdubLevel}
           min={0}
           max={100}
           onChange={(value) => setParam('overdubLevel', value)}
         />
         <LooperSlider
-          label="Feedback"
+          label="기존 루프 유지량"
           value={params.feedback}
           min={0}
           max={100}
           onChange={(value) => setParam('feedback', value)}
         />
         <label className="looper-control is-wide">
-          <span>Quantize</span>
+          <span>길이 맞춤</span>
           <select value={params.quantize} onChange={(event) => setParam('quantize', event.target.value)}>
-            <option value="off">Off</option>
-            <option value="1bar">1 Bar</option>
-            <option value="2bar">2 Bars</option>
-            <option value="4bar">4 Bars</option>
+            <option value="off">사용 안 함</option>
+            <option value="1bar">1마디</option>
+            <option value="2bar">2마디</option>
+            <option value="4bar">4마디</option>
           </select>
         </label>
       </div>
 
+      <p>길이 맞춤은 현재 템포의 4/4 마디 기준입니다. 지정 길이보다 짧은 녹음은 원래 길이를 유지합니다.</p>
       <div className="looper-toggles">
         <label>
-          <span>Half Speed</span>
+          <span>반속 재생</span>
           <input type="checkbox" checked={params.halfSpeed} onChange={(event) => setParam('halfSpeed', event.target.checked)} />
         </label>
         <label>
-          <span>Reverse</span>
+          <span>역방향 재생</span>
           <input type="checkbox" checked={params.reverse} onChange={(event) => setParam('reverse', event.target.checked)} />
         </label>
       </div>
 
       <div className="pedal-switches">
         <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-          {pedal.enabled ? 'On' : 'Off'}
+          {pedal.enabled ? '켜짐' : '꺼짐'}
         </button>
         <button
           type="button"
           className={pedal.bypassed ? 'is-bypassed' : ''}
           onClick={() => onBypass(pedal.id, !pedal.bypassed)}
         >
-          {pedal.bypassed ? 'Bypassed' : 'Bypass'}
+          {pedal.bypassed ? '바이패스 해제' : '바이패스'}
         </button>
       </div>
     </article>
@@ -213,30 +224,30 @@ const readQuantize = (value: PedalParamValue | undefined): LooperParams['quantiz
 
 const formatLooperState = (state: LooperReading['state']) => {
   if (state === 'overdubbing') {
-    return 'Overdub';
+    return '겹쳐 녹음 중';
   }
 
   if (state === 'recording') {
-    return 'Recording';
+    return '녹음 중';
   }
 
   if (state === 'playing') {
-    return 'Playing';
+    return '재생 중';
   }
 
   if (state === 'stopped') {
-    return 'Stopped';
+    return '정지';
   }
 
   if (state === 'loading') {
-    return 'Loading';
+    return '불러오는 중';
   }
 
   if (state === 'error') {
-    return 'Worklet Error';
+    return '오디오 처리 오류';
   }
 
-  return 'Idle';
+  return '대기';
 };
 
 export default LooperPanel;

@@ -28,13 +28,13 @@ function RightUtilityPanel({
       <div className="tempo-readout">
         <span>TEMPO</span>
         <strong>{Math.round(bpm)}</strong>
-        <small>{tapCount > 1 ? `${tapCount} taps` : 'BPM'}</small>
+        <small>{tapCount > 1 ? `${tapCount}회 탭` : 'BPM'}</small>
       </div>
       <div className="master-volume-readout">
         <span>MASTER</span>
         <KnobControl
           className="master-utility-knob"
-          label="Volume"
+          label="음량"
           value={Math.round(masterVolume * 100)}
           min={0}
           max={100}
@@ -47,7 +47,7 @@ function RightUtilityPanel({
         TAP
       </button>
       <button type="button" className="tuner-hold-button" onClick={onTuner}>
-        HOLD TO TUNER
+        튜너 열기
       </button>
     </section>
   );

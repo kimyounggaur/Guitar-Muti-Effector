@@ -1272,7 +1272,6 @@
 }
 
 .hardware-support-panels .panel-heading strong,
-.hardware-support-panels .section-heading h2,
 .hardware-support-panels .detail-header h2,
 .hardware-support-panels .preset-card strong,
 .hardware-support-panels .detail-control strong,
@@ -6253,4 +6252,188 @@
   .screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ {
     flex-basis: 240px;
   }
+}
+
+/* Safety and touch accessibility: give each utility its own usable space. */
+@media (min-width: 1200px) {
+  .hardware-core {
+    grid-template-areas:
+      "left screen knobs expression"
+      "left foot knobs expression"
+      "utility utility utility expression"
+      "status status status expression";
+  }
+}
+.hardware-utility-panel .right-utility-panel {
+  grid-template-columns: minmax(110px, 1.3fr) minmax(90px, 1fr) minmax(116px, 1fr) minmax(80px, 1fr) minmax(120px, 1fr);
+  min-width: 0;
+}
+.hardware-utility-panel .right-utility-panel > * { min-width: 0; }
+.hardware-utility-panel .master-volume-readout { overflow: visible; }
+.hardware-utility-panel .tap-button,
+.hardware-utility-panel .tuner-hold-button { position: relative; z-index: 1; }
+.knob-control { touch-action: pan-y; }
+.knob-face { touch-action: pan-y; }
+.knob-adjust { display: none; }
+.master-status-item strong,
+.master-status-item.is-live strong { color: #f4fbff; }
+.rack-tuner-controls .knob-control strong { color: #f4fbff; }
+.chain-effect-grip { touch-action: none; }
+@media (pointer: coarse) {
+  .knob-adjust { display: flex; gap: 6px; justify-content: center; }
+  .knob-adjust button {
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid #78928b;
+    border-radius: 7px;
+    background: #182823;
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+  }
+  .knob-adjust button:disabled { opacity: .45; }
+}
+@media (max-width: 767px) {
+  .hardware-utility-panel .right-utility-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: auto;
+    min-height: 195px;
+    padding: 10px;
+    scroll-snap-type: x proximity;
+  }
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail::before { display: none; }
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell,
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ {
+    flex: 0 0 92px;
+    scroll-snap-align: start;
+  }
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label { font-size: 0; }
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label::after { font-size: 12px; }
+  .type-tuner .chain-effect-lcd-label::after { content: 'TUN'; }
+  .type-noiseGate .chain-effect-lcd-label::after { content: 'GATE'; }
+  .type-compressor .chain-effect-lcd-label::after { content: 'COMP'; }
+  .type-drive .chain-effect-lcd-label::after { content: 'DRIVE'; }
+  .type-ampEQ .chain-effect-lcd-label::after { content: 'AMP'; }
+  .type-cabinetIR .chain-effect-lcd-label::after { content: 'CAB'; }
+  .type-modulation .chain-effect-lcd-label::after { content: 'MOD'; }
+  .type-delay .chain-effect-lcd-label::after { content: 'DELAY'; }
+  .type-reverb .chain-effect-lcd-label::after { content: 'REVERB'; }
+  .type-looper .chain-effect-lcd-label::after { content: 'LOOP'; }
+  .type-rhythm .chain-effect-lcd-label::after { content: 'RHYTHM'; }
+  .chain-effect-grip { min-height: 44px; min-width: 44px; }
+}
+
+/* Responsive controls and accessible signal-chain ordering. */
+.effect-chain-display {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 6px;
+}
+.chain-order-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #f3faf8;
+  font-size: 12px;
+}
+.chain-order-controls button {
+  min-width: 52px;
+  min-height: 44px;
+  padding: 4px 10px;
+  border: 1px solid #8baba4;
+  border-radius: 6px;
+  background: #142a27;
+  color: #fff;
+  font-size: 12px;
+}
+.chain-order-controls button:disabled { opacity: .5; }
+.chain-order-controls button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+@media (min-width: 768px) and (max-width: 1199px) {
+  .hardware-core {
+    grid-template-areas:
+      "left screen screen"
+      "left knobs knobs"
+      "foot foot expression"
+      "utility utility utility"
+      "status status status";
+  }
+  .hardware-utility-panel .right-utility-panel {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1199px) {
+  .screen-glass:not(.is-preset-browser) .tone-chain-stage { min-width: 0; }
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: auto;
+    min-height: 180px;
+    padding: 10px;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+  }
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail::before { display: none; }
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell,
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ {
+    flex: 0 0 92px;
+    scroll-snap-align: start;
+  }
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label { font-size: 0; }
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label::after { font-size: 12px; }
+  .type-tuner .chain-effect-lcd-label::after { content: 'TUN'; }
+  .type-noiseGate .chain-effect-lcd-label::after { content: 'GATE'; }
+  .type-compressor .chain-effect-lcd-label::after { content: 'COMP'; }
+  .type-drive .chain-effect-lcd-label::after { content: 'DRIVE'; }
+  .type-ampEQ .chain-effect-lcd-label::after { content: 'AMP'; }
+  .type-cabinetIR .chain-effect-lcd-label::after { content: 'CAB'; }
+  .type-modulation .chain-effect-lcd-label::after { content: 'MOD'; }
+  .type-delay .chain-effect-lcd-label::after { content: 'DELAY'; }
+  .type-reverb .chain-effect-lcd-label::after { content: 'REVERB'; }
+  .type-looper .chain-effect-lcd-label::after { content: 'LOOP'; }
+  .type-rhythm .chain-effect-lcd-label::after { content: 'RHYTHM'; }
+}
+@media (max-width: 767px) {
+  .screen-glass:not(.is-preset-browser) .screen-param-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hardware-app button:not(.chain-effect-main),
+  .hardware-app select,
+  .hardware-app input[type="file"] { min-height: 44px; }
+  .hardware-app button:not(.chain-effect-main):not(.chain-effect-grip) { min-width: 44px; }
+  .hardware-app :is(button, label, select, .master-status-item, .screen-param-cell, .patch-identity, .utility-readout, .tempo-readout, .master-volume-readout) { font-size: max(12px, 0.75rem); }
+  .hardware-app :is(.master-status-item strong, .master-status-item span, .screen-param-cell strong, .screen-param-cell span) { color: #f3faf8; font-size: max(12px, 0.75rem); }
+  .screen-glass:not(.is-preset-browser) .chain-effect-grip { min-width: 44px; min-height: 44px; }
+}
+
+/* Keep connection controls and the emergency stop in separate, readable columns. */
+.hardware-primary-controls {
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 190px);
+  align-items: start;
+}
+.hardware-primary-controls .connect-section { min-width: 0; }
+.hardware-primary-controls .connect-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+}
+.hardware-primary-controls .connect-grid > * { min-width: 0; }
+.hardware-primary-controls .panic-button {
+  min-height: 76px;
+  width: 100%;
+  align-self: start;
+  color: #72190e;
+  background: #ffd9d4;
+  border: 2px solid #a92f24;
+}
+@media (max-width: 767px) {
+  .hardware-primary-controls { grid-template-columns: minmax(0, 1fr); }
+  .hardware-primary-controls .panic-button { min-height: 52px; }
+}
+@media (max-width: 767px) {
+  .hardware-primary-controls .panic-button { grid-row: 1; }
 }
