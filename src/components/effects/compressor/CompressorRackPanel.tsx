@@ -4,6 +4,7 @@ import type { Pedal, PedalParamValue } from '../../../audio/types';
 import { useElementVisible } from '../../../hooks/useElementVisible';
 import { clampNumber, percentFromRange, readNumberParam } from '../common/paramFormat';
 import '../../../styles/components/rack-compressor.css';
+import { t } from '../../../i18n/ko';
 
 type CompressorRackPanelProps = {
   pedal: Pedal;
@@ -45,20 +46,20 @@ export default function CompressorRackPanel({ pedal, onToggle, onBypass, onParam
       <span className="comp-rack-screw is-bottom-right" aria-hidden="true" />
 
       <div className="comp-rack-brand">
-        <strong>ST PLANET</strong>
+        <strong>{t('panel.compressor.lettering1')}</strong>
         <i aria-hidden="true" />
       </div>
 
       <div className="comp-rack-model-plate">
-        <span>LEVELING AMPLIFIER</span>
-        <strong>OPTICAL COMP</strong>
+        <span>{t('panel.compressor.lettering2')}</span>
+        <strong>{t('panel.compressor.lettering3')}</strong>
       </div>
 
       <CompressorRackKnob label="Gain" value={level} min={0} max={100} step={1} onChange={(value) => onParamChange('level', value)} />
 
-      <div className="comp-rack-vu-meter" aria-label={`Gain reduction ${Math.round(meterReduction)} dB`}>
+      <div className="comp-rack-vu-meter" aria-label={t('panel.compressor.grLabel', { value: Math.round(meterReduction) })}>
         <span>GR</span>
-        <em>Gain reduction (dB)</em>
+        <em>{t('panel.compressor.grCaption')}</em>
         <div className="comp-rack-vu-scale" aria-hidden="true">
           <b>0</b>
           <b>−8</b>
@@ -66,7 +67,7 @@ export default function CompressorRackPanel({ pedal, onToggle, onBypass, onParam
           <b>−24</b>
         </div>
         <i className="comp-rack-vu-needle" style={{ '--comp-rack-needle-angle': `${needleAngle}deg` } as CSSProperties} aria-hidden="true" />
-        <strong>ST PLANET</strong>
+        <strong>{t('panel.compressor.lettering1')}</strong>
       </div>
 
       <CompressorRackKnob
@@ -85,18 +86,18 @@ export default function CompressorRackPanel({ pedal, onToggle, onBypass, onParam
           onClick={() => onParamChange('ratio', isLimitMode ? 3.5 : 12)}
           aria-pressed={isLimitMode}
         >
-          <span>Compress</span>
+          <span>{t('panel.compressor.compress')}</span>
           <i aria-hidden="true" />
-          <span>Limit</span>
+          <span>{t('panel.compressor.limit')}</span>
         </button>
 
         <button type="button" className={`comp-rack-power ${pedal.enabled ? 'is-on' : ''}`} onClick={onToggle} aria-pressed={pedal.enabled}>
           <i aria-hidden="true" />
-          <span>Power</span>
+          <span>{t('panel.compressor.power')}</span>
         </button>
 
         <button type="button" className={`comp-rack-bypass ${pedal.bypassed ? 'is-bypassed' : ''}`} onClick={onBypass} aria-pressed={pedal.bypassed}>
-          {pedal.bypassed ? 'Bypass' : 'In Line'}
+          {pedal.bypassed ? t('panel.common.bypassLettering') : t('panel.compressor.inLine')}
         </button>
       </div>
 

@@ -1,3 +1,4 @@
+import { AudioEngineError } from '../errors';
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
 import processorUrl from '../worklets/compressor-processor.ts?worker&url';
@@ -16,7 +17,7 @@ const percentToUnit = (value: number) => clamp(value, 0, 100) / 100;
 export function prepareCompressor(context: AudioContext): Promise<void> {
   let promise = loadedContexts.get(context);
   if (!promise) {
-    if (!context.audioWorklet) return Promise.reject(new Error('이 브라우저는 컴프레서를 지원하지 않습니다. HTTPS의 최신 브라우저를 사용해 주세요.'));
+    if (!context.audioWorklet) return Promise.reject(new AudioEngineError('unsupportedBrowser'));
     promise = context.audioWorklet.addModule(processorUrl);
     loadedContexts.set(context, promise);
   }

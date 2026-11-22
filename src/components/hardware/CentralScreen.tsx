@@ -2,7 +2,9 @@ import type { ReactNode } from 'react';
 import { scrollTargetRef } from '../../app/scrollTargets';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import PatchHeader from './PatchHeader';
+import { formatParamName } from '../effects/common/paramFormat';
 import '../../styles/components/lcd.css';
+import { t } from '../../i18n/ko';
 
 type CentralScreenProps = {
   patchName: string;
@@ -28,7 +30,7 @@ function CentralScreen({
   const isBrowsingPresets = Boolean(presetBrowser);
 
   return (
-    <section ref={scrollTargetRef('board')} className="central-screen" aria-label="페달 화면">
+    <section ref={scrollTargetRef('board')} className="central-screen" aria-label={t('panel.lcd.region')}>
       <div className="screen-bezel">
         <div className={`screen-glass ${isBrowsingPresets ? 'is-preset-browser' : ''}`}>
           <PatchHeader
@@ -44,14 +46,14 @@ function CentralScreen({
               {selectedPedal ? (
                 getPedalSummary(selectedPedal).map(([name, value]) => (
                   <div key={name} className="screen-param-cell">
-                    <span>{formatParamName(name)}</span>
+                    <span>{formatParamName(name, selectedPedal.type)}</span>
                     <strong>{formatParamValue(value)}</strong>
                   </div>
                 ))
               ) : (
                 <div className="screen-param-cell is-empty">
-                  <span>선택한 페달</span>
-                  <strong>없음</strong>
+                  <span>{t('panel.lcd.selectedPedal')}</span>
+                  <strong>{t('panel.common.none')}</strong>
                 </div>
               )}
             </div>
@@ -83,15 +85,6 @@ const getPedalSummary = (pedal: Pedal) => {
     .slice(0, 4)
     .map((name) => [name, pedal.params[name]] as const);
 };
-
-const formatParamName = (name: string) =>
-  name
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, (firstLetter) => firstLetter.toUpperCase())
-    .replace('Db', 'dB')
-    .replace('Ms', 'ms')
-    .replace('A4', 'A4')
-    .replace('IR', 'IR');
 
 const formatParamValue = (value: PedalParamValue) => {
   if (typeof value === 'boolean') {

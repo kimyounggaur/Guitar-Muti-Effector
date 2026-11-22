@@ -12,6 +12,7 @@ import { PEDAL_SCHEMAS, TEMPO } from '../../../audio/params/schema';
 import { useAudioStore } from '../../../store/audioStore';
 import KnobControl from '../../controls/KnobControl';
 import '../../../styles/components/rhythm.css';
+import { t } from '../../../i18n/ko';
 
 const S = PEDAL_SCHEMAS.rhythm;
 
@@ -80,15 +81,15 @@ function RhythmPanel({
         {dragListeners ? (<button
           type="button"
           className="drag-handle"
-          aria-label={`Move ${pedal.name}`}
+          aria-label={t('panel.detail.move', { name: pedal.name })}
           {...dragAttributes}
           {...dragListeners}
         >
           ≡
         </button>) : null}
         <button type="button" className="pedal-select rhythm-display" onClick={() => onSelect(pedal.id)}>
-          <span>연습용 리듬</span>
-          <strong>RHYTHM</strong>
+          <span>{t('panel.rhythm.title')}</span>
+          <strong>{t('panel.rhythm.lettering')}</strong>
           <em>{getRhythmPatternName(params.pattern)}</em>
         </button>
       </div>
@@ -97,9 +98,9 @@ function RhythmPanel({
         <div>
           <span>BPM</span>
           <strong>{Math.round(tempoBpm)}</strong>
-          <small>{isPlaying ? '재생 중' : tapCount > 1 ? '탭 입력됨' : '정지'}</small>
+          <small>{isPlaying ? t('panel.rhythm.playing') : tapCount > 1 ? t('panel.rhythm.tapped') : t('panel.common.stop')}</small>
         </div>
-        <div className="beat-leds" aria-label="Beat indicator">
+        <div className="beat-leds" aria-label={t('panel.rhythm.beats')}>
           {Array.from({ length: reading.beatCount || 4 }).map((_, index) => (
             <i
               key={index}
@@ -118,14 +119,14 @@ function RhythmPanel({
 
       <div className="rhythm-transport">
         <button type="button" className={isPlaying ? 'is-playing' : ''} onClick={togglePlay} disabled={!audioReady || !pedal.enabled || pedal.bypassed}>
-          {isPlaying ? '정지' : '재생'}
+          {isPlaying ? t('panel.common.stop') : t('panel.common.play')}
         </button>
         <button type="button" onClick={handleTap}>
           TAP
         </button>
       </div>
 
-      {!audioReady ? <p role="status">리듬을 재생하려면 오디오를 먼저 연결해 주세요.</p> : !pedal.enabled || pedal.bypassed ? <p role="status">리듬 페달을 켜 주세요.</p> : null}
+      {!audioReady ? <p role="status">{t('panel.rhythm.connectHint')}</p> : !pedal.enabled || pedal.bypassed ? <p role="status">{t('panel.rhythm.enableHint')}</p> : null}
       <div className="rhythm-controls">
         <label className="rhythm-control">
           <span>BPM</span>
@@ -138,16 +139,16 @@ function RhythmPanel({
           />
         </label>
         <label className="rhythm-control is-wide">
-          <span>리듬 패턴</span>
+          <span>{t('param.rhythm.pattern')}</span>
           <select value={params.pattern} onChange={(event) => setParam('pattern', event.target.value)}>
-            <option value="metronome">메트로놈 4/4</option>
-            <option value="rock1">Rock 1</option>
-            <option value="rock2">Rock 2</option>
-            <option value="bluesShuffle">블루스 셔플</option>
-            <option value="funk">Funk</option>
-            <option value="ballad">발라드</option>
+            <option value="metronome">{t('panel.rhythm.metronome')}</option>
+            <option value="rock1">{t('panel.rhythm.rock1')}</option>
+            <option value="rock2">{t('panel.rhythm.rock2')}</option>
+            <option value="bluesShuffle">{t('panel.rhythm.bluesShuffle')}</option>
+            <option value="funk">{t('panel.rhythm.funk')}</option>
+            <option value="ballad">{t('panel.rhythm.ballad')}</option>
             <option value="sixEight">6/8</option>
-            <option value="pop">Pop</option>
+            <option value="pop">{t('panel.rhythm.pop')}</option>
           </select>
         </label>
         <RhythmSlider label="리듬 음량" value={params.volume} min={S.volume.min} max={S.volume.max} onChange={(value) => setParam('volume', value)} />
@@ -155,14 +156,14 @@ function RhythmPanel({
 
       <div className="pedal-switches">
         <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-          {pedal.enabled ? '켜짐' : '꺼짐'}
+          {pedal.enabled ? t('panel.common.on') : t('panel.common.off')}
         </button>
         <button
           type="button"
           className={pedal.bypassed ? 'is-bypassed' : ''}
           onClick={() => onBypass(pedal.id, !pedal.bypassed)}
         >
-          {pedal.bypassed ? '바이패스 해제' : '바이패스'}
+          {pedal.bypassed ? t('panel.common.unbypass') : t('panel.common.bypass')}
         </button>
       </div>
     </article>

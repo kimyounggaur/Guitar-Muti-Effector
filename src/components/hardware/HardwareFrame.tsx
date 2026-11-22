@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { t } from '../../i18n/ko';
 
 type HardwareFrameProps = {
   leftPanel: ReactNode;
@@ -20,7 +21,7 @@ function HardwareFrame({
   masterStatusBar,
 }: HardwareFrameProps) {
   return (
-    <section className="hardware-frame" aria-label="Touchscreen guitar multi-effector">
+    <section className="hardware-frame" aria-label={t('panel.frame.region')}>
       <div className="hardware-screw is-top-left" aria-hidden="true" />
       <div className="hardware-screw is-top-right" aria-hidden="true" />
       <div className="hardware-screw is-bottom-left" aria-hidden="true" />

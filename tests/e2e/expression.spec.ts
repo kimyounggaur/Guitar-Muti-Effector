@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 test('expression pedal leaves the master volume unchanged', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name.startsWith('mobile'), 'desktop drag');
   await page.goto('/');
-  const pedal = page.getByRole('slider', { name: 'VOLUME expression' });
+  const pedal = page.getByRole('slider', { name: 'VOLUME 익스프레션' });
   const master = page.locator('.master-status-bar .master-status-item', { hasText: '마스터' }).locator('strong');
   const before = await master.textContent();
   await expect(pedal).toHaveAttribute('aria-valuenow', '100');
@@ -23,7 +23,7 @@ test('expression pedal leaves the master volume unchanged', async ({ page }, tes
 test('a single tap on the volume pedal does not change its value (drag only)', async ({ page }, testInfo) => {
   test.skip(!testInfo.project.name.startsWith('mobile'), 'phone width');
   await page.goto('/');
-  const pedal = page.getByRole('slider', { name: 'VOLUME expression' });
+  const pedal = page.getByRole('slider', { name: 'VOLUME 익스프레션' });
   await pedal.scrollIntoViewIfNeeded();
   const before = await pedal.getAttribute('aria-valuenow');
   const box = (await pedal.boundingBox())!;

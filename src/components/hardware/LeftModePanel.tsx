@@ -1,6 +1,7 @@
 import { scrollToTarget } from '../../app/scrollTargets';
 import { usePedalStore } from '../../store/pedalStore';
 import '../../styles/components/left-panel.css';
+import { t } from '../../i18n/ko';
 
 function LeftModePanel({ onOpenBoard }: { onOpenBoard?: () => void }) {
   const setSelectedPedal = usePedalStore((state) => state.setSelectedPedal);
@@ -10,15 +11,15 @@ function LeftModePanel({ onOpenBoard }: { onOpenBoard?: () => void }) {
   };
   const openPresets = () => scrollToTarget('presets');
   return (
-    <nav className="left-mode-panel" aria-label="빠른 이동">
+    <nav className="left-mode-panel" aria-label={t('panel.left.region')}>
       <div className="hardware-brand">
-        <span>Guitar Multi-effector</span>
-        <strong>Touch Multi Processor</strong>
+        <span>{t('panel.left.brand')}</span>
+        <strong>{t('panel.left.brandSub')}</strong>
       </div>
       <div className="mode-button-stack">
-        <button type="button" onClick={() => { onOpenBoard?.(); scrollToTarget('board'); }}>페달 보드</button>
-        <button type="button" onClick={openLooper}>루퍼 열기</button>
-        <button type="button" onClick={openPresets}>프리셋 열기</button>
+        <button type="button" onClick={() => { onOpenBoard?.(); scrollToTarget('board'); }}>{t('panel.left.board')}</button>
+        <button type="button" onClick={openLooper}>{t('panel.left.looper')}</button>
+        <button type="button" onClick={openPresets}>{t('panel.left.presets')}</button>
       </div>
       <div className="mode-encoder" aria-hidden="true"><i /></div>
     </nav>

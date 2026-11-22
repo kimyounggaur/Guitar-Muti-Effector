@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Pedal, PedalParamValue } from '../../../audio/types';
 import KnobControl from '../../controls/KnobControl';
 import '../../../styles/components/amp-eq.css';
+import { t } from '../../../i18n/ko';
 
 type AmpEQParams = {
   lowCut: number;
@@ -127,21 +128,21 @@ function AmpEQPedal({
         {dragListeners ? (<button
           type="button"
           className="drag-handle classic-eq-drag"
-          aria-label={`Move ${pedal.name}`}
+          aria-label={t('panel.detail.move', { name: pedal.name })}
           {...dragAttributes}
           {...dragListeners}
         >
           ≡
         </button>) : null}
         <button type="button" className="pedal-select amp-eq-display classic-eq-title" onClick={() => onSelect(pedal.id)}>
-          <span>AMP MODULE</span>
-          <strong>CLASSIC EQ</strong>
+          <span>{t('panel.ampEq.lettering1')}</span>
+          <strong>{t('panel.ampEq.lettering2')}</strong>
           <em>{formatToneLabel(params)}</em>
         </button>
         <label className="classic-eq-preset">
-          <span>이퀄라이저 프리셋</span>
+          <span>{t('panel.ampEq.preset')}</span>
           <select value={matchedPreset} onChange={(event) => applyPreset(event.target.value)}>
-            <option value="custom">직접 설정</option>
+            <option value="custom">{t('panel.ampEq.manual')}</option>
             {AMP_EQ_PRESETS.map((preset) => (
               <option key={preset.id} value={preset.id}>
                 {preset.name}
@@ -155,13 +156,14 @@ function AmpEQPedal({
         <div className="classic-eq-toggle-stack">
           <span className="classic-eq-lamp is-reset" aria-hidden="true" />
           <button type="button" className="classic-eq-metal-toggle" onClick={resetEQ}>
-            초기화
+            
+            {t('panel.common.reset')}
           </button>
-          <p>양쪽 채널에 동일하게 적용</p>
+          <p>{t('panel.ampEq.bothChannels')}</p>
         </div>
 
         <div className="classic-eq-graph-wrap">
-          <canvas ref={canvasRef} className="eq-curve-canvas" width="760" height="186" aria-label="이퀄라이저 예상 곡선" />
+          <canvas ref={canvasRef} className="eq-curve-canvas" width="760" height="186" aria-label={t('panel.ampEq.curve')} />
           <div className="classic-eq-graph-labels" aria-hidden="true">
             <span>20Hz</span>
             <span>200Hz</span>
@@ -179,7 +181,8 @@ function AmpEQPedal({
             className={`classic-eq-metal-toggle ${pedal.bypassed ? 'is-bypassed' : ''}`}
             onClick={() => onBypass(pedal.id, !pedal.bypassed)}
           >
-            Bypass
+            
+            {t('panel.common.bypassLettering')}
           </button>
         </div>
       </div>
@@ -245,7 +248,7 @@ function AmpEQPedal({
       </div>
 
       <div className="classic-eq-lower-controls">
-        <span>Freq / Q</span>
+        <span>{t('panel.ampEq.freqQ')}</span>
         <EQSlider
           label="Mid Freq"
           value={params.midFreq}
@@ -267,14 +270,14 @@ function AmpEQPedal({
 
       <div className="pedal-switches">
         <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-          {pedal.enabled ? '이퀄라이저 켜짐' : '이퀄라이저 꺼짐'}
+          {pedal.enabled ? t('panel.ampEq.on') : t('panel.ampEq.off')}
         </button>
         <button
           type="button"
           className={pedal.bypassed ? 'is-bypassed' : ''}
           onClick={() => onBypass(pedal.id, !pedal.bypassed)}
         >
-          {pedal.bypassed ? '바이패스 해제' : '바이패스'}
+          {pedal.bypassed ? t('panel.common.unbypass') : t('panel.common.bypass')}
         </button>
       </div>
     </article>

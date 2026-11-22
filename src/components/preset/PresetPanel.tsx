@@ -12,6 +12,8 @@ import { useTempoStore } from '../../store/tempoStore';
 import ImportExportPreset from './ImportExportPreset';
 import PresetCard from './PresetCard';
 import '../../styles/components/preset-panel.css';
+import { formatCategory, t } from '../../i18n/ko';
+import { showToast } from '../common/Toast';
 
 type PresetPanelProps = {
   onLoadPreset: (preset: PedalboardPreset) => void;
@@ -91,7 +93,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
         return true;
       }
 
-      const haystack = [preset.name, preset.category, preset.origin, preset.description, ...preset.tags]
+      const haystack = [preset.name, preset.category, formatCategory(preset.category), preset.origin, preset.description, ...preset.tags]
         .join(' ')
         .toLowerCase();
       return haystack.includes(normalizedSearch);
@@ -107,17 +109,19 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
     const preset = savePreset(presetName, createSnapshot());
     setPresetName(`${preset.name} 복사`);
     setSelectedCategory(USER_PRESETS);
-    setSaveStatus('사용자 프리셋을 저장했습니다.');
+    setSaveStatus(t('toast.presetSaved'));
+    showToast('toast.presetSaved');
   };
 
   const handleUpdateActive = () => {
     if (!activePreset || activePreset.origin === 'factory') {
-      setSaveStatus('공장 프리셋은 직접 덮어쓸 수 없습니다. 새 프리셋으로 저장해 주세요.');
+      setSaveStatus(t('panel.preset.factoryLocked'));
       return;
     }
-    if (!window.confirm('현재 사용자 프리셋을 덮어쓰시겠습니까?')) return;
+    if (!window.confirm(t('confirm.overwritePreset'))) return;
     updateActivePreset(createSnapshot());
-    setSaveStatus('현재 프리셋을 저장했습니다.');
+    setSaveStatus(t('toast.presetUpdated'));
+    showToast('toast.presetUpdated');
   };
 
   const handleLoad = (preset: PedalboardPreset) => {
@@ -136,17 +140,17 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
   };
 
   return (
-    <section className="preset-section preset-library-section" aria-label="프리셋 라이브러리">
+    <section className="preset-section preset-library-section" aria-label={t('panel.preset.library')}>
       <details ref={scrollTargetRef('presets')} className="preset-browser-frame">
-        <summary>프리셋 라이브러리 열기 · {presets.length}개</summary>
+        <summary>{t('panel.preset.openLibrary', { count: presets.length })}</summary>
         <header className="preset-browser-topline">
-          <span>프리셋 라이브러리</span>
-          <span>전체</span>
+          <span>{t('panel.preset.library')}</span>
+          <span>{t('panel.preset.all')}</span>
           <strong>{presets.length}</strong>
         </header>
 
         <div className="preset-browser-grid">
-          <aside className="preset-library-sidebar" aria-label="프리셋 분류">
+          <aside className="preset-library-sidebar" aria-label={t('panel.preset.categories')}>
             <div className="preset-category-list">
               {libraryCategories.map((category) => (
                 <button
@@ -155,24 +159,26 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
                   className={category === selectedCategory ? 'is-active' : ''}
                   onClick={() => setSelectedCategory(category)}
                 >
-                  <span>{category}</span>
+                  <span>{formatCategory(category)}</span>
                   <b>{categoryCounts.get(category) ?? 0}</b>
                 </button>
               ))}
             </div>
 
             <div className="preset-tools-panel">
-              <span>프리셋 도구</span>
+              <span>{t('panel.preset.tools')}</span>
               <label>
-                <small>프리셋 이름</small>
+                <small>{t('panel.preset.name')}</small>
                 <input type="text" value={presetName} onChange={(event) => setPresetName(event.target.value)} />
               </label>
               <div className="preset-tool-buttons">
                 <button type="button" onClick={handleSavePreset}>
-                  새로 저장
+                  
+                  {t('panel.preset.saveNew')}
                 </button>
                 <button type="button" onClick={handleUpdateActive} disabled={!activePresetId || activePreset?.origin === 'factory'}>
-                  현재 설정 저장
+                  
+                  {t('panel.preset.saveCurrent')}
                 </button>
               </div>
               <p role="status">{saveStatus}</p>
@@ -184,22 +190,22 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
           <div className="preset-browser-main">
             <div className="preset-list-header">
               <div>
-                <h2>{selectedCategory}</h2>
+                <h2>{formatCategory(selectedCategory)}</h2>
                 <span>
-                  {filteredPresets.length}개
-                  {activePreset ? ` · 현재: ${activePreset.name}` : ''}
+                  {t('panel.preset.count', { count: filteredPresets.length })}
+                  {activePreset ? t('panel.preset.current', { name: activePreset.name }) : ''}
                 </span>
               </div>
               <strong>{Math.round(masterVolume * 100)}% · {tempoBpm} BPM</strong>
             </div>
 
             <label className="preset-search-box">
-              <span>프리셋 검색</span>
+              <span>{t('panel.preset.search')}</span>
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="프리셋 검색"
+                placeholder={t('panel.preset.search')}
               />
             </label>
 
@@ -218,7 +224,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
                 ))
               ) : (
                 <div className="preset-empty-state">
-                  {selectedCategory === NO_CATEGORY && !searchQuery.trim() ? '분류를 누르면 프리셋이 펼쳐집니다.' : '검색 조건에 맞는 프리셋이 없습니다.'}
+                  {selectedCategory === NO_CATEGORY && !searchQuery.trim() ? t('panel.preset.pickCategory') : t('panel.preset.noMatch')}
                 </div>
               )}
             </div>

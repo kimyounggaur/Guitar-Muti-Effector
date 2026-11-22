@@ -3,6 +3,8 @@ import DeviceSelector from './DeviceSelector';
 import { useAudioStore } from '../../store/audioStore';
 import type { InputChannel } from '../../audio/types';
 import '../../styles/components/connect-panel.css';
+import { t } from '../../i18n/ko';
+import { toUserMessage } from '../../app/userMessage';
 
 type ConnectGuitarPanelProps = {
   isAudioReady: boolean;
@@ -57,13 +59,13 @@ function ConnectGuitarPanel({
         const present = devices.some((d) => d.deviceId === selectedDeviceId);
         if (isAudioReady && selectedDeviceId && previouslyPresent && !present) {
           stopRef.current();
-          setDeviceNotice('선택한 입력 장치가 연결 해제되어 오디오를 정지했습니다. 장치를 다시 연결하고 선택해 주세요.');
+          setDeviceNotice(t('error.deviceRemoved'));
         } else if (isAudioReady && !selectedDeviceId) {
-          setDeviceNotice('오디오 장치 구성이 변경되었습니다. 입력과 소리가 정상인지 확인해 주세요.');
+          setDeviceNotice(t('error.deviceChanged'));
         }
         previouslyPresent = present;
       } catch {
-        if (!cancelled) setDeviceNotice('오디오 장치 목록을 확인할 수 없습니다. 연결 상태를 확인해 주세요.');
+        if (!cancelled) setDeviceNotice(t('error.deviceListFailed'));
       }
     };
     media.addEventListener('devicechange', onDeviceListChange);
@@ -89,7 +91,7 @@ function ConnectGuitarPanel({
       await onOutputDeviceChange(id);
       setSelectedOutputDeviceId(id);
     } catch (error) {
-      setOutputNotice(audioErrorHelp(error));
+      setOutputNotice(toUserMessage(error));
     } finally { setOutputChanging(false); }
   };
 
@@ -97,20 +99,21 @@ function ConnectGuitarPanel({
   return (
     <section
       className={`connect-section ${settingsOpen ? 'is-settings-open' : ''} ${safetyOpen ? 'is-safety-open' : ''}`}
-      aria-label="Guitar input connection"
+      aria-label={t('panel.connect.region')}
     >
       <div className="panel-heading">
-        <span>Input</span>
-        <strong>{isAudioReady ? '오디오 연결됨' : '오디오 정지됨'}</strong>
+        <span>{t('panel.connect.title')}</span>
+        <strong>{isAudioReady ? t('panel.connect.connected') : t('panel.connect.stopped')}</strong>
       </div>
 
       <div className="connect-grid">
         <div className="connection-card">
           <button className="connect-button" type="button" onClick={onConnect} disabled={isConnecting}>
-            {isConnecting ? '연결 중...' : '기타 연결하기'}
+            {isConnecting ? t('panel.connect.connecting') : t('panel.connect.connect')}
           </button>
           <button className="stop-button" type="button" onClick={onStop} disabled={!isAudioReady && !isConnecting}>
-            오디오 정지
+            
+            {t('panel.connect.stop')}
           </button>
           <MobileInputMeter />
           <button
@@ -120,14 +123,16 @@ function ConnectGuitarPanel({
             aria-controls="audio-input-settings"
             onClick={() => setSettingsOpen((open) => !open)}
           >
-            입력 설정
+            
+            {t('panel.connect.settings')}
           </button>
         </div>
         {!isAudioReady ? (
           <p className="mobile-only mobile-safety-line">
-            헤드폰을 쓰고 낮은 음량에서 시작하세요.
+            
+            {t('panel.connect.safetyLine')}
             <button type="button" aria-expanded={safetyOpen} onClick={() => setSafetyOpen((open) => !open)}>
-              {safetyOpen ? '접기' : '자세히'}
+              {safetyOpen ? t('panel.common.collapse') : t('panel.common.details')}
             </button>
           </p>
         ) : null}
@@ -141,34 +146,34 @@ function ConnectGuitarPanel({
         />
 
         <label className="device-selector" htmlFor="audio-input-channel">
-          <span>기타 입력 채널 (양쪽 출력)</span>
+          <span>{t('input.channel')}</span>
           <select id="audio-input-channel" value={inputChannel} onChange={(event) => setInputChannel(event.target.value as InputChannel)}>
-            <option value="1">입력 1</option>
-            <option value="2">입력 2</option>
-            <option value="mix">입력 1 + 2 합치기</option>
+            <option value="1">{t('input.channel1')}</option>
+            <option value="2">{t('input.channel2')}</option>
+            <option value="mix">{t('input.channelMix')}</option>
           </select>
         </label>
 
         <label className="device-selector" htmlFor="audio-output-device">
-          <span>소리 출력 장치</span>
+          <span>{t('output.device')}</span>
           <select id="audio-output-device" value={selectedOutputDeviceId}
             disabled={!isAudioReady || isConnecting || outputChanging || !outputSupported}
             onChange={(event) => void changeOutput(event.target.value)}>
-            <option value="">시스템 기본 출력</option>
+            <option value="">{t('output.defaultDevice')}</option>
             {outputDevices.filter((device) => device.deviceId && device.deviceId !== 'default').map((device, index) => (
-              <option key={device.deviceId} value={device.deviceId}>{device.label || `출력 장치 ${index + 1}`}</option>
+              <option key={device.deviceId} value={device.deviceId}>{device.label || t('output.deviceN', { n: index + 1 })}</option>
             ))}
           </select>
-          {!outputSupported && <small>이 브라우저에서는 시스템 소리 설정에서 출력 장치를 변경해 주세요.</small>}
+          {!outputSupported && <small>{t('output.notSupportedHint')}</small>}
         </label>
         </div>
 
         <div className="safety-card">
-          <strong>안전하게 시작하기</strong>
+          <strong>{t('panel.connect.safetyTitle')}</strong>
           <ul>
-            <li>실시간 모니터링 시 헤드폰을 사용하세요.</li>
-            <li>오디오 인터페이스의 직접 모니터링을 끄세요.</li>
-            <li>출력 음량을 낮게 설정하고 시작하세요.</li>
+            <li>{t('panel.connect.safety1')}</li>
+            <li>{t('panel.connect.safety2')}</li>
+            <li>{t('panel.connect.safety3')}</li>
           </ul>
         </div>
       </div>
@@ -176,22 +181,9 @@ function ConnectGuitarPanel({
       <InputSafetyNotice isAudioReady={isAudioReady} />
       {deviceNotice ? <p role="status" className="error-message">{deviceNotice}</p> : null}
       {outputNotice ? <p role="alert" className="error-message">{outputNotice}</p> : null}
-      {errorMessage ? <p role="alert" className="error-message">{audioErrorHelp(errorMessage)}</p> : null}
+      {errorMessage ? <p role="alert" className="error-message">{errorMessage}</p> : null}
     </section>
   );
-}
-
-export function audioErrorHelp(error: unknown): string {
-  const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error ?? '');
-  if (/NotAllowedError|Permission denied|permission.*denied|not allowed/i.test(message))
-    return '마이크 또는 출력 장치 권한이 거부되었습니다. 브라우저 주소창의 사이트 권한을 허용한 뒤 다시 연결해 주세요.';
-  if (/NotFoundError|Requested device not found|device.*not found/i.test(message))
-    return '선택한 오디오 장치를 찾을 수 없습니다. 장치 연결을 확인하고 다시 선택해 주세요.';
-  if (/NotReadableError|Could not start audio source|device.*busy/i.test(message))
-    return '오디오 장치에 접근할 수 없습니다. 다른 앱에서 장치를 사용 중인지 확인해 주세요.';
-  if (/OverconstrainedError/i.test(message)) return '선택한 장치를 사용할 수 없습니다. 다른 입력 장치를 선택해 주세요.';
-  if (/AbortError/i.test(message)) return '오디오 연결이 취소되었습니다. 필요하면 다시 연결해 주세요.';
-  return message || '오디오 설정을 변경하지 못했습니다. 장치 연결과 브라우저 권한을 확인해 주세요.';
 }
 
 /** Thin input level bar for the phone top bar (hidden on wider screens). */
@@ -199,7 +191,7 @@ function MobileInputMeter() {
   const rmsDb = useAudioStore((state) => state.inputMeter.rmsDb);
   const fill = Math.min(100, Math.max(0, ((rmsDb + 60) / 60) * 100));
   return (
-    <span className="mobile-only mobile-input-meter" role="meter" aria-label="입력 레벨" aria-valuemin={-60} aria-valuemax={0} aria-valuenow={Math.round(Math.max(-60, rmsDb))}>
+    <span className="mobile-only mobile-input-meter" role="meter" aria-label={t('input.level')} aria-valuemin={-60} aria-valuemax={0} aria-valuenow={Math.round(Math.max(-60, rmsDb))}>
       <i style={{ width: `${fill}%` }} />
     </span>
   );
@@ -216,7 +208,7 @@ function InputSafetyNotice({ isAudioReady }: { isAudioReady: boolean }) {
     return () => window.clearTimeout(timer);
   }, [clipping, isAudioReady]);
   if (!isAudioReady || (!held && !warning)) return null;
-  return <p role="status" className="error-message">입력 신호가 너무 큽니다. 오디오 인터페이스의 입력 게인을 낮춰 주세요.</p>;
+  return <p role="status" className="error-message">{t('error.inputTooLoud')}</p>;
 }
 
 export default ConnectGuitarPanel;

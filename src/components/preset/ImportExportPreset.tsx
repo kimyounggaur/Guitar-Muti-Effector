@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
+import { t } from '../../i18n/ko';
+import { showToast } from '../common/Toast';
 
 type ImportExportPresetProps = {
   compact?: boolean;
@@ -21,7 +23,8 @@ function ImportExportPreset({ compact = false }: ImportExportPresetProps) {
     link.download = 'guitar-user-presets.json';
     link.click();
     URL.revokeObjectURL(url);
-    setStatus('사용자 프리셋 파일을 내려받았습니다.');
+    setStatus(t('toast.exported'));
+    showToast('toast.exported');
   };
 
   const handleCopy = async () => {
@@ -30,18 +33,18 @@ function ImportExportPreset({ compact = false }: ImportExportPresetProps) {
 
     try {
       await navigator.clipboard.writeText(json);
-      setStatus('클립보드에 복사했습니다.');
+      setStatus(t('panel.preset.copied'));
     } catch {
-      setStatus('복사할 수 없습니다. 텍스트를 직접 복사해 주세요.');
+      setStatus(t('panel.preset.copyFailed'));
     }
   };
 
   const handleImport = (json: string) => {
     try {
       const result = importPresets(json);
-      setStatus(`${result.imported}개 프리셋을 가져왔습니다.`);
+      setStatus(t('panel.preset.imported', { count: result.imported }));
     } catch {
-      setStatus('가져오기에 실패했습니다. JSON 파일 형식을 확인해 주세요.');
+      setStatus(t('panel.preset.importFailed'));
     }
   };
 
@@ -59,13 +62,16 @@ function ImportExportPreset({ compact = false }: ImportExportPresetProps) {
     <div className={`preset-import-export ${compact ? 'is-compact' : ''}`}>
       <div className="preset-io-actions">
         <button type="button" onClick={handleExport}>
-          파일 내보내기
+          
+          {t('panel.preset.exportFile')}
         </button>
         <button type="button" onClick={handleCopy}>
-          복사
+          
+          {t('panel.preset.duplicate')}
         </button>
         <button type="button" onClick={() => fileInputRef.current?.click()}>
-          파일 가져오기
+          
+          {t('panel.preset.importFile')}
         </button>
       </div>
 
@@ -80,15 +86,16 @@ function ImportExportPreset({ compact = false }: ImportExportPresetProps) {
       <textarea
         value={jsonText}
         onChange={(event) => setJsonText(event.target.value)}
-        placeholder="Preset JSON"
-        aria-label="Preset JSON"
+        placeholder={t('panel.preset.json')}
+        aria-label={t('panel.preset.json')}
       />
 
       <div className="preset-io-footer">
         <button type="button" onClick={() => handleImport(jsonText)} disabled={!jsonText.trim()}>
-          JSON 가져오기
+          
+          {t('panel.preset.importJson')}
         </button>
-        <span>{status || '사용자 프리셋을 파일로 저장하거나 가져옵니다.'}</span>
+        <span>{status || t('panel.preset.ioHint')}</span>
       </div>
     </div>
   );

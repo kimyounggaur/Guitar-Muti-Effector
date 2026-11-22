@@ -3,6 +3,7 @@ import { getParamSpec } from '../../../audio/params/schema';
 import type { Pedal, PedalParamValue, PedalType } from '../../../audio/types';
 import KnobControl from '../../controls/KnobControl';
 import { formatParamName, formatPedalType } from './paramFormat';
+import { t } from '../../../i18n/ko';
 
 type NumberRange = {
   min: number;
@@ -14,18 +15,18 @@ type NumberRange = {
 const selectOptions: Partial<Record<PedalType, Record<string, Array<[string, string]>>>> = {
   tuner: {
     mode: [
-      ['chromatic', 'Chromatic'],
-      ['guitar', 'Guitar'],
-      ['bass', 'Bass'],
-      ['ukulele', 'Ukulele'],
+      ['chromatic', '크로매틱'],
+      ['guitar', '기타'],
+      ['bass', '베이스'],
+      ['ukulele', '우쿨렐레'],
     ],
   },
   drive: {
     mode: [
-      ['overdrive', 'Overdrive'],
-      ['crunch', 'Crunch'],
-      ['distortion', 'Distortion'],
-      ['fuzz', 'Fuzz'],
+      ['overdrive', '오버드라이브'],
+      ['crunch', '크런치'],
+      ['distortion', '디스토션'],
+      ['fuzz', '퍼즈'],
     ],
   },
   cabinetIR: {
@@ -33,75 +34,75 @@ const selectOptions: Partial<Record<PedalType, Record<string, Array<[string, str
       ['1x12', '1x12'],
       ['2x12', '2x12'],
       ['4x12', '4x12'],
-      ['openBack', 'Open Back'],
-      ['custom', 'Custom'],
+      ['openBack', '오픈 백'],
+      ['custom', '사용자 IR'],
     ],
     mic: [
-      ['dynamic', 'Dynamic'],
-      ['ribbon', 'Ribbon'],
-      ['condenser', 'Condenser'],
-      ['mixed', 'Mixed'],
+      ['dynamic', '다이내믹'],
+      ['ribbon', '리본'],
+      ['condenser', '콘덴서'],
+      ['mixed', '혼합'],
     ],
   },
   modulation: {
     mode: [
-      ['chorus', 'Chorus'],
-      ['flanger', 'Flanger'],
-      ['phaser', 'Phaser'],
-      ['tremolo', 'Tremolo'],
-      ['vibrato', 'Vibrato'],
+      ['chorus', '코러스'],
+      ['flanger', '플랜저'],
+      ['phaser', '페이저'],
+      ['tremolo', '트레몰로'],
+      ['vibrato', '비브라토'],
     ],
     division: [
       ['1/1', '1/1'],
       ['1/2', '1/2'],
       ['1/4', '1/4'],
       ['1/8', '1/8'],
-      ['dotted1/8', 'Dotted 1/8'],
+      ['dotted1/8', '점8분 (1/8.)'],
       ['1/16', '1/16'],
     ],
   },
   delay: {
     mode: [
-      ['digital', 'Digital'],
-      ['analog', 'Analog'],
-      ['tape', 'Tape'],
-      ['slapback', 'Slapback'],
-      ['pingpong', 'Pingpong'],
+      ['digital', '디지털'],
+      ['analog', '아날로그'],
+      ['tape', '테이프'],
+      ['slapback', '슬랩백'],
+      ['pingpong', '핑퐁'],
     ],
     division: [
       ['1/4', '1/4'],
       ['1/8', '1/8'],
-      ['dotted1/8', 'Dotted 1/8'],
+      ['dotted1/8', '점8분 (1/8.)'],
       ['1/16', '1/16'],
     ],
   },
   reverb: {
     mode: [
-      ['room', 'Room · 합성'],
-      ['hall', 'Hall · 합성'],
-      ['plate', 'Plate · 합성'],
-      ['spring', 'Spring · 합성'],
-      ['ambient', 'Ambient · 합성'],
+      ['room', '룸 · 합성'],
+      ['hall', '홀 · 합성'],
+      ['plate', '플레이트 · 합성'],
+      ['spring', '스프링 · 합성'],
+      ['ambient', '앰비언트 · 합성'],
     ],
   },
   looper: {
     quantize: [
-      ['off', 'Off'],
-      ['1bar', '1 Bar'],
-      ['2bar', '2 Bars'],
-      ['4bar', '4 Bars'],
+      ['off', '끔'],
+      ['1bar', '1마디'],
+      ['2bar', '2마디'],
+      ['4bar', '4마디'],
     ],
   },
   rhythm: {
     pattern: [
-      ['metronome', 'Metronome 4/4'],
-      ['rock1', 'Rock 1'],
-      ['rock2', 'Rock 2'],
-      ['bluesShuffle', 'Blues Shuffle'],
-      ['funk', 'Funk'],
-      ['ballad', 'Ballad'],
+      ['metronome', '메트로놈 4/4'],
+      ['rock1', '록 1'],
+      ['rock2', '록 2'],
+      ['bluesShuffle', '블루스 셔플'],
+      ['funk', '펑크'],
+      ['ballad', '발라드'],
       ['sixEight', '6/8'],
-      ['pop', 'Pop'],
+      ['pop', '팝'],
     ],
   },
 };
@@ -120,7 +121,7 @@ export function DetailControl({ pedal, paramName, value, onChange }: DetailContr
   if (typeof value === 'boolean') {
     return (
       <label className="detail-toggle">
-        <span>{formatParamName(paramName)}</span>
+        <span>{formatParamName(paramName, pedal.type)}</span>
         <input type="checkbox" checked={value} onChange={(event) => onChange(event.target.checked)} />
       </label>
     );
@@ -131,7 +132,7 @@ export function DetailControl({ pedal, paramName, value, onChange }: DetailContr
     return (
       <KnobControl
         className="detail-control"
-        label={formatParamName(paramName)}
+        label={formatParamName(paramName, pedal.type)}
         value={value}
         min={range.min}
         max={range.max}
@@ -145,7 +146,7 @@ export function DetailControl({ pedal, paramName, value, onChange }: DetailContr
   if (options) {
     return (
       <label className="detail-select">
-        <span>{formatParamName(paramName)}</span>
+        <span>{formatParamName(paramName, pedal.type)}</span>
         <select value={value} onChange={(event) => onChange(event.target.value)}>
           {options.map(([optionValue, label]) => (
             <option key={optionValue} value={optionValue}>
@@ -159,7 +160,7 @@ export function DetailControl({ pedal, paramName, value, onChange }: DetailContr
 
   return (
     <label className="detail-select">
-      <span>{formatParamName(paramName)}</span>
+      <span>{formatParamName(paramName, pedal.type)}</span>
       <input type="text" value={value} onChange={(event) => onChange(event.target.value)} />
     </label>
   );
@@ -224,29 +225,29 @@ type GenericPedalDetailProps = {
 export function GenericPedalDetail({ pedal, onToggle, onBypass, onParamChange, actions }: GenericPedalDetailProps) {
   const controls = Object.entries(pedal.params ?? {}).filter(([name]) => !name.startsWith('__'));
   return (
-    <section className="detail-section" aria-label="Selected pedal detail">
+    <section className="detail-section" aria-label={t('panel.detail.region')}>
       <div className="detail-header">
         <div>
-          <span className="eyebrow">상세 설정</span>
+          <span className="eyebrow">{t('panel.detail.title')}</span>
           <h2>{pedal.name}</h2>
           <p>
-            {formatPedalType(pedal.type)} · {pedal.enabled ? '켜짐' : '꺼짐'} ·{' '}
-            {pedal.bypassed ? '바이패스 중' : '신호 처리 중'}
+            {formatPedalType(pedal.type)} · {pedal.enabled ? t('panel.common.on') : t('panel.common.off')} ·{' '}
+            {pedal.bypassed ? t('panel.detail.bypassing') : t('panel.detail.processing')}
           </p>
         </div>
         <div className="detail-status">
           <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={onToggle}>
-            {pedal.enabled ? '켜짐' : '꺼짐'}
+            {pedal.enabled ? t('panel.common.on') : t('panel.common.off')}
           </button>
           <button type="button" className={pedal.bypassed ? 'is-bypassed' : ''} onClick={onBypass}>
-            {pedal.bypassed ? '바이패스 해제' : '바이패스'}
+            {pedal.bypassed ? t('panel.common.unbypass') : t('panel.common.bypass')}
           </button>
         </div>
       </div>
 
       {pedal.type === 'reverb' ? (
         <p className="ir-source-note">
-          <span className="ir-source-badge">합성</span> 모든 리버브 모드는 앱이 만든 합성 임펄스를 사용합니다.
+          <span className="ir-source-badge">{t('panel.common.synthetic')}</span>  {t('panel.detail.reverbSynthetic')}
         </p>
       ) : null}
 
