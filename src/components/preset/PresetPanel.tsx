@@ -18,6 +18,8 @@ type PresetPanelProps = {
 };
 
 const ALL_PRESETS = 'All Presets';
+const NO_CATEGORY = '';
+const PHONE_QUERY = '(max-width: 600px)';
 const USER_PRESETS = 'User Presets';
 
 function PresetPanel({ onLoadPreset }: PresetPanelProps) {
@@ -34,7 +36,10 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
   const deletePreset = usePresetStore((state) => state.deletePreset);
   const duplicatePreset = usePresetStore((state) => state.duplicatePreset);
   const [presetName, setPresetName] = useState('새 프리셋');
-  const [selectedCategory, setSelectedCategory] = useState(ALL_PRESETS);
+  // On phones (max-width: 600px) the list starts folded: no category is open until one is tapped.
+  const [selectedCategory, setSelectedCategory] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia?.(PHONE_QUERY).matches ? NO_CATEGORY : ALL_PRESETS,
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
 
@@ -69,9 +74,11 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
 
   const filteredPresets = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
+    if (selectedCategory === NO_CATEGORY && !normalizedSearch) return [];
     return presets.filter((preset) => {
       const categoryMatch =
         selectedCategory === ALL_PRESETS ||
+        selectedCategory === NO_CATEGORY ||
         (selectedCategory === USER_PRESETS
           ? preset.origin !== 'factory' || preset.category === USER_PRESETS
           : preset.category === selectedCategory);
@@ -210,7 +217,9 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
                   />
                 ))
               ) : (
-                <div className="preset-empty-state">검색 조건에 맞는 프리셋이 없습니다.</div>
+                <div className="preset-empty-state">
+                  {selectedCategory === NO_CATEGORY && !searchQuery.trim() ? '분류를 누르면 프리셋이 펼쳐집니다.' : '검색 조건에 맞는 프리셋이 없습니다.'}
+                </div>
               )}
             </div>
           </div>

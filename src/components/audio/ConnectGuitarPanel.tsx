@@ -38,6 +38,9 @@ function ConnectGuitarPanel({
   const [outputChanging, setOutputChanging] = useState(false);
   const outputSupported = typeof AudioContext !== 'undefined' && 'setSinkId' in AudioContext.prototype;
   const [deviceNotice, setDeviceNotice] = useState('');
+  // Phone layout only (max-width: 600px): input settings and the safety notes fold away. Desktop ignores these.
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [safetyOpen, setSafetyOpen] = useState(false);
   const stopRef = useRef(onStop);
   stopRef.current = onStop;
 
@@ -92,7 +95,10 @@ function ConnectGuitarPanel({
 
   useEffect(() => { if (isConnecting) setDeviceNotice(''); }, [isConnecting]);
   return (
-    <section className="connect-section" aria-label="Guitar input connection">
+    <section
+      className={`connect-section ${settingsOpen ? 'is-settings-open' : ''} ${safetyOpen ? 'is-safety-open' : ''}`}
+      aria-label="Guitar input connection"
+    >
       <div className="panel-heading">
         <span>Input</span>
         <strong>{isAudioReady ? '오디오 연결됨' : '오디오 정지됨'}</strong>
@@ -106,8 +112,27 @@ function ConnectGuitarPanel({
           <button className="stop-button" type="button" onClick={onStop} disabled={!isAudioReady && !isConnecting}>
             오디오 정지
           </button>
+          <MobileInputMeter />
+          <button
+            className="mobile-only mobile-settings-toggle"
+            type="button"
+            aria-expanded={settingsOpen}
+            aria-controls="audio-input-settings"
+            onClick={() => setSettingsOpen((open) => !open)}
+          >
+            입력 설정
+          </button>
         </div>
+        {!isAudioReady ? (
+          <p className="mobile-only mobile-safety-line">
+            헤드폰을 쓰고 낮은 음량에서 시작하세요.
+            <button type="button" aria-expanded={safetyOpen} onClick={() => setSafetyOpen((open) => !open)}>
+              {safetyOpen ? '접기' : '자세히'}
+            </button>
+          </p>
+        ) : null}
 
+        <div id="audio-input-settings" className="connect-settings">
         <DeviceSelector
           inputDevices={inputDevices}
           selectedDeviceId={selectedDeviceId}
@@ -136,6 +161,7 @@ function ConnectGuitarPanel({
           </select>
           {!outputSupported && <small>이 브라우저에서는 시스템 소리 설정에서 출력 장치를 변경해 주세요.</small>}
         </label>
+        </div>
 
         <div className="safety-card">
           <strong>안전하게 시작하기</strong>
@@ -166,6 +192,17 @@ export function audioErrorHelp(error: unknown): string {
   if (/OverconstrainedError/i.test(message)) return '선택한 장치를 사용할 수 없습니다. 다른 입력 장치를 선택해 주세요.';
   if (/AbortError/i.test(message)) return '오디오 연결이 취소되었습니다. 필요하면 다시 연결해 주세요.';
   return message || '오디오 설정을 변경하지 못했습니다. 장치 연결과 브라우저 권한을 확인해 주세요.';
+}
+
+/** Thin input level bar for the phone top bar (hidden on wider screens). */
+function MobileInputMeter() {
+  const rmsDb = useAudioStore((state) => state.inputMeter.rmsDb);
+  const fill = Math.min(100, Math.max(0, ((rmsDb + 60) / 60) * 100));
+  return (
+    <span className="mobile-only mobile-input-meter" role="meter" aria-label="입력 레벨" aria-valuemin={-60} aria-valuemax={0} aria-valuenow={Math.round(Math.max(-60, rmsDb))}>
+      <i style={{ width: `${fill}%` }} />
+    </span>
+  );
 }
 
 // Subscribe separately so meter updates do not redraw device selection controls.

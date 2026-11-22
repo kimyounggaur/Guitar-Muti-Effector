@@ -18,6 +18,8 @@ const seekStepSeconds = 10;
 function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFilePlayerPanelProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
+  // Phone layout only: the player folds to its heading until opened.
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [audioElementKey, setAudioElementKey] = useState(0);
   const [track, setTrack] = useState<UploadedTrack | null>(null);
   const [duration, setDuration] = useState(0);
@@ -112,10 +114,13 @@ function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFi
   };
 
   return (
-    <section className="audio-file-player" aria-label="Uploaded audio player">
+    <section className={`audio-file-player ${mobileOpen ? 'is-open' : ''}`} aria-label="Uploaded audio player">
       <div className="panel-heading">
         <span>Audio File</span>
         <strong>{track ? track.name : 'No track loaded'}</strong>
+        <button className="mobile-only mobile-panel-toggle" type="button" aria-expanded={mobileOpen} onClick={() => setMobileOpen((open) => !open)}>
+          {mobileOpen ? '접기' : '펼치기'}
+        </button>
       </div>
 
       <label className="audio-upload-control">
