@@ -1,9 +1,8 @@
 import { create } from 'zustand';
-import { writeLocal } from './safeStorage';
+import { loadUserPresets, saveUserPresets } from './persistence';
 import { factoryTrimDb } from './factoryCalibration';
 import { Pedal, createDefaultPedals, normalizePedals } from '../audio/types';
 
-export const PRESET_STORAGE_KEY = 'web-guitar-pedalboard-presets';
 
 export type PresetOrigin = 'factory' | 'user' | 'imported';
 
@@ -394,32 +393,25 @@ const clonePreset = (preset: PedalboardPreset): PedalboardPreset => ({
   tags: [...preset.tags],
 });
 
+const presetListFrom = (parsed: unknown): unknown[] | null =>
+  Array.isArray(parsed)
+    ? parsed
+    : typeof parsed === 'object' && parsed && 'presets' in parsed && Array.isArray(parsed.presets)
+      ? parsed.presets
+      : null;
+
+const normalizePresetList = (parsed: unknown) =>
+  (presetListFrom(parsed) ?? []).map((preset) => normalizePreset(preset, 'user')).filter(Boolean) as PedalboardPreset[];
+
+/** User presets from the stored v3 list (factory presets are never stored). */
+export const normalizeUserPresetList = (parsed: unknown): PedalboardPreset[] =>
+  mergeWithFactoryLibrary(normalizePresetList(parsed)).filter((preset) => preset.origin !== 'factory');
+
+/** The old preset key: edited factory presets become '(이전 사용자 설정)' user presets. */
+export const migrateLegacyPresetList = (parsed: unknown): PedalboardPreset[] => normalizeUserPresetList(parsed);
+
 const writePresets = (presets: PedalboardPreset[]) => {
-  writeLocal(PRESET_STORAGE_KEY, JSON.stringify({ version: 3, presets: presets.filter((preset) => preset.origin !== 'factory' && !FACTORY_IDS.has(preset.id)) }));
-};
-
-const readPresets = () => {
-  try {
-    const raw = window.localStorage.getItem(PRESET_STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-
-    const parsed = JSON.parse(raw) as unknown;
-    const presets = Array.isArray(parsed)
-      ? parsed
-      : typeof parsed === 'object' && parsed && 'presets' in parsed && Array.isArray(parsed.presets)
-        ? parsed.presets
-        : null;
-
-    if (!presets) {
-      return null;
-    }
-
-    return presets.map((preset) => normalizePreset(preset, 'user')).filter(Boolean) as PedalboardPreset[];
-  } catch {
-    return null;
-  }
+  saveUserPresets(presets.filter((preset) => preset.origin !== 'factory' && !FACTORY_IDS.has(preset.id)));
 };
 
 const inferCategory = (name: string) => {
@@ -489,8 +481,7 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
   activePresetId: DEFAULT_PRESETS[0]?.id ?? null,
   currentPresetName: DEFAULT_PRESETS[0]?.name ?? 'Init Patch',
   hydratePresets: () => {
-    const presets = mergeWithFactoryLibrary(readPresets());
-    writePresets(presets);
+    const presets = mergeWithFactoryLibrary(loadUserPresets());
     set((state) => {
       const activePreset = presets.find((preset) => preset.id === state.activePresetId) ?? presets[0] ?? null;
       return {

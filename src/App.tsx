@@ -23,9 +23,8 @@ import { useAudioStore } from './store/audioStore';
 import { usePedalStore } from './store/pedalStore';
 import { PedalboardPreset, usePresetStore } from './store/presetStore';
 import { useTempoStore } from './store/tempoStore';
-import { readLocal, writeLocal } from './store/safeStorage';
+import { hydrateFromSession, loadSession, migrateLegacyStorage, startSessionAutosave } from './store/persistence';
 
-const SESSION_KEY = 'guitar-multi-effector-session-v2';
 
 function App() {
   const audioEngineRef = useRef(new AudioEngine());
@@ -44,7 +43,6 @@ function App() {
   const presets = usePresetStore((state) => state.presets);
   const activePresetId = usePresetStore((state) => state.activePresetId);
   const currentPresetName = usePresetStore((state) => state.currentPresetName);
-  const hydratePresets = usePresetStore((state) => state.hydratePresets);
   const loadPreset = usePresetStore((state) => state.loadPreset);
   const tempoBpm = useTempoStore((state) => state.bpm);
   const tapCount = useTempoStore((state) => state.tapCount);
@@ -98,62 +96,14 @@ function App() {
   useEffect(() => {
     const onStorageError = () => setErrorMessage('브라우저 저장 공간을 사용할 수 없습니다. 현재 설정은 새로고침하면 사라질 수 있습니다.');
     window.addEventListener('pedalboard-storage-error', onStorageError);
-    hydratePresets();
-    let restored = false;
-    try {
-      const session = JSON.parse(readLocal(SESSION_KEY) || 'null');
-      if (session && Array.isArray(session.pedals)) {
-        usePedalStore.getState().setPedals(session.pedals);
-        if (typeof session.masterVolume === 'number' && Number.isFinite(session.masterVolume)) {
-          useAudioStore.getState().setMasterVolume(Math.min(1, Math.max(0, session.masterVolume)));
-        }
-        if (typeof session.tempoBpm === 'number' && Number.isFinite(session.tempoBpm)) useTempoStore.getState().setBpm(session.tempoBpm);
-        else {
-          // Older sessions kept the tempo inside pedal params.
-          const legacyBpm = session.pedals.map((pedal: { params?: { bpm?: unknown } }) => pedal?.params?.bpm).find((bpm: unknown) => typeof bpm === 'number' && Number.isFinite(bpm));
-          if (typeof legacyBpm === 'number') useTempoStore.getState().setBpm(legacyBpm);
-        }
-        const existing = usePresetStore.getState().presets.find((p) => p.id === session.activePresetId);
-        useAudioStore.getState().setPresetTrimDb(typeof session.outputTrimDb === 'number' ? session.outputTrimDb : existing?.outputTrimDb ?? 0);
-        usePresetStore.getState().restoreSelection(existing?.id ?? null, existing?.name ?? '사용자 설정');
-        restored = true;
-      }
-    } catch { /* Invalid saved session falls back to the factory patch. */ }
-    if (!restored) {
-      // Preserve boards from the previous version without falsely labeling them as a factory patch.
-      try {
-        const legacyPedals = JSON.parse(readLocal('guitar-multi-effector-pedals-v1') || 'null');
-        if (Array.isArray(legacyPedals)) {
-          usePedalStore.getState().setPedals(legacyPedals);
-          usePresetStore.getState().restoreSelection(null, '이전 작업 설정');
-          restored = true;
-        }
-      } catch { /* Ignore invalid legacy data. */ }
-    }
-    if (!restored) {
-      const first = usePresetStore.getState().presets[0];
-      if (first) {
-        usePedalStore.getState().setPedals(first.pedals);
-        useAudioStore.getState().setPresetTrimDb(first.outputTrimDb);
-        useTempoStore.getState().setBpm(first.tempoBpm);
-      }
-    }
-    let timer = 0;
-    const save = () => {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        const audio = useAudioStore.getState();
-        const preset = usePresetStore.getState();
-        writeLocal(SESSION_KEY, JSON.stringify({ pedals: usePedalStore.getState().pedals, masterVolume: audio.masterVolume, outputTrimDb: audio.presetTrimDb, tempoBpm: useTempoStore.getState().bpm, activePresetId: preset.activePresetId }));
-      }, 300);
-    };
-    writeLocal(SESSION_KEY, JSON.stringify({ pedals: usePedalStore.getState().pedals, masterVolume: useAudioStore.getState().masterVolume, outputTrimDb: useAudioStore.getState().presetTrimDb, tempoBpm: useTempoStore.getState().bpm, activePresetId: usePresetStore.getState().activePresetId }));
-    const unsubPedals = usePedalStore.subscribe((state, previous) => { if (state.pedals !== previous.pedals) save(); });
-    const unsubAudio = useAudioStore.subscribe((state, previous) => { if (state.masterVolume !== previous.masterVolume || state.presetTrimDb !== previous.presetTrimDb) save(); });
-    const unsubTempo = useTempoStore.subscribe((state, previous) => { if (state.bpm !== previous.bpm) save(); });
-    const unsubPreset = usePresetStore.subscribe((state, previous) => { if (state.activePresetId !== previous.activePresetId) save(); });
-    return () => { window.clearTimeout(timer); unsubPedals(); unsubAudio(); unsubTempo(); unsubPreset(); window.removeEventListener('pedalboard-storage-error', onStorageError); };
-  }, [hydratePresets, setErrorMessage]);
+    return () => window.removeEventListener('pedalboard-storage-error', onStorageError);
+  }, [setErrorMessage]);
+
+  useEffect(() => {
+    migrateLegacyStorage();
+    hydrateFromSession(loadSession());
+    return startSessionAutosave();
+  }, []);
 
   useEffect(() => {
     if (!selectedPedalId && pedals[0]) {
