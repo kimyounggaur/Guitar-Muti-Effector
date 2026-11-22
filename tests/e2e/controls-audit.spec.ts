@@ -48,7 +48,7 @@ test.describe('controls audit', () => {
   test('compressor: GR meter present, no +10/+4 switch', async ({ page }) => {
     await select(page, 'COMP');
     const section = page.locator('.detail-section');
-    await expect(section.locator('.la2a-vu-meter')).toHaveAttribute('aria-label', /Gain reduction/);
+    await expect(section.locator('.comp-rack-vu-meter')).toHaveAttribute('aria-label', /Gain reduction/);
     await expect(section.getByRole('button', { name: /^\+10|^\+4/ })).toHaveCount(0);
   });
 

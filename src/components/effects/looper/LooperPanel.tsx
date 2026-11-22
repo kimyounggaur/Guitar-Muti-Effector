@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { emptyLooperReading, LooperReading, subscribeLooper } from '../../audio/nodes/LooperNode';
-import { Pedal, PedalParamValue } from '../../audio/types';
-import KnobControl from '../controls/KnobControl';
+import { emptyLooperReading, LooperReading, subscribeLooper } from '../../../audio/nodes/LooperNode';
+import { Pedal, PedalParamValue } from '../../../audio/types';
+import KnobControl from '../../controls/KnobControl';
 
 type LooperParams = {
   level: number;
