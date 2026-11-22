@@ -15,9 +15,8 @@ test.use({
   permissions: ['microphone'],
 });
 
-// FIXME(P1 → P2): after stop and reconnect the tuner keeps showing '신호 없음' although the input meter
-// shows signal (reproduced with the fake microphone). F7 is therefore not resolved.
-test.fixme('F7: tuner clears on stop and updates within 1 s after reconnect', async ({ page }, testInfo) => {
+// The tuner only analyses while its panel is on screen (P2 optimisation), so the test keeps it in view.
+test('F7: tuner clears on stop and updates within 1 s after reconnect', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-1280', 'runs once');
   await page.goto('/');
   const reading = page.locator('.tuner-detail-section .rack-tuner-note-display span');
@@ -30,6 +29,7 @@ test.fixme('F7: tuner clears on stop and updates within 1 s after reconnect', as
   await expect(reading).not.toHaveText(/\d+\.\d+ Hz/, { timeout: 2_000 });
 
   await page.locator('.connect-button').click();
+  await reading.scrollIntoViewIfNeeded(); // the connect button sits at the top of the page
   const started = Date.now();
   await expect(reading).toHaveText(/\d+\.\d+ Hz/, { timeout: 5_000 });
   const elapsed = Date.now() - started;
