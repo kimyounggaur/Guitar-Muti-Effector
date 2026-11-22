@@ -102,10 +102,10 @@ function CabinetIRPedal({
         <label className="cabinet-control is-wide">
           <span>캐비닛</span>
           <select value={params.cabinetType} onChange={(event) => setParam('cabinetType', event.target.value)}>
-            <option value="1x12">1x12</option>
-            <option value="2x12">2x12</option>
+            <option value="1x12">1x12 · 합성</option>
+            <option value="2x12">2x12 · 합성</option>
             <option value="4x12">4x12</option>
-            <option value="openBack">Open Back</option>
+            <option value="openBack">Open Back · 합성</option>
             <option value="custom" disabled={!hasCustomCabinetIR(pedal.id) && params.cabinetType !== 'custom'}>사용자 IR</option>
           </select>
         </label>
@@ -113,12 +113,19 @@ function CabinetIRPedal({
           <span>마이크</span>
           <select value={params.mic} onChange={(event) => setParam('mic', event.target.value)}>
             <option value="dynamic">Dynamic</option>
-            <option value="ribbon">Ribbon</option>
-            <option value="condenser">Condenser</option>
+            <option value="ribbon">Ribbon · 합성</option>
+            <option value="condenser">Condenser · 합성</option>
             <option value="mixed">Mixed</option>
           </select>
         </label>
       </div>
+
+      <p className="ir-source-note">
+        <span className={`ir-source-badge ${irSource(params) === 'recorded' ? 'is-recorded' : ''}`}>
+          {irSource(params) === 'recorded' ? '실제 녹음 IR' : irSource(params) === 'custom' ? '사용자 IR' : '합성'}
+        </span>
+        {irSource(params) === 'synthetic' ? ' 이 조합은 앱이 만든 합성 응답을 사용합니다. 실제 녹음 IR은 4x12 + Dynamic·Mixed입니다.' : null}
+      </p>
 
       <label className="ir-upload">
         <span>사용자 IR 파일 (WAV)</span>
@@ -343,3 +350,10 @@ const dbToY = (db: number, height: number) => {
 };
 
 export default CabinetIRPedal;
+
+/** Which impulse response a cabinet setting uses (see public/irs/NOTICE.md). */
+function irSource(params: { cabinetType: string; mic: string }): 'recorded' | 'custom' | 'synthetic' {
+  if (params.cabinetType === 'custom') return 'custom';
+  if (params.cabinetType === '4x12' && (params.mic === 'dynamic' || params.mic === 'mixed')) return 'recorded';
+  return 'synthetic';
+}

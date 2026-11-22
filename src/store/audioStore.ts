@@ -15,6 +15,8 @@ export type AudioStoreState = {
   errorMessage: string;
   masterVolume: number;
   presetTrimDb: number;
+  /** Volume pedal position 0..1 (decision S4-a). Not saved: a new session always starts at 1. */
+  expression: number;
   inputMeter: MeterReading;
   outputMeter: MeterReading;
   setIsConnecting: (isConnecting: boolean) => void;
@@ -29,6 +31,7 @@ export type AudioStoreState = {
   setErrorMessage: (errorMessage: string) => void;
   setMasterVolume: (masterVolume: number) => void;
   setPresetTrimDb: (db: number) => void;
+  setExpression: (expression: number) => void;
   setMeters: (inputMeter: MeterReading, outputMeter: MeterReading) => void;
   resetAudioState: () => void;
 };
@@ -46,6 +49,7 @@ export const useAudioStore = create<AudioStoreState>((set) => ({
   errorMessage: '',
   masterVolume: 0.35,
   presetTrimDb: 0,
+  expression: 1,
   inputMeter: emptyMeterReading,
   outputMeter: emptyMeterReading,
   setIsConnecting: (isConnecting) => set({ isConnecting }),
@@ -60,6 +64,7 @@ export const useAudioStore = create<AudioStoreState>((set) => ({
   setErrorMessage: (errorMessage) => set({ errorMessage }),
   setMasterVolume: (masterVolume) => set({ masterVolume }),
   setPresetTrimDb: (db) => set({ presetTrimDb: Number.isFinite(db) ? Math.max(-36, Math.min(0, db)) : 0 }),
+  setExpression: (expression) => set({ expression: Number.isFinite(expression) ? Math.max(0, Math.min(1, expression)) : 1 }),
   setMeters: (inputMeter, outputMeter) => set({ inputMeter, outputMeter }),
   resetAudioState: () =>
     set({

@@ -22,7 +22,7 @@ test.describe('controls audit', () => {
     await expect(page.locator('.preset-browser-frame')).toHaveAttribute('open', '');
   });
 
-  test('tuner: power/bypass work, MUTE/CALIB/DISPLAY are gone, Amp EQ shortcut is dead', async ({ page }) => {
+  test('tuner: power/bypass work, MUTE/CALIB/DISPLAY are gone, Amp EQ shortcut removed', async ({ page }) => {
     await page.locator('.tuner-hold-button').click(); // former HOLD TO TUNER
     const section = page.locator('.tuner-detail-section');
     await expect(section).toBeVisible();
@@ -31,9 +31,8 @@ test.describe('controls audit', () => {
     const before = await power.textContent();
     await power.click();
     await expect(power).not.toHaveText(before ?? '');
-    // FINDING: the 'Amp EQ' shortcut selects id 'ampEQ', but the EQ pedal id is 'amp-eq', so nothing happens.
-    await section.getByRole('button', { name: 'Amp EQ', exact: true }).click();
-    await expect(page.locator('.detail-section')).toHaveClass(/tuner-detail-section/);
+    // P2: the dead 'Amp EQ' shortcut (wrong pedal id) was removed.
+    await expect(section.getByRole('button', { name: 'Amp EQ', exact: true })).toHaveCount(0);
   });
 
   test('drive: no SPRING REVERB/Blend, model arrows change the model', async ({ page }) => {
@@ -53,10 +52,11 @@ test.describe('controls audit', () => {
     await expect(section.getByRole('button', { name: /^\+10|^\+4/ })).toHaveCount(0);
   });
 
-  test('noise gate: Attack/Hold/Decay dials exist; Decay drives the release time', async ({ page }) => {
+  test('noise gate: Attack/Hold/릴리스 dials, no duplicate Depth, power button named 게이트 켜기', async ({ page }) => {
     await select(page, 'Noise Gate');
     const section = page.locator('.detail-section');
-    for (const label of ['Attack', 'Hold', 'Decay', 'Depth', 'Sensitivity']) await expect(section.getByText(label, { exact: true }).first()).toBeVisible();
+    for (const label of ['Attack', 'Hold', '릴리스', 'Sensitivity', '게이트 켜기']) await expect(section.getByText(label, { exact: true }).first()).toBeVisible();
+    for (const label of ['Decay', 'Depth', 'Auto mode']) await expect(section.getByText(label, { exact: true })).toHaveCount(0);
   });
 
   test('meters, status bar and cabinet custom option', async ({ page }) => {

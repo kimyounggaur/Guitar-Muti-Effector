@@ -4,12 +4,14 @@ import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 type ExpressionPedalProps = {
   value: number;
   targetLabel?: string;
+  /** Current master volume in %, shown as the ceiling of the volume pedal. */
+  masterPercent?: number;
   onChange: (value: number) => void;
 };
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-function ExpressionPedal({ value, targetLabel = 'MASTER', onChange }: ExpressionPedalProps) {
+function ExpressionPedal({ value, targetLabel = 'VOLUME', masterPercent, onChange }: ExpressionPedalProps) {
   const [dragging, setDragging] = useState(false);
   const dragOrigin = useRef<{ y: number; value: number } | null>(null);
   const safeValue = clamp(value, 0, 100);
@@ -67,6 +69,7 @@ function ExpressionPedal({ value, targetLabel = 'MASTER', onChange }: Expression
         <span>EXP PEDAL</span>
         <strong>{targetLabel}</strong>
         <small>{safeValue}%</small>
+        {masterPercent !== undefined ? <small className="expression-ceiling">볼륨 페달 · 마스터 {masterPercent}% 이하</small> : null}
       </div>
     </section>
   );

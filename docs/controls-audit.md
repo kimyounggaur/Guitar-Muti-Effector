@@ -17,7 +17,7 @@
 | 9 | 드라이브 상세 | EQ/AMP MODEL 화살표 | "PRE MODEL" 위·아래 화살표가 드라이브 모드를 실제로 바꿈 | 정상 | e2e: 모델 이름 변경 확인 |
 | 10 | 컴프레서 상세 | VU 미터 | 실제 게인 리덕션 값을 구독(`subscribeCompressorReduction`), 보일 때만 갱신 | 정상 | `PedalDetailPanel.tsx` 컴프레서 패널 |
 | 11 | 컴프레서 상세 | GR / +10 / +4 | GR은 미터 표시(정상). +10/+4 전환 스위치는 화면에 없음 | 정상 | e2e: `+10`/`+4` 버튼 0개 |
-| 12 | 노이즈 게이트 상세 | Attack / Hold / Decay | Attack·Hold는 이름대로 동작. **Decay는 실제로 `releaseMs`(닫힘 시간)를 바꿈** | 이름 변경 필요 | `NoiseGateRackPanel` |
+| 12 | 노이즈 게이트 상세 | Attack / Hold / Decay | Attack·Hold는 이름대로 동작. **Decay는 실제로 `releaseMs`(닫힘 시간)를 바꿈** → P2에서 "릴리스"로 변경 | 이름 변경 필요 | `NoiseGateRackPanel` |
 | 13 | LCD 상단 | PEAK/RMS 막대 | IN/OUT 두 막대가 실제 RMS를 30fps로 표시 | 정상 | `PatchHeader.tsx`, e2e 막대 2개 |
 | 14 | 상태 막대 | CPU / Latency | CPU 표시는 없음. "출력 지연"은 `baseLatency + outputLatency` 추정값 | 정상 | `MasterStatusBar.tsx`, e2e |
 | 15 | 캐비닛 상세 | Custom | "사용자 IR" 선택지. WAV 업로드 전에는 비활성, 업로드하면 실제 IR 사용 | 정상 | `CabinetIRPedal.tsx`, e2e `disabled` 확인 |
@@ -29,4 +29,4 @@
 | 노이즈 게이트 상세 | Depth 다이얼 | Sensitivity 다이얼, Threshold 페이더와 **같은 값**(`thresholdDb`)을 바꿈. "깊이(감쇄량)"처럼 보이지만 감쇄량 조절 기능은 없음 | 삭제 필요 | `NoiseGateRackPanel` |
 | 노이즈 게이트 상세 | Auto mode | 게이트 켜기·끄기 버튼. "자동 모드"라는 별도 기능은 없음 | 이름 변경 필요 | `NoiseGateRackPanel` |
 
-P2에서 처리할 것: 4·Depth 삭제, 12·Auto mode 이름 변경. 설계서 §4 결정 2에 따라 "구현 필요"는 루퍼·리듬·IR 업로드만 대상이며, 이번 점검에서 그 셋은 모두 동작합니다.
+P2(2026-11-22)에서 처리함: 4번 "Amp EQ" 바로가기와 Depth 다이얼 삭제, 12번 "Decay" → "릴리스", "Auto mode" → "게이트 켜기". 설계서 §4 결정 2에 따라 "구현 필요"는 루퍼·리듬·IR 업로드만 대상이며, 이번 점검에서 그 셋은 모두 동작합니다.
