@@ -1,7 +1,6 @@
 // Single place for everything the app keeps in the browser (design §3.4).
 // All access goes through safeStorage so blocked or full storage never interrupts playing.
-import type { InputChannel } from '../audio/AudioEngine';
-import { normalizePedals, type Pedal } from '../audio/types';
+import { normalizePedals, type InputChannel, type Pedal } from '../audio/types';
 import { clampTempo } from '../audio/params/schema';
 import { readLocal, removeLocal, writeLocal } from './safeStorage';
 import { useAudioStore } from './audioStore';

@@ -1,12 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { AudioControllerProvider } from './app/AudioControllerContext';
 import './styles/globals.css';
 import './styles/hardware.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <AudioControllerProvider>
+      <App />
+    </AudioControllerProvider>
   </React.StrictMode>,
 );
 

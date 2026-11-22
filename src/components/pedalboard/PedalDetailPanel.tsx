@@ -1,4 +1,5 @@
 import { type CSSProperties, useEffect, useMemo, useState } from 'react';
+import { scrollTargetRef } from '../../app/scrollTargets';
 import { Pedal, PedalParamValue, PedalType } from '../../audio/types';
 import { subscribeCompressorReduction } from '../../audio/nodes/CompressorEffect';
 import { useElementVisible } from '../../hooks/useElementVisible';
@@ -173,7 +174,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
   if (selectedPedal.type === 'looper') {
     return (
-      <section className="detail-section" aria-label="루퍼 조작">
+      <section ref={scrollTargetRef('looper')} className="detail-section" aria-label="루퍼 조작">
         <LooperPanel
           pedal={selectedPedal}
           selected
@@ -243,7 +244,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
   if (selectedPedal.type === 'tuner') {
     return (
-      <section className="detail-section tuner-detail-section" aria-label="Tuner detail">
+      <section ref={scrollTargetRef('tuner')} className="detail-section tuner-detail-section" aria-label="Tuner detail">
         <TunerPanel
           pedal={selectedPedal}
           selected
