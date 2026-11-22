@@ -5,7 +5,9 @@ import { clampTempo } from '../audio/params/schema';
 import { readLocal, removeLocal, writeLocal } from './safeStorage';
 import { useAudioStore } from './audioStore';
 import { usePedalStore } from './pedalStore';
-import { migrateLegacyPresetList, normalizeUserPresetList, usePresetStore, type PedalboardPreset } from './presetStore';
+import { migrateLegacyPresetList, normalizeUserPresetList } from '../presets/migrate';
+import type { PedalboardPreset } from '../presets/types';
+import { usePresetStore } from './presetStore';
 import { useTempoStore } from './tempoStore';
 
 export const KEYS = { session: 'gme.session.v3', userPresets: 'gme.userPresets.v3' } as const;
