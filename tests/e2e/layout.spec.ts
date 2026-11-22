@@ -1,9 +1,9 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { measureLayout, tapHitPoints } from './helpers/measure';
 
-// P0: record only. Values are attached to the report and collected by `npm run e2e:baseline`.
-// Later stages turn selected numbers into assertions (see docs/refactoring-design.md §3.6).
-test('layout metrics (recorded)', async ({ page }, testInfo) => {
+// P0 recorded these numbers; from P6a the text size, contrast, overflow and TAP checks are assertions.
+// Values are still attached to the report so `npm run e2e:baseline` can record them.
+test('layout metrics', async ({ page }, testInfo) => {
   await page.goto('/');
   await page.locator('.connect-button').waitFor();
   await page.evaluate(() => document.fonts.ready);
@@ -14,4 +14,9 @@ test('layout metrics (recorded)', async ({ page }, testInfo) => {
     body: JSON.stringify({ project: testInfo.project.name, ...metrics, tapHitPoints: tap }, null, 2),
     contentType: 'application/json',
   });
+
+  expect(metrics.textUnder12px, 'text smaller than 12px').toBe(0);
+  expect(metrics.lowContrastText, 'text below 4.5:1 contrast').toBe(0);
+  expect(metrics.horizontalOverflow, `horizontal overflow ${metrics.overflowPx}px`).toBe(false);
+  if (tap) expect(tap).toEqual({ center: true, left: true, right: true, top: true, bottom: true });
 });

@@ -227,7 +227,7 @@
   display: block;
   margin-top: 8px;
   color: rgba(232, 232, 222, 0.72);
-  font-size: 0.5rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -246,7 +246,7 @@
   background: #14181d;
   color: #8c9691;
   cursor: pointer;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -323,7 +323,7 @@
 .expression-label span,
 .master-status-item b {
   color: #9fd5e8;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -358,7 +358,7 @@
   position: relative;
   z-index: 1;
   color: #d7f5ff;
-  font-size: 0.64rem;
+  font-size: var(--fs-xs);
 }
 
 .screen-meter-pill i {
@@ -373,7 +373,7 @@
   border-radius: 4px;
   background: rgba(3, 12, 17, 0.62);
   color: #9fd5e8;
-  font-size: 0.64rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   padding: 5px 8px;
 }
@@ -457,7 +457,7 @@
 
 .chain-effect-main span {
   color: var(--effect-color);
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
@@ -532,7 +532,7 @@
   bottom: 8px;
   opacity: 0;
   color: #7df0c9;
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   transition: opacity 180ms ease;
 }
@@ -595,7 +595,7 @@
 }
 
 .hardware-knob-empty span {
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
@@ -634,7 +634,7 @@
 
 .tempo-readout small {
   color: #7f8a84;
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
 }
 
@@ -657,7 +657,7 @@
 .master-utility-knob.knob-control > span {
   justify-self: center;
   color: #9fd5e8;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.04em;
 }
@@ -1311,7 +1311,7 @@
 
 .audio-upload-control span {
   color: var(--skin-muted);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1667,7 +1667,7 @@
   display: grid;
   gap: 5px;
   color: #17120c;
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -1806,7 +1806,7 @@
   inset: 16px 22px;
   pointer-events: none;
   color: rgba(244, 244, 226, 0.54);
-  font-size: clamp(0.66rem, 0.9vw, 0.9rem);
+  font-size: clamp(var(--fs-xs), 0.9vw, 0.9rem);
   font-weight: 900;
 }
 
@@ -2129,7 +2129,7 @@
 
 .effect-svg-status {
   fill: rgba(247, 251, 255, 0.66);
-  font-size: 9px;
+  font-size: var(--fs-xs);
 }
 
 .effect-svg-selected {
@@ -2298,7 +2298,7 @@
 
 .rack-tuner-brand span {
   color: #a88cff;
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 
 .rack-tuner-brand strong {
@@ -2330,7 +2330,7 @@
     linear-gradient(180deg, #2f3036, #08090c);
   color: #e5ddff;
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   box-shadow:
     inset 0 -10px 18px rgba(0, 0, 0, 0.56),
@@ -2410,7 +2410,7 @@
   justify-content: space-between;
   gap: 12px;
   color: #8c90a6;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.08em;
 }
@@ -2508,7 +2508,7 @@
   place-items: end center;
   min-height: 58px;
   color: #a5a5b8;
-  font-size: 0.54rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-align: center;
 }
@@ -2780,7 +2780,7 @@
   background: transparent;
   color: #f8e7a9;
   cursor: pointer;
-  font-size: 0.56rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   padding: 0;
   text-transform: uppercase;
@@ -2871,7 +2871,7 @@
 .amp5-reverb-section > span {
   align-self: center;
   color: #4a3c16;
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   line-height: 1.05;
   text-align: center;
@@ -2943,7 +2943,7 @@
 
 .amp5-knob span {
   color: #4a3c16;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -2953,7 +2953,7 @@
   border-radius: 2px;
   background: rgba(43, 35, 14, 0.12);
   color: #473712;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
   font-weight: 950;
   line-height: 1;
@@ -2982,7 +2982,7 @@
     linear-gradient(180deg, rgba(255, 179, 54, 0.18), transparent),
     #1b1308;
   color: #f4c25a;
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
   padding: 0 8px;
   text-overflow: ellipsis;
@@ -2992,7 +2992,7 @@
 .amp5-model-slot span {
   grid-column: 1 / -1;
   color: #4a3c16;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-align: center;
   text-transform: uppercase;
@@ -3040,7 +3040,7 @@
   background: transparent;
   color: #4a3c16;
   cursor: pointer;
-  font-size: 0.54rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   padding: 0;
   text-transform: uppercase;
@@ -3085,7 +3085,7 @@
   top: 20px;
   left: 22px;
   color: #4a3714;
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
@@ -3405,14 +3405,14 @@
 .comp-rack-model-plate span,
 .comp-rack-model-plate strong {
   color: #2e281f;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   line-height: 1.1;
   text-transform: uppercase;
 }
 
 .comp-rack-model-plate strong {
-  font-size: 0.5rem;
+  font-size: var(--fs-xs);
 }
 
 .comp-rack-knob {
@@ -3426,7 +3426,7 @@
 .comp-rack-knob span {
   order: 3;
   color: #66553a;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3492,7 +3492,7 @@
   border-radius: 2px;
   background: rgba(47, 37, 24, 0.14);
   color: #493a25;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
   font-weight: 950;
   padding: 2px 6px;
@@ -3523,7 +3523,7 @@
   top: 16px;
   left: 20px;
   color: #423421;
-  font-size: 0.64rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
@@ -3531,7 +3531,7 @@
   position: absolute;
   top: 18px;
   color: #6b4b20;
-  font-size: 0.52rem;
+  font-size: var(--fs-xs);
   font-style: normal;
   font-weight: 900;
   letter-spacing: 0.04em;
@@ -3546,7 +3546,7 @@
   display: flex;
   justify-content: space-between;
   color: #5d4422;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
@@ -3587,7 +3587,7 @@
   position: absolute;
   bottom: 32px;
   color: #4c3419;
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
@@ -3609,7 +3609,7 @@
 .comp-rack-meter-select span {
   grid-column: 1 / -1;
   color: #5a4a32;
-  font-size: 0.5rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.04em;
   text-align: center;
@@ -3626,7 +3626,7 @@
     #2c2924;
   color: #f3ead6;
   cursor: pointer;
-  font-size: 0.55rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
@@ -3639,7 +3639,7 @@
   background: transparent;
   color: #4d3d27;
   cursor: pointer;
-  font-size: 0.56rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -3679,7 +3679,7 @@
   background: transparent;
   color: #5a4930;
   cursor: pointer;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -3740,7 +3740,7 @@
 .comp-rack-trim span {
   overflow: hidden;
   color: #5d4a2f;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-overflow: ellipsis;
   text-transform: uppercase;
@@ -3777,7 +3777,7 @@
 
 .comp-rack-trim strong {
   color: #463622;
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
   font-weight: 950;
   text-align: right;
@@ -3975,7 +3975,7 @@
   align-content: space-between;
   min-height: 156px;
   color: #babec0;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
   font-weight: 900;
   text-align: right;
@@ -3986,7 +3986,7 @@
   justify-items: center;
   gap: 6px;
   color: #c8cbce;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -4083,7 +4083,7 @@
   display: grid;
   gap: 6px;
   color: #a3a8aa;
-  font-size: 0.64rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
 }
 
@@ -4144,7 +4144,7 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 24%),
     linear-gradient(180deg, #171b21, #050607 54%, #12161b);
   color: #86b6ff;
-  font-size: 0.56rem;
+  font-size: var(--fs-xs);
   font-style: normal;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
@@ -4154,7 +4154,7 @@
 
 .noise-rack-auto span {
   max-width: 60px;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   line-height: 1;
   text-align: center;
 }
@@ -4164,7 +4164,7 @@
   border-radius: 3px;
   background: #050507;
   color: #9fa8ff;
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   padding: 3px 5px;
 }
 
@@ -4202,7 +4202,7 @@
 
 .noise-rack-dial > span {
   color: #aeb4b7;
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
 }
 
 .noise-rack-dial input {
@@ -4346,7 +4346,7 @@
   justify-items: center;
   gap: 4px;
   color: #1f2426;
-  font-size: 0.56rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
 }
 
@@ -4385,7 +4385,7 @@
   border-radius: 2px;
   background: #050507;
   color: #e4e7ff;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   line-height: 1;
   padding: 4px 5px;
 }
@@ -4402,7 +4402,7 @@
   background: transparent;
   color: #171717;
   cursor: pointer;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
   padding: 0;
 }
@@ -4655,7 +4655,7 @@
 
 .preset-tools-panel small {
   color: rgba(255, 255, 255, 0.48);
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -4720,7 +4720,7 @@
   min-height: 66px;
   border-radius: 7px;
   font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   padding: 10px;
   resize: vertical;
 }
@@ -4736,7 +4736,7 @@
 
 .preset-import-export.is-compact .preset-io-footer span {
   color: rgba(255, 255, 255, 0.48);
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   line-height: 1.35;
 }
 
@@ -4765,7 +4765,7 @@
 
 .preset-output-panel small {
   color: #8eb4d3;
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
@@ -4803,7 +4803,7 @@
 .preset-list-header strong {
   color: #58efff;
   font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -4888,7 +4888,7 @@
 .preset-library-row .preset-title-button span {
   color: #8eb4d3;
   font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
@@ -4896,7 +4896,7 @@
   display: block;
   overflow: hidden;
   color: rgba(255, 255, 255, 0.42);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4930,7 +4930,7 @@
 .preset-library-row .preset-actions button {
   min-height: 30px;
   border-radius: 5px;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   padding: 0 7px;
 }
 
@@ -5067,7 +5067,7 @@
 
 .preset-library-row small {
   max-width: 100%;
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
 }
 
 .preset-library-row .preset-actions {
@@ -5182,7 +5182,7 @@
   display: -webkit-box;
   min-height: 2.4em;
   overflow: hidden;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   line-height: 1.2;
   white-space: normal;
   -webkit-box-orient: vertical;
@@ -5272,7 +5272,7 @@
 
 .hardware-knob-bay .hardware-knob-control.knob-control > span,
 .hardware-knob-bay .hardware-knob-empty span {
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 
 .hardware-knob-bay .hardware-knob-control strong,
@@ -5318,7 +5318,7 @@
 }
 
 .hardware-utility-panel .master-utility-knob strong {
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .preset-stomp-panel {
@@ -5401,7 +5401,7 @@
     linear-gradient(145deg, #20272b, #07090b 72%);
   color: #dde5e6;
   cursor: pointer;
-  font-size: 0.64rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.04em;
   padding: 0 12px 0 8px;
@@ -5500,14 +5500,14 @@
 
 .stomp-category-switch .stomp-label-strip b {
   color: #f8fbff;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
 }
 
 .stomp-category-switch .stomp-label-strip em {
   overflow: hidden;
   color: #aeb9bd;
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   font-style: normal;
   font-weight: 950;
   letter-spacing: 0.01em;
@@ -5554,7 +5554,7 @@
 .stomp-category-switch small {
   order: 5;
   color: var(--skin-mint);
-  font-size: 0.64rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -5629,7 +5629,7 @@
 .lcd-preset-card span,
 .lcd-preset-card small {
   color: #6eefff;
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -5650,7 +5650,7 @@
   background: rgba(6, 14, 19, 0.88);
   color: #f7fdff;
   cursor: pointer;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -5743,7 +5743,7 @@
   border-radius: 999px;
   background: rgba(3, 13, 17, 0.72);
   color: #75f6ff;
-  font-size: 0.56rem;
+  font-size: var(--fs-xs);
   line-height: 1;
   padding: 3px 6px;
 }
@@ -5773,7 +5773,7 @@
   border-radius: 999px;
   background: rgba(246, 200, 95, 0.08);
   color: #d9c78e;
-  font-size: 0.5rem;
+  font-size: var(--fs-xs);
   line-height: 1;
   padding: 3px 6px;
 }
@@ -5786,7 +5786,7 @@
   display: -webkit-box;
   overflow: hidden;
   color: rgba(221, 236, 241, 0.76);
-  font-size: 0.56rem;
+  font-size: var(--fs-xs);
   font-style: normal;
   line-height: 1.18;
   -webkit-box-orient: vertical;
@@ -5959,7 +5959,7 @@
   gap: 5px;
   align-items: center;
   color: rgba(210, 218, 221, 0.7);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -6081,7 +6081,7 @@
   border-radius: 3px;
   background: rgba(0, 0, 0, 0.72);
   color: rgba(248, 252, 255, 0.98);
-  font-size: clamp(0.68rem, 0.82vw, 0.84rem);
+  font-size: clamp(var(--fs-xs), 0.82vw, 0.84rem);
   font-weight: 950;
   letter-spacing: 0.05em;
   line-height: 1;
@@ -6149,12 +6149,12 @@
 
 .screen-glass:not(.is-preset-browser) .effect-svg-name {
   fill: rgba(235, 241, 242, 0.94);
-  font-size: 10px;
+  font-size: var(--fs-xs);
 }
 
 .screen-glass:not(.is-preset-browser) .effect-svg-status {
   fill: rgba(203, 214, 216, 0.68);
-  font-size: 8px;
+  font-size: var(--fs-xs);
 }
 
 .screen-glass:not(.is-preset-browser) .effect-svg-selected {
@@ -6472,4 +6472,99 @@
 .detail-section > .ir-source-note .ir-source-badge {
   color: #3a2424;
   border-color: #7a5656;
+}
+
+/* P6a: contrast via tokens (each pair ≥ 4.5:1, see src/styles/tokens.css) */
+.hardware-support-panels .panel-heading span,
+.audio-file-player .audio-upload-control span,
+.audio-file-player .audio-player-hint {
+  color: #3b2f32; /* 6.8:1 on the pink panel */
+}
+
+.control-knob-panel .hardware-knob-control > span,
+.control-knob-panel .hardware-knob-control > strong,
+.control-knob-panel .hardware-knob-empty > span,
+.control-knob-panel .hardware-knob-empty > strong {
+  color: #140f11; /* 5.1:1 on the knob bay */
+}
+
+.right-utility-panel .utility-readout > span,
+.right-utility-panel .tempo-readout > span,
+.right-utility-panel .tempo-readout > small,
+.right-utility-panel .master-volume-readout > span,
+.right-utility-panel .master-utility-knob > span,
+.master-status-bar .master-status-item > b {
+  color: var(--panel-fg-muted);
+}
+
+.right-utility-panel .utility-readout > strong,
+.right-utility-panel .master-utility-knob > strong {
+  color: var(--panel-fg);
+}
+
+.stomp-mode-toggle-row > button {
+  background: #3a3d40;
+  color: var(--panel-fg);
+}
+
+.stomp-mode-toggle-row > button.is-active {
+  background: #2e6b61;
+  color: #ffffff; /* 6.2:1 */
+}
+
+.preset-card-main > small {
+  color: var(--lcd-fg-muted);
+}
+
+/* The brand plate is drawn by gradients over a dark base; its text uses the LCD ink. */
+.hardware-brand {
+  background-color: #101013;
+}
+
+.hardware-brand > span,
+.hardware-brand > strong {
+  color: var(--lcd-fg);
+}
+
+/* P6a / U3: brand plate text stays inside the plate at every width */
+.hardware-brand {
+  padding: 14px 8px;
+}
+
+.hardware-brand span {
+  font-size: clamp(var(--fs-sm), 1.2vw, 1.4rem);
+  overflow-wrap: anywhere;
+}
+
+.hardware-brand strong {
+  max-width: 100%;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+/* U3: the right rack ear of the tuner no longer pushes the page sideways */
+.hardware-support-panels .detail-section.tuner-detail-section {
+  overflow-x: clip;
+}
+
+/* P6a: foot switch captions sit on the light metal plate, so they use dark ink */
+.stomp-category-switch strong {
+  color: #161a1d; /* ≥ 7:1 on the plate */
+}
+
+.stomp-category-switch small {
+  color: #05332e; /* ≥ 5:1 on the plate */
+}
+
+.hardware-brand {
+  padding: 14px 6px;
+}
+
+.hardware-brand strong {
+  letter-spacing: 0;
+}
+
+/* The metal plate's base colour (under its sheen gradients), so contrast checks see the real plate. */
+.foot-switch-panel.preset-stomp-panel {
+  background-color: #bbbfc0;
 }

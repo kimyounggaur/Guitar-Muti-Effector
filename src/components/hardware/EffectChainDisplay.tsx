@@ -184,8 +184,8 @@ function SortableEffectBlock({ pedal, selected, onSelect, onToggle }: SortableEf
       } ${pedal.bypassed ? 'is-bypassed' : ''} ${isDragging ? 'is-dragging' : ''}`}
       style={style}
     >
-      <span className="chain-effect-lcd-label" title={pedal.name}>
-        {truncateLabel(pedal.name.toUpperCase(), 13)}
+      <span className="chain-effect-lcd-label" title={pedal.name} aria-label={pedal.name}>
+        {shortLabels[pedal.type]}
       </span>
       <button
         type="button"

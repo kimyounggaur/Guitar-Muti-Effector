@@ -1,0 +1,30 @@
+/* Design tokens (design §3.6). Loaded before every other stylesheet.
+   Text never goes below --fs-xs (12px); every bg/fg pair below keeps a 4.5:1 contrast ratio or more. */
+:root {
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 15px;
+  --fs-lg: 18px;
+  --fs-xl: 24px;
+  --fs-2xl: 32px;
+
+  --hit-min: 44px;
+
+  /* LCD screen: #0a0c14 */
+  --lcd-bg: #0a0c14;
+  --lcd-fg: #f4f6f8;        /* 18.0:1 */
+  --lcd-fg-muted: #a3a9b5;  /* 8.3:1 */
+
+  /* Hardware panel: #2b272a */
+  --panel-bg: #2b272a;
+  --panel-fg: #f2ebe6;      /* 12.5:1 */
+  --panel-fg-muted: #b5a8ab; /* 6.4:1 */
+
+  /* Rack face: #898a88 */
+  --rack-bg: #898a88;
+  --rack-fg: #0f1011;       /* 5.5:1 */
+
+  /* Accent and danger text on --lcd-bg */
+  --accent: #5fd3c0;        /* 10.8:1 */
+  --danger: #ff7a7a;        /* 7.7:1 */
+}
