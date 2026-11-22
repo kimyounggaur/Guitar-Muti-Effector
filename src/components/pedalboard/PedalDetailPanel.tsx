@@ -3,6 +3,7 @@ import { Pedal, PedalParamValue, PedalType } from '../../audio/types';
 import { subscribeCompressorReduction } from '../../audio/nodes/CompressorEffect';
 import { useElementVisible } from '../../hooks/useElementVisible';
 import { usePedalStore } from '../../store/pedalStore';
+import { saveSessionNow } from '../../store/persistence';
 import { getParamSpec } from '../../audio/params/schema';
 import KnobControl from '../controls/KnobControl';
 import AmpEQPedal from '../effects/AmpEQPedal';
@@ -127,7 +128,6 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
   const updatePedalParam = usePedalStore((state) => state.updatePedalParam);
   const setSelectedPedal = usePedalStore((state) => state.setSelectedPedal);
   const resetPedals = usePedalStore((state) => state.resetPedals);
-  const savePedalsToStorage = usePedalStore((state) => state.savePedalsToStorage);
   const selectedPedal = useMemo(
     () => pedals.find((pedal) => pedal.id === selectedPedalId) ?? pedals[0] ?? null,
     [pedals, selectedPedalId],
@@ -227,7 +227,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
         />
 
         <div className="detail-actions amp-eq-detail-actions">
-          <button type="button" onClick={savePedalsToStorage}>
+          <button type="button" onClick={saveSessionNow}>
             페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
@@ -257,7 +257,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
         />
 
         <div className="detail-actions tuner-detail-actions">
-          <button type="button" onClick={savePedalsToStorage}>
+          <button type="button" onClick={saveSessionNow}>
             페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
@@ -279,7 +279,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
         />
 
         <div className="detail-actions noise-gate-detail-actions">
-          <button type="button" onClick={savePedalsToStorage}>
+          <button type="button" onClick={saveSessionNow}>
             페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
@@ -304,7 +304,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
         />
 
         <div className="detail-actions compressor-detail-actions">
-          <button type="button" onClick={savePedalsToStorage}>
+          <button type="button" onClick={saveSessionNow}>
             페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
@@ -329,7 +329,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
         />
 
         <div className="detail-actions drive-rack-detail-actions">
-          <button type="button" onClick={savePedalsToStorage}>
+          <button type="button" onClick={saveSessionNow}>
             페달 설정 저장
           </button>
           <button type="button" onClick={handleReset}>
@@ -386,7 +386,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
       </div>
 
       <div className="detail-actions">
-        <button type="button" onClick={savePedalsToStorage}>
+        <button type="button" onClick={saveSessionNow}>
           페달 설정 저장
         </button>
         <button type="button" onClick={handleReset}>

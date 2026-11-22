@@ -1,8 +1,5 @@
 import { create } from 'zustand';
-import { writeLocal } from './safeStorage';
 import { Pedal, PedalParamValue, createDefaultPedals, normalizePedals } from '../audio/types';
-
-const PEDAL_STORAGE_KEY = 'guitar-multi-effector-pedals-v1';
 
 type PedalStore = {
   pedals: Pedal[];
@@ -17,32 +14,11 @@ type PedalStore = {
   setDraggingPedal: (id: string | null) => void;
   reorderPedals: (oldIndex: number, newIndex: number) => void;
   resetPedals: () => void;
-  savePedalsToStorage: () => void;
-  loadPedalsFromStorage: () => void;
 };
-
-const clonePedals = (pedals: Pedal[]) =>
-  pedals.map((pedal) => ({
-    ...pedal,
-    params: { ...pedal.params },
-  }));
 
 const mergeWithDefaultPedals = (pedals: unknown) => normalizePedals(pedals);
 
-const readStoredPedals = () => {
-  try {
-    const raw = window.localStorage.getItem(PEDAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-};
-
-const writeStoredPedals = (pedals: Pedal[]) => {
-  writeLocal(PEDAL_STORAGE_KEY, JSON.stringify(pedals));
-};
-
-export const usePedalStore = create<PedalStore>((set, get) => ({
+export const usePedalStore = create<PedalStore>((set) => ({
   pedals: createDefaultPedals(),
   activePedalId: null,
   selectedPedalId: null,
@@ -76,7 +52,6 @@ export const usePedalStore = create<PedalStore>((set, get) => ({
     })),
   setPedals: (pedals) => {
     const nextPedals = mergeWithDefaultPedals(pedals);
-    writeStoredPedals(nextPedals);
     set({
       pedals: nextPedals,
       activePedalId: null,
@@ -101,23 +76,11 @@ export const usePedalStore = create<PedalStore>((set, get) => ({
       const pedals = [...state.pedals];
       const [movedPedal] = pedals.splice(oldIndex, 1);
       pedals.splice(newIndex, 0, movedPedal);
-      writeStoredPedals(pedals);
 
       return { pedals };
     }),
   resetPedals: () => {
     const pedals = createDefaultPedals();
-    writeStoredPedals(pedals);
     set({ pedals, activePedalId: null, selectedPedalId: null, draggingPedalId: null });
-  },
-  savePedalsToStorage: () => writeStoredPedals(get().pedals),
-  loadPedalsFromStorage: () => {
-    const storedPedals = readStoredPedals();
-
-    if (storedPedals) {
-      const pedals = mergeWithDefaultPedals(storedPedals);
-      writeStoredPedals(pedals);
-      set({ pedals, selectedPedalId: pedals[0]?.id ?? null });
-    }
   },
 }));
