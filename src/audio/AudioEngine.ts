@@ -12,7 +12,7 @@ import { ReverbEffect } from './nodes/ReverbEffect';
 import { RhythmNode } from './nodes/RhythmNode';
 import { createSafetyLimiter, prepareSafetyLimiter } from './nodes/SafetyLimiterEffect';
 import { TunerNode } from './nodes/TunerNode';
-import { EffectNodeWrapper, Pedal, PedalParamValue, PedalType } from './types';
+import { EffectNodeWrapper, InputChannel, Pedal, PedalParamValue, PedalType } from './types';
 import { TEMPO, clampTempo } from './params/schema';
 
 export type AudioEngineState = {
@@ -20,7 +20,7 @@ export type AudioEngineState = {
   latencyHint: string;
 };
 
-export type InputChannel = '1' | '2' | 'mix';
+export type { InputChannel } from './types';
 
 const createInputConstraints = (deviceId: string): MediaStreamConstraints => ({
   audio: {

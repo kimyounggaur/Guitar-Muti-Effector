@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { scrollTargetRef } from '../../app/scrollTargets';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import PatchHeader from './PatchHeader';
 
@@ -26,7 +27,7 @@ function CentralScreen({
   const isBrowsingPresets = Boolean(presetBrowser);
 
   return (
-    <section className="central-screen" aria-label="페달 화면">
+    <section ref={scrollTargetRef('board')} className="central-screen" aria-label="페달 화면">
       <div className="screen-bezel">
         <div className={`screen-glass ${isBrowsingPresets ? 'is-preset-browser' : ''}`}>
           <PatchHeader

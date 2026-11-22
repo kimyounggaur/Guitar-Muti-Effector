@@ -15,6 +15,9 @@ import { clampParam, defaultParams, getParamSpec } from './params/schema';
 
 export type PedalParamValue = number | string | boolean;
 
+/** Which interface input feeds the chain. */
+export type InputChannel = '1' | '2' | 'mix';
+
 export type Pedal = {
   id: string;
   type: PedalType;

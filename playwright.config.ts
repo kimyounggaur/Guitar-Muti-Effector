@@ -4,6 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
 // Audio probes that need source modules (AudioWorklet ?worker&url imports) use the Vite dev server on 5174.
 export default defineConfig({
   testDir: 'tests/e2e',
+  snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{arg}{ext}',
   timeout: 120_000,
   fullyParallel: false,
   workers: 1,

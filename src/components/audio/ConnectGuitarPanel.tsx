@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import DeviceSelector from './DeviceSelector';
 import { useAudioStore } from '../../store/audioStore';
-import type { InputChannel } from '../../audio/AudioEngine';
+import type { InputChannel } from '../../audio/types';
 
 type ConnectGuitarPanelProps = {
   isAudioReady: boolean;

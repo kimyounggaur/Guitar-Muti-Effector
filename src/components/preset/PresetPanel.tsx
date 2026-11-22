@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { scrollTargetRef } from '../../app/scrollTargets';
 import { useAudioStore } from '../../store/audioStore';
 import { usePedalStore } from '../../store/pedalStore';
 import {
@@ -128,7 +129,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
 
   return (
     <section className="preset-section preset-library-section" aria-label="프리셋 라이브러리">
-      <details className="preset-browser-frame">
+      <details ref={scrollTargetRef('presets')} className="preset-browser-frame">
         <summary>프리셋 라이브러리 열기 · {presets.length}개</summary>
         <header className="preset-browser-topline">
           <span>프리셋 라이브러리</span>

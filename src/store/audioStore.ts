@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { MeterReading, emptyMeterReading } from '../audio/nodes/MeterNode';
-import type { InputChannel } from '../audio/AudioEngine';
+import type { InputChannel } from '../audio/types';
 
 export type AudioStoreState = {
   isAudioReady: boolean;
