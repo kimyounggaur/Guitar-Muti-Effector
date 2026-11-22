@@ -43,6 +43,9 @@ export class AudioEngine {
   private mediaElementSource: MediaElementAudioSourceNode | null = null;
   private masterGain: GainNode | null = null;
   private presetTrimGain: GainNode | null = null;
+  // Volume pedal (decision S4-a): sits before the preset trim and can only attenuate (0..1).
+  private expressionGain: GainNode | null = null;
+  private expressionValue = 1;
   private presetTrimDb = 0;
   private safetyLimiter: AudioWorkletNode | null = null;
   private chainOutput: GainNode | null = null;
@@ -144,6 +147,17 @@ export class AudioEngine {
     const now = this.audioContext.currentTime;
     this.masterGain.gain.cancelScheduledValues(now);
     this.masterGain.gain.setTargetAtTime(volume, now, 0.015);
+  }
+
+  /** Expression (volume) pedal position, 0..1. Never boosts and never changes the master volume. */
+  setExpression(value: number) {
+    this.expressionValue = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 1;
+    if (this.expressionGain && this.audioContext) {
+      const gain = this.expressionGain.gain;
+      const now = this.audioContext.currentTime;
+      gain.cancelScheduledValues(now);
+      gain.setTargetAtTime(this.expressionValue, now, 0.015);
+    }
   }
 
   setPresetTrimDb(db: number) {
@@ -300,6 +314,7 @@ export class AudioEngine {
     this.audioContext = null;
     this.masterGain = null;
     this.presetTrimGain = null;
+    this.expressionGain = null;
     this.safetyLimiter = null;
     this.chainOutput = null;
     this.inputMeter = null;
@@ -339,6 +354,8 @@ export class AudioEngine {
     this.masterGain = this.audioContext.createGain();
     this.presetTrimGain = this.audioContext.createGain();
     this.presetTrimGain.gain.value = 10 ** (this.presetTrimDb / 20);
+    this.expressionGain = this.audioContext.createGain();
+    this.expressionGain.gain.value = this.expressionValue;
     this.safetyLimiter = createSafetyLimiter(this.audioContext);
     this.chainOutput = this.audioContext.createGain();
     this.inputMeter = new MeterNode(this.audioContext);
@@ -398,7 +415,13 @@ export class AudioEngine {
 
   private connectSafeOutput() {
     if (!this.chainOutput || !this.outputMeter || !this.presetTrimGain || !this.safetyLimiter || !this.masterGain || !this.audioContext) return;
-    this.chainOutput.connect(this.presetTrimGain);
+    // chainOutput → expressionGain (volume pedal, attenuation only) → presetTrim → safetyLimiter → master → meter → destination
+    if (this.expressionGain) {
+      this.chainOutput.connect(this.expressionGain);
+      this.expressionGain.connect(this.presetTrimGain);
+    } else {
+      this.chainOutput.connect(this.presetTrimGain);
+    }
     this.presetTrimGain.connect(this.safetyLimiter);
     this.safetyLimiter.connect(this.masterGain);
     this.masterGain.connect(this.outputMeter.input);
@@ -425,6 +448,7 @@ export class AudioEngine {
     safeDisconnect(this.mediaElementSource);
     safeDisconnect(this.inputMeter?.input ?? null);
     safeDisconnect(this.outputMeter?.input ?? null);
+    safeDisconnect(this.expressionGain);
     safeDisconnect(this.presetTrimGain);
     safeDisconnect(this.safetyLimiter);
     safeDisconnect(this.chainOutput);

@@ -40,6 +40,7 @@ function App() {
   const latencyHint = useAudioStore((state) => state.latencyHint);
   const errorMessage = useAudioStore((state) => state.errorMessage);
   const masterVolume = useAudioStore((state) => state.masterVolume);
+  const expression = useAudioStore((state) => state.expression);
   const presets = usePresetStore((state) => state.presets);
   const activePresetId = usePresetStore((state) => state.activePresetId);
   const currentPresetName = usePresetStore((state) => state.currentPresetName);
@@ -302,6 +303,11 @@ function App() {
     [setMasterVolume],
   );
 
+  const handleExpressionChange = useCallback((value: number) => {
+    useAudioStore.getState().setExpression(value);
+    audioEngineRef.current.setExpression(useAudioStore.getState().expression);
+  }, []);
+
   const handlePanic = useCallback(async () => {
     const operation = ++audioOperationRef.current;
     setIsConnecting(true);
@@ -532,9 +538,10 @@ function App() {
         }
         expressionPedal={
           <ExpressionPedal
-            value={Math.round(masterVolume * 100)}
-            targetLabel="MASTER"
-            onChange={(value) => handleMasterVolumeChange(value / 100)}
+            value={Math.round(expression * 100)}
+            targetLabel="VOLUME"
+            masterPercent={Math.round(masterVolume * 100)}
+            onChange={(value) => handleExpressionChange(value / 100)}
           />
         }
         masterStatusBar={

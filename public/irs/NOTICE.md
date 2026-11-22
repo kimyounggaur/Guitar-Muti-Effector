@@ -15,3 +15,17 @@ permission to redistribute and adapt it without conditions.
 Other cabinet types and microphone choices use the app's synthetic fallback.
 The factory pack does not contain ribbon or condenser microphone captures;
 those options must not be described as recorded microphones.
+
+## Synthetic ("합성") choices
+
+The app labels every choice below as "합성" (synthetic) next to the option:
+
+| Pedal | Choice | Impulse response |
+| --- | --- | --- |
+| Cabinet | 4x12 + Dynamic, 4x12 + Mixed | Recorded (files above) |
+| Cabinet | 4x12 + Ribbon, 4x12 + Condenser | Synthetic |
+| Cabinet | 1x12, 2x12, Open Back (any microphone) | Synthetic |
+| Cabinet | 사용자 IR | The user's own WAV file (kept in the current tab only) |
+| Reverb | Room, Hall, Plate, Spring, Ambient | Synthetic |
+
+No other recorded impulse responses are bundled. Adding one requires checking its licence first.

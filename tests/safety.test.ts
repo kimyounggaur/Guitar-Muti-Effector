@@ -248,3 +248,49 @@ test('every final output passes trim, limiter and master before the output meter
   assert.deepEqual(master.outputs, [meter]);
   assert.deepEqual(meter.outputs, [destination]);
 });
+
+test('expression gain sits between the chain output and the preset trim', () => {
+  const engine = new AudioEngine() as any;
+  const bus = new FakeNode(), expression = new FakeNode(), trim = new FakeNode(), limiter = new FakeNode();
+  const master = new FakeNode(), meter = new FakeNode(), destination = new FakeNode();
+  engine.audioContext = { destination };
+  engine.chainOutput = bus;
+  engine.expressionGain = expression;
+  engine.presetTrimGain = trim;
+  engine.safetyLimiter = limiter;
+  engine.masterGain = master;
+  engine.outputMeter = { input: meter, output: meter };
+  engine.connectSafeOutput();
+  assert.deepEqual(bus.outputs, [expression]);
+  assert.deepEqual(expression.outputs, [trim]);
+  assert.deepEqual(trim.outputs, [limiter]);
+  assert.deepEqual(limiter.outputs, [master]);
+  assert.deepEqual(master.outputs, [meter]);
+  assert.deepEqual(meter.outputs, [destination]);
+});
+
+test('expression pedal never exceeds master', () => {
+  const engine = new AudioEngine() as any;
+  const expression = new Parameter(), master = new Parameter();
+  engine.audioContext = { currentTime: 0 };
+  engine.expressionGain = { gain: expression };
+  engine.masterGain = { gain: master };
+  engine.setMasterVolume(0.3);
+  for (const value of [1, 1.5, 100, Infinity, NaN]) {
+    engine.setExpression(value);
+    assert.ok(expression.value >= 0 && expression.value <= 1, `expression ${value} → ${expression.value}`);
+    // Gain after the master stage (trim ≤ 1, limiter never amplifies): expression × master.
+    assert.ok(expression.value * master.value <= 0.3 + 1e-12);
+  }
+  engine.setExpression(-2);
+  assert.equal(expression.value, 0);
+});
+
+test('expression pedal does not change master volume state', () => {
+  const engine = new AudioEngine() as any;
+  engine.setMasterVolume(0.42);
+  const before = engine.currentMasterVolume;
+  engine.setExpression(0.1);
+  engine.setExpression(1);
+  assert.equal(engine.currentMasterVolume, before);
+});

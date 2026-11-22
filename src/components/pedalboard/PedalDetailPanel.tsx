@@ -90,11 +90,11 @@ const selectOptions: Partial<Record<PedalType, Record<string, Array<[string, str
   },
   reverb: {
     mode: [
-      ['room', 'Room'],
-      ['hall', 'Hall'],
-      ['plate', 'Plate'],
-      ['spring', 'Spring'],
-      ['ambient', 'Ambient'],
+      ['room', 'Room · 합성'],
+      ['hall', 'Hall · 합성'],
+      ['plate', 'Plate · 합성'],
+      ['spring', 'Spring · 합성'],
+      ['ambient', 'Ambient · 합성'],
     ],
   },
   looper: {
@@ -274,9 +274,6 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
           <button type="button" onClick={handleReset}>
             전체 초기화
           </button>
-          <button type="button" onClick={() => setSelectedPedal('ampEQ')}>
-            Amp EQ
-          </button>
         </div>
       </section>
     );
@@ -377,6 +374,12 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
           </button>
         </div>
       </div>
+
+      {selectedPedal.type === 'reverb' ? (
+        <p className="ir-source-note">
+          <span className="ir-source-badge">합성</span> 모든 리버브 모드는 앱이 만든 합성 임펄스를 사용합니다.
+        </p>
+      ) : null}
 
       <div className="detail-body">
         <MiniGraph pedal={selectedPedal} />
@@ -762,20 +765,11 @@ function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamChange }: NoiseG
 
       <button type="button" className={`noise-rack-auto ${pedal.enabled ? 'is-on' : ''}`} onClick={onToggle}>
         <i aria-hidden="true">ON</i>
-        <span>Auto mode</span>
-        <strong>{pedal.enabled ? 'Auto' : 'Off'}</strong>
+        <span>게이트 켜기</span>
+        <strong>{pedal.enabled ? '켜짐' : '꺼짐'}</strong>
       </button>
 
       <div className="noise-rack-knobs">
-        <RackDial
-          label="Depth"
-          value={sensitivity}
-          min={0}
-          max={100}
-          step={1}
-          suffix=""
-          onChange={(value) => onParamChange('thresholdDb', -60 + (value / 100) * 50)}
-        />
         <RackDial
           label="Attack"
           value={attack}
@@ -795,7 +789,7 @@ function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamChange }: NoiseG
           onChange={(value) => onParamChange('holdMs', value)}
         />
         <RackDial
-          label="Decay"
+          label="릴리스"
           value={release}
           min={20}
           max={500}
