@@ -1,6 +1,9 @@
 import { PedalParamValue } from '../types';
 import { DriveMode, clamp, createDriveCurve, isDriveMode, percentToUnit } from '../utils/curves';
 import { BaseEffect } from './BaseEffect';
+import { PEDAL_SCHEMAS } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.drive;
 
 const asNumber = (value: PedalParamValue, fallback = 0) => (typeof value === 'number' ? value : fallback);
 
@@ -50,7 +53,7 @@ export class DriveEffect extends BaseEffect {
       this.applyAll();
     });
     this.paramHandlers.set('drive', (value) => {
-      this.drive = clamp(asNumber(value, 48), 0, 100);
+      this.drive = clamp(asNumber(value, S.drive.default), S.drive.min, S.drive.max);
       this.applyDrive();
     });
     this.paramHandlers.set('gain', (value) => {
@@ -58,16 +61,16 @@ export class DriveEffect extends BaseEffect {
       this.applyDrive();
     });
     this.paramHandlers.set('tone', (value) => {
-      this.tone = clamp(asNumber(value, 58), 0, 100);
+      this.tone = clamp(asNumber(value, S.tone.default), S.tone.min, S.tone.max);
       this.applyTone();
     });
     this.paramHandlers.set('level', (value) => {
-      this.level = clamp(asNumber(value, 72), 0, 100);
+      this.level = clamp(asNumber(value, S.level.default), S.level.min, S.level.max);
       this.applyLevel();
     });
     this.paramHandlers.set('mix', (value) => this.setMix(percentToUnit(asNumber(value, 100), 100)));
     this.paramHandlers.set('bias', (value) => {
-      this.bias = clamp(asNumber(value, 0), -1, 1);
+      this.bias = clamp(asNumber(value, S.bias.default), S.bias.min, S.bias.max);
       this.updateCurve();
     });
   }

@@ -1,5 +1,5 @@
 import { EffectNodeWrapper, PedalParamValue, PedalType } from '../types';
-import { getTempoBpm } from '../../store/tempoStore';
+import { TEMPO, clampTempo } from '../params/schema';
 import looperProcessorUrl from '../worklets/looper-processor.ts?worker&url';
 
 export type LooperState = 'idle' | 'recording' | 'playing' | 'overdubbing' | 'stopped' | 'loading' | 'error';
@@ -61,7 +61,8 @@ export class LooperNode implements EffectNodeWrapper {
   private pendingParams = new Map<string, PedalParamValue>();
 
   constructor(private readonly context: AudioContext, readonly id: string) {
-    this.pendingParams.set('bpm', getTempoBpm());
+    // The engine passes the shared tempo with setTempo() right after creation.
+    this.pendingParams.set('bpm', TEMPO.default);
     // Browser output latency is an estimate; input interface latency is not exposed.
     this.pendingParams.set('latencyMs', Math.max(0, (context.baseLatency + (context.outputLatency || 0)) * 1000));
     this.input = context.createGain();
@@ -95,6 +96,12 @@ export class LooperNode implements EffectNodeWrapper {
 
     this.pendingParams.set(name, value);
     if (name !== 'level') this.postParam(name, value);
+  }
+
+  setTempo(bpm: number) {
+    const value = clampTempo(bpm);
+    this.pendingParams.set('bpm', value);
+    this.postParam('bpm', value);
   }
 
   setBypass(bypassed: boolean) {

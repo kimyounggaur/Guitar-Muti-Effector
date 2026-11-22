@@ -8,6 +8,9 @@ import {
   isTunerMode,
 } from '../utils/pitch';
 import { BaseEffect } from './BaseEffect';
+import { PEDAL_SCHEMAS } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.tuner;
 
 export type TunerReading = {
   frequency: number | null;
@@ -67,19 +70,19 @@ export class TunerNode extends BaseEffect {
     this.start();
 
     this.paramHandlers.set('referenceA4', (value) => {
-      this.referenceA4 = clamp(asNumber(value, 440), 430, 450);
+      this.referenceA4 = clamp(asNumber(value, S.referenceA4.default), S.referenceA4.min, S.referenceA4.max);
     });
     this.paramHandlers.set('referenceHz', (value) => {
-      this.referenceA4 = clamp(asNumber(value, 440), 430, 450);
+      this.referenceA4 = clamp(asNumber(value, S.referenceA4.default), S.referenceA4.min, S.referenceA4.max);
     });
     this.paramHandlers.set('mode', (value) => {
       this.tunerMode = isTunerMode(value) ? value : 'guitar';
     });
     this.paramHandlers.set('sensitivity', (value) => {
-      this.sensitivity = clamp(asNumber(value, 64), 0, 100);
+      this.sensitivity = clamp(asNumber(value, S.sensitivity.default), S.sensitivity.min, S.sensitivity.max);
     });
     this.paramHandlers.set('smoothing', (value) => {
-      this.smoothing = clamp(asNumber(value, 62), 0, 100);
+      this.smoothing = clamp(asNumber(value, S.smoothing.default), S.smoothing.min, S.smoothing.max);
     });
   }
 

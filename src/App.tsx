@@ -108,6 +108,11 @@ function App() {
           useAudioStore.getState().setMasterVolume(Math.min(1, Math.max(0, session.masterVolume)));
         }
         if (typeof session.tempoBpm === 'number' && Number.isFinite(session.tempoBpm)) useTempoStore.getState().setBpm(session.tempoBpm);
+        else {
+          // Older sessions kept the tempo inside pedal params.
+          const legacyBpm = session.pedals.map((pedal: { params?: { bpm?: unknown } }) => pedal?.params?.bpm).find((bpm: unknown) => typeof bpm === 'number' && Number.isFinite(bpm));
+          if (typeof legacyBpm === 'number') useTempoStore.getState().setBpm(legacyBpm);
+        }
         const existing = usePresetStore.getState().presets.find((p) => p.id === session.activePresetId);
         useAudioStore.getState().setPresetTrimDb(typeof session.outputTrimDb === 'number' ? session.outputTrimDb : existing?.outputTrimDb ?? 0);
         usePresetStore.getState().restoreSelection(existing?.id ?? null, existing?.name ?? '사용자 설정');
@@ -173,17 +178,11 @@ function App() {
   }, [resetAudioState, setErrorMessage, setMasterVolume]);
 
   useEffect(() => {
-    const syncTempo = (bpm: number) => {
-      const syncedPedals = usePedalStore.getState().pedals.filter(
-        (pedal) => pedal.type === 'rhythm' || pedal.type === 'looper' || ((pedal.type === 'delay' || pedal.type === 'modulation') && pedal.params.sync === true),
-      );
-      syncedPedals.forEach((pedal) => {
-        if (pedal.params.bpm !== bpm) usePedalStore.getState().updatePedalParam(pedal.id, 'bpm', bpm);
-        audioEngineRef.current.setPedalParam(pedal.id, 'bpm', bpm);
-      });
-    };
-    syncTempo(useTempoStore.getState().bpm);
-    return useTempoStore.subscribe((state, previous) => { if (state.bpm !== previous.bpm) syncTempo(state.bpm); });
+    // The tempo lives in tempoStore only; the engine forwards it to tempo-aware effects.
+    audioEngineRef.current.setTempo(useTempoStore.getState().bpm);
+    return useTempoStore.subscribe((state, previous) => {
+      if (state.bpm !== previous.bpm) audioEngineRef.current.setTempo(state.bpm);
+    });
   }, []);
 
   useEffect(() => {
@@ -233,6 +232,7 @@ function App() {
     try {
       const state = await audioEngineRef.current.connect(selectedDeviceId, 0);
       if (operation !== audioOperationRef.current) return;
+      audioEngineRef.current.setTempo(useTempoStore.getState().bpm);
       audioEngineRef.current.setMasterVolume(useAudioStore.getState().masterVolume);
       setSampleRate(state.sampleRate);
       setLatencyHint(state.latencyHint);
@@ -422,11 +422,6 @@ function App() {
       useAudioStore.getState().setPresetTrimDb(preset.outputTrimDb);
       usePedalStore.getState().setPedals(preset.pedals);
       useTempoStore.getState().setBpm(preset.tempoBpm);
-      usePedalStore.getState().pedals.forEach((pedal) => {
-        if (pedal.type === 'rhythm' || pedal.type === 'looper' || ((pedal.type === 'delay' || pedal.type === 'modulation') && pedal.params.sync === true)) {
-          usePedalStore.getState().updatePedalParam(pedal.id, 'bpm', preset.tempoBpm);
-        }
-      });
 
       window.requestAnimationFrame(() => {
         const nextPedals = usePedalStore.getState().pedals;

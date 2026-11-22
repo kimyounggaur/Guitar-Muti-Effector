@@ -1,5 +1,8 @@
 import { BaseEffect } from './BaseEffect';
 import processorUrl from '../worklets/noise-gate-processor.ts?worker&url';
+import { PEDAL_SCHEMAS, clampNumberParam } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.noiseGate;
 
 const loadedContexts = new WeakMap<AudioContext, Promise<void>>();
 
@@ -22,9 +25,9 @@ export class NoiseGateEffect extends BaseEffect {
       outputChannelCount: [2],
     });
     this.connectWet(gate);
-    for (const name of ['thresholdDb', 'attackMs', 'holdMs', 'releaseMs']) {
+    for (const name of ['thresholdDb', 'attackMs', 'holdMs', 'releaseMs'] as const) {
       this.paramHandlers.set(name, (value) => {
-        if (typeof value === 'number' && Number.isFinite(value)) gate.port.postMessage({ name, value });
+        if (typeof value === 'number' && Number.isFinite(value)) gate.port.postMessage({ name, value: clampNumberParam(S[name], value) });
       });
     }
   }

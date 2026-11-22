@@ -6,6 +6,9 @@ import {
   readReverbMode,
 } from '../utils/impulse';
 import { BaseEffect } from './BaseEffect';
+import { PEDAL_SCHEMAS } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.reverb;
 
 type ReverbLane = {
   preDelay: DelayNode;
@@ -59,11 +62,11 @@ export class ReverbEffect extends BaseEffect {
 
     this.paramHandlers.set('mode', (value) => {
       this.mode = readReverbMode(value);
-      this.decay = clamp(this.decay || defaultDecayForMode(this.mode), 0.2, 10);
+      this.decay = clamp(this.decay || defaultDecayForMode(this.mode), S.decay.min, S.decay.max);
       this.scheduleImpulse();
     });
     this.paramHandlers.set('decay', (value) => {
-      this.decay = clamp(asNumber(value, defaultDecayForMode(this.mode)), 0.2, 10);
+      this.decay = clamp(asNumber(value, defaultDecayForMode(this.mode)), S.decay.min, S.decay.max);
       this.scheduleImpulse();
     });
     this.paramHandlers.set('size', (value) => {
@@ -71,15 +74,15 @@ export class ReverbEffect extends BaseEffect {
       this.scheduleImpulse();
     });
     this.paramHandlers.set('preDelay', (value) => {
-      this.preDelayMs = clamp(asNumber(value, 22), 0, 200);
+      this.preDelayMs = clamp(asNumber(value, S.preDelay.default), S.preDelay.min, S.preDelay.max);
       smoothParam(context, this.activeLane.preDelay.delayTime, this.preDelayMs / 1000, 0.018);
     });
     this.paramHandlers.set('lowCut', (value) => {
-      this.lowCutFrequency = clamp(asNumber(value, 120), 20, 500);
+      this.lowCutFrequency = clamp(asNumber(value, S.lowCut.default), S.lowCut.min, S.lowCut.max);
       smoothParam(context, this.activeLane.lowCut.frequency, this.lowCutFrequency, 0.018);
     });
     this.paramHandlers.set('highCut', (value) => {
-      this.highCutFrequency = clamp(asNumber(value, 7600), 1000, 12000);
+      this.highCutFrequency = clamp(asNumber(value, S.highCut.default), S.highCut.min, S.highCut.max);
       smoothParam(context, this.activeLane.highCut.frequency, this.highCutFrequency, 0.018);
     });
     this.paramHandlers.set('damping', (value) => {
@@ -91,7 +94,7 @@ export class ReverbEffect extends BaseEffect {
       this.setMix(numberValue <= 1 ? numberValue : percentToUnit(numberValue, 24));
     });
     this.paramHandlers.set('level', (value) => {
-      this.level = clamp(asNumber(value, 72), 0, 100);
+      this.level = clamp(asNumber(value, S.level.default), S.level.min, S.level.max);
       smoothParam(context, this.activeLane.levelGain.gain, this.levelToGain(), 0.018);
     });
   }

@@ -1,5 +1,8 @@
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
+import { PEDAL_SCHEMAS, TEMPO, clampTempo } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.modulation;
 
 export type ModulationMode = 'chorus' | 'flanger' | 'phaser' | 'tremolo' | 'vibrato';
 export type ModulationDivision = '1/1' | '1/2' | '1/4' | '1/8' | 'dotted1/8' | '1/16';
@@ -51,7 +54,7 @@ export class ModulationEffect extends BaseEffect {
   private tone = 68;
   private stereoWidth = 52;
   private sync = false;
-  private bpm = 120;
+  private bpm: number = TEMPO.default;
   private division: ModulationDivision = '1/4';
 
   constructor(context: AudioContext, id: string) {
@@ -204,15 +207,15 @@ export class ModulationEffect extends BaseEffect {
       this.applyTone();
     });
     this.paramHandlers.set('rate', (value) => {
-      this.rate = clamp(asNumber(value, 0.85), 0.05, 20);
+      this.rate = clamp(asNumber(value, S.rate.default), S.rate.min, S.rate.max);
       this.applyRate();
     });
     this.paramHandlers.set('depth', (value) => {
-      this.depth = clamp(asNumber(value, 44), 0, 100);
+      this.depth = clamp(asNumber(value, S.depth.default), S.depth.min, S.depth.max);
       this.applyDepth();
     });
     this.paramHandlers.set('feedback', (value) => {
-      this.feedback = clamp(asNumber(value, 0.18), 0, 0.95);
+      this.feedback = clamp(asNumber(value, S.feedback.default), S.feedback.min, S.feedback.max);
       this.applyFeedback();
     });
     this.paramHandlers.set('mix', (value) => {
@@ -220,25 +223,26 @@ export class ModulationEffect extends BaseEffect {
       this.setMix(numberValue <= 1 ? numberValue : percentToUnit(numberValue, 42));
     });
     this.paramHandlers.set('tone', (value) => {
-      this.tone = clamp(asNumber(value, 68), 0, 100);
+      this.tone = clamp(asNumber(value, S.tone.default), S.tone.min, S.tone.max);
       this.applyTone();
     });
     this.paramHandlers.set('stereoWidth', (value) => {
-      this.stereoWidth = clamp(asNumber(value, 52), 0, 100);
+      this.stereoWidth = clamp(asNumber(value, S.stereoWidth.default), S.stereoWidth.min, S.stereoWidth.max);
       this.applyWidth();
     });
     this.paramHandlers.set('sync', (value) => {
       this.sync = value === true;
       this.applyRate();
     });
-    this.paramHandlers.set('bpm', (value) => {
-      this.bpm = clamp(asNumber(value, 120), 40, 240);
-      this.applyRate();
-    });
     this.paramHandlers.set('division', (value) => {
       this.division = readDivision(value);
       this.applyRate();
     });
+  }
+
+  setTempo(bpm: number) {
+    this.bpm = clampTempo(bpm);
+    this.applyRate();
   }
 
   private applyAll(smooth = true) {

@@ -1,5 +1,8 @@
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
+import { PEDAL_SCHEMAS, TEMPO, clampTempo } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.delay;
 
 type DelayMode = 'digital' | 'analog' | 'tape' | 'slapback' | 'pingpong';
 type DelayDivision = '1/4' | '1/8' | 'dotted1/8' | '1/16';
@@ -39,7 +42,7 @@ export class DelayEffect extends BaseEffect {
   private feedback = 0.32;
   private tone = 62;
   private sync = false;
-  private bpm = 120;
+  private bpm: number = TEMPO.default;
   private division: DelayDivision = '1/4';
   private flutter = 0;
 
@@ -101,11 +104,11 @@ export class DelayEffect extends BaseEffect {
       this.applyFlutter();
     });
     this.paramHandlers.set('timeMs', (value) => {
-      this.timeMs = clamp(asNumber(value, 420), 20, 2000);
+      this.timeMs = clamp(asNumber(value, S.timeMs.default), S.timeMs.min, S.timeMs.max);
       this.applyTime();
     });
     this.paramHandlers.set('feedback', (value) => {
-      this.feedback = clamp(asNumber(value, 0.32), 0, 0.85);
+      this.feedback = clamp(asNumber(value, S.feedback.default), S.feedback.min, S.feedback.max);
       this.applyFeedback();
     });
     this.paramHandlers.set('mix', (value) => {
@@ -113,15 +116,11 @@ export class DelayEffect extends BaseEffect {
       this.setMix(numberValue <= 1 ? numberValue : percentToUnit(numberValue, 28));
     });
     this.paramHandlers.set('tone', (value) => {
-      this.tone = clamp(asNumber(value, 62), 0, 100);
+      this.tone = clamp(asNumber(value, S.tone.default), S.tone.min, S.tone.max);
       this.applyTone();
     });
     this.paramHandlers.set('sync', (value) => {
       this.sync = value === true;
-      this.applyTime();
-    });
-    this.paramHandlers.set('bpm', (value) => {
-      this.bpm = clamp(asNumber(value, 120), 40, 240);
       this.applyTime();
     });
     this.paramHandlers.set('division', (value) => {
@@ -129,7 +128,7 @@ export class DelayEffect extends BaseEffect {
       this.applyTime();
     });
     this.paramHandlers.set('flutter', (value) => {
-      this.flutter = clamp(asNumber(value, 0), 0, 100);
+      this.flutter = clamp(asNumber(value, S.flutter.default), S.flutter.min, S.flutter.max);
       this.applyFlutter();
     });
   }
@@ -190,6 +189,11 @@ export class DelayEffect extends BaseEffect {
     this.leftFeedback.connect(this.leftDelay);
     this.merger.connect(this.pingPongModeGain);
     this.pingPongModeGain.connect(this.wetOutput);
+  }
+
+  setTempo(bpm: number) {
+    this.bpm = clampTempo(bpm);
+    this.applyTime();
   }
 
   private applyAll(smooth = true) {

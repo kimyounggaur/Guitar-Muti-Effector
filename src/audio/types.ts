@@ -11,6 +11,8 @@ export type PedalType =
   | 'looper'
   | 'rhythm';
 
+import { clampParam, defaultParams, getParamSpec } from './params/schema';
+
 export type PedalParamValue = number | string | boolean;
 
 export type Pedal = {
@@ -31,6 +33,8 @@ export interface EffectNodeWrapper {
   disconnect(): void;
   setParam(name: string, value: PedalParamValue): void;
   setBypass(bypassed: boolean): void;
+  /** Tempo-aware effects (delay/modulation sync, looper quantize, rhythm) receive the shared tempo here. */
+  setTempo?(bpm: number): void;
   dispose(): void;
 }
 
@@ -50,13 +54,21 @@ export const isPedalType = (value: unknown): value is PedalType =>
 export const isPedalParamValue = (value: unknown): value is PedalParamValue =>
   typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean';
 
-export const normalizePedalParams = (params: unknown): Record<string, PedalParamValue> => {
+/**
+ * Normalises stored or imported parameters. Known parameters go through the schema (range, safetyMax,
+ * enum options); unknown keys keep the previous behaviour (any primitive value), internal '__' keys are kept.
+ * The tempo now lives in tempoStore only, so a stored params.bpm is dropped (see normalizePedals for migration).
+ */
+export const normalizePedalParams = (params: unknown, type?: PedalType): Record<string, PedalParamValue> => {
   if (!params || typeof params !== 'object') {
     return {};
   }
 
   return Object.fromEntries(
-    Object.entries(params).filter((entry): entry is [string, PedalParamValue] => isPedalParamValue(entry[1])),
+    Object.entries(params)
+      .filter((entry): entry is [string, PedalParamValue] => isPedalParamValue(entry[1]))
+      .filter(([name]) => name !== 'bpm')
+      .map(([name, value]) => [name, type && !name.startsWith('__') && getParamSpec(type, name) ? clampParam(type, name, value) : value]),
   );
 };
 
@@ -83,7 +95,7 @@ export const normalizePedals = (pedals: unknown): Pedal[] => {
         bypassed: typeof pedal.bypassed === 'boolean' ? pedal.bypassed : fallback?.bypassed ?? false,
         params: {
           ...(fallback?.params ?? {}),
-          ...normalizePedalParams(pedal.params),
+          ...normalizePedalParams(pedal.params, type),
         },
       };
     })
@@ -97,125 +109,15 @@ export const normalizePedals = (pedals: unknown): Pedal[] => {
 };
 
 export const createDefaultPedals = (): Pedal[] => [
-  {
-    id: 'tuner',
-    type: 'tuner',
-    name: 'TUNER',
-    enabled: true,
-    bypassed: false,
-    params: { referenceA4: 440, mode: 'guitar', sensitivity: 64, smoothing: 62 },
-  },
-  {
-    id: 'noise-gate',
-    type: 'noiseGate',
-    name: 'Noise Gate',
-    enabled: true,
-    bypassed: false,
-    params: { thresholdDb: -48, attackMs: 8, holdMs: 80, releaseMs: 180 },
-  },
-  {
-    id: 'compressor',
-    type: 'compressor',
-    name: 'COMP',
-    enabled: true,
-    bypassed: false,
-    params: { threshold: -28, ratio: 3.5, attack: 0.012, release: 0.22, knee: 18, sustain: 42, mix: 78, level: 72 },
-  },
-  {
-    id: 'drive',
-    type: 'drive',
-    name: 'DRIVE',
-    enabled: true,
-    bypassed: false,
-    params: { mode: 'overdrive', drive: 48, tone: 58, level: 72, mix: 100, bias: 0 },
-  },
-  {
-    id: 'amp-eq',
-    type: 'ampEQ',
-    name: 'AMP EQ',
-    enabled: true,
-    bypassed: false,
-    params: { lowCut: 70, bass: 2, mid: -1, midFreq: 760, midQ: 0.9, treble: 2, presence: 1, level: 72 },
-  },
-  {
-    id: 'cabinet-ir',
-    type: 'cabinetIR',
-    name: 'CAB IR',
-    enabled: true,
-    bypassed: false,
-    params: { cabinetType: '2x12', mic: 'dynamic', lowCut: 80, highCut: 6500, mix: 100, level: 72 },
-  },
-  {
-    id: 'modulation',
-    type: 'modulation',
-    name: 'MOD',
-    enabled: true,
-    bypassed: true,
-    params: {
-      mode: 'chorus',
-      rate: 0.85,
-      depth: 44,
-      feedback: 0.18,
-      mix: 42,
-      tone: 68,
-      stereoWidth: 52,
-      sync: false,
-      bpm: 120,
-      division: '1/4',
-    },
-  },
-  {
-    id: 'delay',
-    type: 'delay',
-    name: 'DELAY',
-    enabled: true,
-    bypassed: false,
-    params: {
-      mode: 'digital',
-      timeMs: 420,
-      feedback: 0.32,
-      mix: 28,
-      tone: 62,
-      sync: false,
-      bpm: 120,
-      division: '1/4',
-      flutter: 0,
-    },
-  },
-  {
-    id: 'reverb',
-    type: 'reverb',
-    name: 'REVERB',
-    enabled: true,
-    bypassed: false,
-    params: { mode: 'room', decay: 0.9, preDelay: 22, lowCut: 120, highCut: 7600, mix: 24, level: 72 },
-  },
-  {
-    id: 'looper',
-    type: 'looper',
-    name: 'LOOPER',
-    enabled: true,
-    bypassed: false,
-    params: {
-      level: 85,
-      overdubLevel: 85,
-      feedback: 100,
-      quantize: 'off',
-      reverse: false,
-      halfSpeed: false,
-    },
-  },
-  {
-    id: 'rhythm',
-    type: 'rhythm',
-    name: 'RHYTHM',
-    enabled: true,
-    bypassed: false,
-    params: {
-      bpm: 120,
-      pattern: 'metronome',
-      volume: 70,
-      playing: false,
-    },
-  },
+  { id: 'tuner', type: 'tuner', name: 'TUNER', enabled: true, bypassed: false, params: defaultParams('tuner') },
+  { id: 'noise-gate', type: 'noiseGate', name: 'Noise Gate', enabled: true, bypassed: false, params: defaultParams('noiseGate') },
+  { id: 'compressor', type: 'compressor', name: 'COMP', enabled: true, bypassed: false, params: defaultParams('compressor') },
+  { id: 'drive', type: 'drive', name: 'DRIVE', enabled: true, bypassed: false, params: defaultParams('drive') },
+  { id: 'amp-eq', type: 'ampEQ', name: 'AMP EQ', enabled: true, bypassed: false, params: defaultParams('ampEQ') },
+  { id: 'cabinet-ir', type: 'cabinetIR', name: 'CAB IR', enabled: true, bypassed: false, params: defaultParams('cabinetIR') },
+  { id: 'modulation', type: 'modulation', name: 'MOD', enabled: true, bypassed: true, params: defaultParams('modulation') },
+  { id: 'delay', type: 'delay', name: 'DELAY', enabled: true, bypassed: false, params: defaultParams('delay') },
+  { id: 'reverb', type: 'reverb', name: 'REVERB', enabled: true, bypassed: false, params: defaultParams('reverb') },
+  { id: 'looper', type: 'looper', name: 'LOOPER', enabled: true, bypassed: false, params: defaultParams('looper') },
+  { id: 'rhythm', type: 'rhythm', name: 'RHYTHM', enabled: true, bypassed: false, params: defaultParams('rhythm') },
 ];

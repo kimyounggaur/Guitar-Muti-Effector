@@ -71,7 +71,7 @@ const summaryParams: Record<string, string[]> = {
   delay: ['mode', 'timeMs', 'feedback', 'mix'],
   reverb: ['mode', 'decay', 'preDelay', 'mix'],
   looper: ['level', 'overdubLevel', 'feedback', 'quantize'],
-  rhythm: ['pattern', 'bpm', 'volume', 'playing'],
+  rhythm: ['pattern', 'volume', 'playing'],
 };
 
 const getPedalSummary = (pedal: Pedal) => {

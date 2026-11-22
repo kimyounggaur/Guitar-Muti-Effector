@@ -1,5 +1,8 @@
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
+import { PEDAL_SCHEMAS } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.cabinetIR;
 
 export type CabinetType = '1x12' | '2x12' | '4x12' | 'openBack' | 'custom';
 export type CabinetMic = 'dynamic' | 'ribbon' | 'condenser' | 'mixed';
@@ -86,11 +89,11 @@ export class CabinetIREffect extends BaseEffect {
       if (this.cabinetType === 'custom') void this.loadCabinetBuffer();
     });
     this.paramHandlers.set('lowCut', (value) => {
-      this.lowCutFrequency = clamp(asNumber(value, 80), 40, 200);
+      this.lowCutFrequency = clamp(asNumber(value, S.lowCut.default), S.lowCut.min, S.lowCut.max);
       smoothParam(context, this.activeLane.lowCut.frequency, this.lowCutFrequency, 0.018);
     });
     this.paramHandlers.set('highCut', (value) => {
-      this.highCutFrequency = clamp(asNumber(value, 6500), 3000, 12000);
+      this.highCutFrequency = clamp(asNumber(value, S.highCut.default), S.highCut.min, S.highCut.max);
       smoothParam(context, this.activeLane.highCut.frequency, this.highCutFrequency, 0.018);
     });
     this.paramHandlers.set('mix', (value) => {
@@ -98,7 +101,7 @@ export class CabinetIREffect extends BaseEffect {
       this.setMix(numberValue <= 1 ? numberValue : percentToUnit(numberValue, 100));
     });
     this.paramHandlers.set('level', (value) => {
-      this.level = clamp(asNumber(value, 72), 0, 100);
+      this.level = clamp(asNumber(value, S.level.default), S.level.min, S.level.max);
       smoothParam(context, this.activeLane.levelGain.gain, this.levelToGain(), 0.018);
     });
   }
