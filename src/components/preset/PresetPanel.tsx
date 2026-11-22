@@ -11,6 +11,7 @@ import {
 import { useTempoStore } from '../../store/tempoStore';
 import ImportExportPreset from './ImportExportPreset';
 import PresetCard from './PresetCard';
+import '../../styles/components/preset-panel.css';
 
 type PresetPanelProps = {
   onLoadPreset: (preset: PedalboardPreset) => void;

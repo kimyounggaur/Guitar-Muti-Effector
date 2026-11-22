@@ -1,5 +1,6 @@
 import { scrollToTarget } from '../../app/scrollTargets';
 import { usePedalStore } from '../../store/pedalStore';
+import '../../styles/components/left-panel.css';
 
 function LeftModePanel({ onOpenBoard }: { onOpenBoard?: () => void }) {
   const setSelectedPedal = usePedalStore((state) => state.setSelectedPedal);

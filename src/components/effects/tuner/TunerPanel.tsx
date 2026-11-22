@@ -5,6 +5,7 @@ import { Pedal, PedalParamValue } from '../../../audio/types';
 import { isTunerMode, midiToFrequency, STANDARD_TUNINGS, TunerMode } from '../../../audio/utils/pitch';
 import KnobControl from '../../controls/KnobControl';
 import { useElementVisible } from '../../../hooks/useElementVisible';
+import '../../../styles/components/tuner.css';
 
 type TunerPanelProps = {
   pedal: Pedal;

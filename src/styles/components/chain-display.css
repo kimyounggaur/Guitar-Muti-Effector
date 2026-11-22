@@ -1,0 +1,786 @@
+.chain-effect-lcd-label {
+  display: none
+}
+
+.chain-effect-main {
+  place-items: center;
+  gap: 6px;
+  width: 100%;
+  border-radius: 8px;
+  color: #f7fbff;
+  cursor: pointer
+}
+
+.chain-effect-main span {
+  color: var(--effect-color);
+  font-size: var(--fs-xs);
+  font-weight: 950
+}
+
+.chain-effect-main strong {
+  font-size: 0.82rem;
+  font-weight: 950;
+  line-height: 1.1;
+  text-align: center
+}
+
+.chain-effect-main i {
+  width: 14px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--effect-color);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--effect-color) 70%, transparent)
+}
+
+.chain-effect-switch-icon {
+  width: 11px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow:
+    0 -4px 0 currentColor,
+    0 4px 0 currentColor;
+  pointer-events: none
+}
+
+.chain-effect-shell.is-selected .chain-effect-main {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 0 0 3px rgba(255, 255, 255, 0.16),
+    0 0 30px color-mix(in srgb, var(--effect-color) 42%, transparent)
+}
+
+.chain-effect-shell.is-enabled:not(.is-bypassed) .chain-effect-grip {
+  border-color: color-mix(in srgb, var(--effect-color) 38%, rgba(255, 255, 255, 0.08));
+  color: var(--effect-color);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--effect-color) 30%, transparent)
+}
+
+.chain-effect-shell.is-disabled,
+.chain-effect-shell.is-bypassed {
+  opacity: 0.46
+}
+
+.chain-effect-shell.is-dragging {
+  z-index: 5;
+  opacity: 0.78
+}
+
+.lcd-chain-toast {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  opacity: 0;
+  font-size: var(--fs-xs);
+  font-weight: 950;
+  transition: opacity 180ms ease
+}
+
+.lcd-chain-toast.is-visible {
+  opacity: 1
+}
+
+.lcd-chain-rail {
+  scrollbar-width: thin;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  grid-auto-rows: minmax(var(--lcd-effect-block-height), auto);
+  align-items: stretch;
+  gap: 16px;
+  min-height: var(--lcd-effect-rail-min-height);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 16px
+}
+
+.chain-effect-shell {
+  position: relative;
+  opacity: 0.98;
+  min-width: 0;
+  flex: initial
+}
+
+.chain-effect-shell:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 3px);
+  width: 17px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(159, 213, 232, 0.5);
+  transform: translateY(-50%);
+  display: none
+}
+
+@media (min-width: 1200px) {
+  .lcd-chain-rail {
+    grid-template-columns: repeat(6, minmax(118px, 1fr));
+    grid-template-rows: repeat(2, minmax(var(--lcd-effect-block-height), 1fr))
+  }
+
+}
+
+@media (max-width: 1199px) {
+  .lcd-chain-rail {
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    min-height: calc(var(--lcd-effect-rail-min-height) - 16px)
+  }
+
+}
+
+@media (max-width: 767px) {
+  .lcd-chain-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(var(--lcd-effect-block-height-mobile), auto);
+    min-height: 360px;
+    gap: 12px;
+    padding: 12px
+  }
+
+}
+
+.chain-effect-svg-button {
+  display: block;
+  min-height: var(--lcd-effect-block-height);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible
+}
+
+.chain-effect-svg-button:hover,
+.chain-effect-svg-button:focus-visible {
+  background: transparent;
+  box-shadow: none
+}
+
+.chain-effect-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: var(--lcd-effect-block-height);
+  overflow: visible
+}
+
+.effect-svg-shadow {
+  fill: rgba(0, 0, 0, 0.42);
+  filter: blur(2px)
+}
+
+.effect-svg-body {
+  stroke-width: 2.6;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--effect-color) 28%, transparent))
+}
+
+.effect-svg-top-shine {
+  fill: rgba(255, 255, 255, 0.12)
+}
+
+.effect-svg-display {
+  fill: rgba(3, 10, 14, 0.72);
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 1
+}
+
+.effect-svg-grid {
+  fill: none;
+  stroke: rgba(159, 213, 232, 0.12);
+  stroke-width: 1
+}
+
+.effect-svg-icon {
+  fill: none;
+  stroke-width: 4.4;
+  stroke-linecap: round;
+  stroke-linejoin: round
+}
+
+.effect-svg-led-halo {
+  opacity: 0.24;
+  filter: blur(4px)
+}
+
+.effect-svg-led {
+  stroke: rgba(255, 255, 255, 0.36);
+  stroke-width: 1.3;
+  filter: drop-shadow(0 0 7px currentColor)
+}
+
+.effect-svg-chip {
+  fill: rgba(2, 4, 6, 0.46);
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1
+}
+
+.effect-svg-chip-lines {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.68);
+  stroke-linecap: round;
+  stroke-width: 2
+}
+
+.effect-svg-short-label,
+.effect-svg-name,
+.effect-svg-status {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  user-select: none
+}
+
+.effect-svg-short-label {
+  fill: var(--effect-color);
+  font-size: 14px
+}
+
+.effect-svg-name {
+  fill: #f7fbff;
+  font-size: 15px
+}
+
+.effect-svg-status {
+  fill: rgba(247, 251, 255, 0.66);
+  font-size: var(--fs-xs)
+}
+
+.effect-svg-selected {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.78);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--effect-color) 55%, transparent))
+}
+
+.chain-effect-shell.is-selected .effect-svg-body {
+  stroke-width: 3.4
+}
+
+.chain-effect-shell.is-disabled .effect-svg-body,
+.chain-effect-shell.is-bypassed .effect-svg-body {
+  filter: none
+}
+
+.chain-effect-shell.is-disabled .effect-svg-icon,
+.chain-effect-shell.is-bypassed .effect-svg-icon,
+.chain-effect-shell.is-disabled .effect-svg-short-label,
+.chain-effect-shell.is-bypassed .effect-svg-short-label {
+  opacity: 0.42
+}
+
+@media (max-width: 767px) {
+  .chain-effect-svg-button,
+.chain-effect-svg {
+    min-height: var(--lcd-effect-block-height-mobile)
+  }
+
+}
+
+.tone-chain-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  height: 100%;
+  min-height: inherit;
+  isolation: isolate;
+  padding: 0 clamp(8px, 1vw, 16px)
+}
+
+.tone-chain-stage::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  right: clamp(34px, 4vw, 58px);
+  left: clamp(34px, 4vw, 58px);
+  height: 2px;
+  background:
+    linear-gradient(90deg, transparent, rgba(148, 157, 160, 0.72) 10%, rgba(148, 157, 160, 0.72) 90%, transparent);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.08)
+}
+
+.screen-glass:not(.is-preset-browser) .tone-chain-stage::before {
+  display: none
+}
+
+.tone-chain-jack {
+  position: relative;
+  z-index: 2;
+  display: inline-grid;
+  grid-auto-flow: column;
+  gap: 5px;
+  align-items: center;
+  color: rgba(210, 218, 221, 0.7);
+  font-size: var(--fs-xs);
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase
+}
+
+.tone-chain-jack i {
+  display: block;
+  width: 18px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(210, 218, 221, 0.46);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #000 0 38%, #353c3f 40% 48%, transparent 50%),
+    rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.04)
+}
+
+.screen-glass:not(.is-preset-browser) .lcd-chain-rail {
+  position: relative;
+  z-index: 1;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: initial;
+  justify-content: stretch;
+  align-items: center;
+  gap: clamp(8px, 1vw, 14px) clamp(6px, 0.8vw, 12px);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow-y: hidden;
+  padding: clamp(14px, 1.8vw, 24px) clamp(8px, 1.2vw, 16px) clamp(12px, 1.6vw, 20px)
+}
+
+.screen-glass:not(.is-preset-browser) .lcd-chain-rail::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: clamp(58px, 5.2vw, 76px) clamp(48px, 5vw, 78px) clamp(54px, 5vw, 74px);
+  border-top: 2px solid rgba(148, 157, 160, 0.68);
+  border-right: 2px solid rgba(148, 157, 160, 0.68);
+  border-bottom: 2px solid rgba(148, 157, 160, 0.68);
+  border-left: 0;
+  border-radius: 0 14px 14px 0;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.08)
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell {
+  z-index: 1;
+  display: grid;
+  gap: 1px;
+  justify-items: center;
+  width: 100%
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(3) {
+  grid-column: 3;
+  grid-row: 1
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(4) {
+  grid-column: 4;
+  grid-row: 1
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(5) {
+  grid-column: 5;
+  grid-row: 1
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(6) {
+  grid-column: 6;
+  grid-row: 1
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(7) {
+  grid-column: 6;
+  grid-row: 2
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(8) {
+  grid-column: 5;
+  grid-row: 2
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(9) {
+  grid-column: 4;
+  grid-row: 2
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(10) {
+  grid-column: 3;
+  grid-row: 2
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:nth-child(11) {
+  grid-column: 2;
+  grid-row: 2
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-lcd-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--effect-color) 36%, rgba(255, 255, 255, 0.12));
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.72);
+  color: rgba(248, 252, 255, 0.98);
+  font-size: clamp(var(--fs-xs), 0.82vw, 0.84rem);
+  font-weight: 950;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin-bottom: -2px;
+  padding: 2px 6px;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 10px color-mix(in srgb, var(--effect-color) 46%, transparent);
+  text-transform: uppercase;
+  white-space: nowrap
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell:not(:last-child)::after {
+  display: none
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-svg-button {
+  height: clamp(92px, 9.4vw, 118px);
+  min-height: 0
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ .chain-effect-svg-button {
+  height: clamp(104px, 10vw, 132px)
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-main {
+  min-height: 0;
+  background: transparent;
+  box-shadow: none
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-svg {
+  min-height: 0
+}
+
+.screen-glass:not(.is-preset-browser) .effect-svg-body {
+  stroke-width: 2.4;
+  filter:
+    drop-shadow(0 0 7px color-mix(in srgb, var(--effect-color) 36%, transparent))
+    drop-shadow(0 4px 10px rgba(0, 0, 0, 0.72))
+}
+
+.screen-glass:not(.is-preset-browser) .effect-svg-top-shine {
+  fill: rgba(255, 255, 255, 0.18)
+}
+
+.screen-glass:not(.is-preset-browser) .effect-svg-display {
+  fill: rgba(1, 4, 5, 0.68)
+}
+
+.screen-glass:not(.is-preset-browser) .effect-svg-icon {
+  stroke-width: 4.8
+}
+
+.screen-glass:not(.is-preset-browser) .effect-svg-short-label {
+  fill: rgba(255, 255, 255, 0.92);
+  font-size: 12px
+}
+
+.screen-glass:not(.is-preset-browser) .effect-svg-name {
+  fill: rgba(235, 241, 242, 0.94);
+  font-size: var(--fs-xs)
+}
+
+.screen-glass:not(.is-preset-browser) .effect-svg-status {
+  fill: rgba(203, 214, 216, 0.68)
+}
+
+.screen-glass:not(.is-preset-browser) .effect-svg-selected {
+  stroke: rgba(255, 255, 255, 0.88);
+  filter:
+    drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))
+    drop-shadow(0 0 16px color-mix(in srgb, var(--effect-color) 42%, transparent))
+}
+
+.screen-glass:not(.is-preset-browser) .tone-amp-body {
+  stroke-width: 2.2;
+  filter:
+    drop-shadow(0 0 10px rgba(255, 255, 255, 0.12))
+    drop-shadow(0 8px 14px rgba(0, 0, 0, 0.66))
+}
+
+.tone-amp-grille {
+  fill:
+    color-mix(in srgb, #b7bdbe 68%, #111 32%);
+  stroke: rgba(35, 38, 39, 0.42);
+  stroke-width: 1
+}
+
+.tone-amp-grille-lines,
+.tone-amp-cloth {
+  fill: none;
+  stroke: rgba(38, 43, 44, 0.34);
+  stroke-linecap: round
+}
+
+.tone-amp-grille-lines {
+  stroke-width: 1.2
+}
+
+.tone-amp-cloth {
+  stroke-width: 0.8
+}
+
+.tone-amp-top {
+  fill: rgba(23, 25, 26, 0.6);
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1
+}
+
+.screen-glass:not(.is-preset-browser) .tone-amp-name {
+  fill: #111517;
+  font-size: 13px
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell.is-disabled,
+.screen-glass:not(.is-preset-browser) .chain-effect-shell.is-bypassed {
+  opacity: 0.35
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-shell.is-selected {
+  opacity: 1
+}
+
+.screen-glass:not(.is-preset-browser) .chain-effect-grip {
+  right: 50%;
+  bottom: -2px;
+  width: 22px;
+  height: 16px;
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.58);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.85rem;
+  transform: translateX(50%)
+}
+
+@media (max-width: 767px) {
+  .tone-chain-stage {
+    grid-template-columns: 1fr;
+    gap: 8px
+  }
+
+  .tone-chain-stage::before,
+.tone-chain-jack {
+    display: none
+  }
+
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell {
+    flex-basis: 110px
+  }
+
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ {
+    flex-basis: 240px
+  }
+
+}
+
+.chain-effect-grip {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.24);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  font-weight: 950;
+  z-index: 4; touch-action: none
+}
+
+@media (max-width: 767px) {
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail {
+    justify-content: flex-start;
+    min-height: 220px;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: auto;
+    min-height: 195px;
+    padding: 10px;
+    scroll-snap-type: x proximity
+  }
+
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail::before { display: none
+  }
+
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell,
+.screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ {
+    flex: 0 0 92px;
+    scroll-snap-align: start
+  }
+
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label { font-size: 0
+  }
+
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label::after { font-size: 12px
+  }
+
+  .type-tuner .chain-effect-lcd-label::after { content: 'TUN'
+  }
+
+  .type-noiseGate .chain-effect-lcd-label::after { content: 'GATE'
+  }
+
+  .type-compressor .chain-effect-lcd-label::after { content: 'COMP'
+  }
+
+  .type-drive .chain-effect-lcd-label::after { content: 'DRIVE'
+  }
+
+  .type-ampEQ .chain-effect-lcd-label::after { content: 'AMP'
+  }
+
+  .type-cabinetIR .chain-effect-lcd-label::after { content: 'CAB'
+  }
+
+  .type-modulation .chain-effect-lcd-label::after { content: 'MOD'
+  }
+
+  .type-delay .chain-effect-lcd-label::after { content: 'DELAY'
+  }
+
+  .type-reverb .chain-effect-lcd-label::after { content: 'REVERB'
+  }
+
+  .type-looper .chain-effect-lcd-label::after { content: 'LOOP'
+  }
+
+  .type-rhythm .chain-effect-lcd-label::after { content: 'RHYTHM'
+  }
+
+  .chain-effect-grip { min-height: 44px; min-width: 44px
+  }
+
+}
+
+.effect-chain-display {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 6px
+}
+
+.chain-order-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #f3faf8;
+  font-size: 12px
+}
+
+.chain-order-controls button {
+  min-width: 52px;
+  min-height: 44px;
+  padding: 4px 10px;
+  border: 1px solid #8baba4;
+  border-radius: 6px;
+  background: #142a27;
+  color: #fff;
+  font-size: 12px
+}
+
+.chain-order-controls button:disabled { opacity: .5
+}
+
+.chain-order-controls button:focus-visible { outline: 3px solid #fff; outline-offset: 2px
+}
+
+@media (max-width: 1199px) {
+  .screen-glass:not(.is-preset-browser) .tone-chain-stage { min-width: 0
+  }
+
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: auto;
+    min-height: 180px;
+    padding: 10px;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain
+  }
+
+  .screen-glass:not(.is-preset-browser) .lcd-chain-rail::before { display: none
+  }
+
+  .screen-glass:not(.is-preset-browser) .chain-effect-shell,
+.screen-glass:not(.is-preset-browser) .chain-effect-shell.type-ampEQ {
+    flex: 0 0 92px;
+    scroll-snap-align: start
+  }
+
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label { font-size: 0
+  }
+
+  .screen-glass:not(.is-preset-browser) .chain-effect-lcd-label::after { font-size: 12px
+  }
+
+  .type-tuner .chain-effect-lcd-label::after { content: 'TUN'
+  }
+
+  .type-noiseGate .chain-effect-lcd-label::after { content: 'GATE'
+  }
+
+  .type-compressor .chain-effect-lcd-label::after { content: 'COMP'
+  }
+
+  .type-drive .chain-effect-lcd-label::after { content: 'DRIVE'
+  }
+
+  .type-ampEQ .chain-effect-lcd-label::after { content: 'AMP'
+  }
+
+  .type-cabinetIR .chain-effect-lcd-label::after { content: 'CAB'
+  }
+
+  .type-modulation .chain-effect-lcd-label::after { content: 'MOD'
+  }
+
+  .type-delay .chain-effect-lcd-label::after { content: 'DELAY'
+  }
+
+  .type-reverb .chain-effect-lcd-label::after { content: 'REVERB'
+  }
+
+  .type-looper .chain-effect-lcd-label::after { content: 'LOOP'
+  }
+
+  .type-rhythm .chain-effect-lcd-label::after { content: 'RHYTHM'
+  }
+
+}
+
+@media (max-width: 767px) {
+  .hardware-app button:not(.chain-effect-main):not(.chain-effect-grip) { min-width: 44px
+  }
+
+  .screen-glass:not(.is-preset-browser) .chain-effect-grip { min-height: 44px
+  }
+
+}

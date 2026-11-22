@@ -12,6 +12,7 @@ import LooperPanel from '../effects/looper/LooperPanel';
 import NoiseGateRackPanel from '../effects/noiseGate/NoiseGateRackPanel';
 import RhythmPanel from '../effects/rhythm/RhythmPanel';
 import TunerPanel from '../effects/tuner/TunerPanel';
+import '../../styles/components/detail-panel.css';
 
 type PedalDetailPanelProps = {
   onPedalToggled?: (pedals: Pedal[]) => void;

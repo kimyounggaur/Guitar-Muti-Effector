@@ -3,6 +3,7 @@ import { subscribeCompressorReduction } from '../../../audio/nodes/CompressorEff
 import type { Pedal, PedalParamValue } from '../../../audio/types';
 import { useElementVisible } from '../../../hooks/useElementVisible';
 import { clampNumber, percentFromRange, readNumberParam } from '../common/paramFormat';
+import '../../../styles/components/rack-compressor.css';
 
 type CompressorRackPanelProps = {
   pedal: Pedal;

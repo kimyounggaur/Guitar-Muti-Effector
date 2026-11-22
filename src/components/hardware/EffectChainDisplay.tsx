@@ -19,6 +19,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Pedal, PedalType } from '../../audio/types';
 import { usePedalStore } from '../../store/pedalStore';
+import '../../styles/components/chain-display.css';
 
 type EffectChainDisplayProps = {
   pedals: Pedal[];
@@ -130,7 +131,7 @@ function EffectChainDisplay({
           onDragCancel={() => setDraggingPedal(null)}
         >
           <SortableContext items={pedalIds} strategy={horizontalListSortingStrategy}>
-            <div className={`lcd-chain-rail tone-master-rail ${draggingPedalId ? 'is-dragging' : ''}`}>
+            <div className={`lcd-chain-rail lcd-chain-master-rail ${draggingPedalId ? 'is-dragging' : ''}`}>
               {pedals.map((pedal) => (
                 <SortableEffectBlock
                   key={pedal.id}
@@ -229,7 +230,7 @@ function EffectBlockSvg({ pedal, palette, selected }: EffectBlockSvgProps) {
 
   if (pedal.type === 'ampEQ') {
     return (
-      <svg className="chain-effect-svg tone-master-effect-svg is-amp-svg" viewBox="0 0 260 150" aria-hidden="true" focusable="false">
+      <svg className="chain-effect-svg lcd-chain-effect-svg is-amp-svg" viewBox="0 0 260 150" aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
             <stop offset="0" stopColor="#d7dde0" stopOpacity="0.96" />
@@ -268,7 +269,7 @@ function EffectBlockSvg({ pedal, palette, selected }: EffectBlockSvgProps) {
   }
 
   return (
-    <svg className="chain-effect-svg tone-master-effect-svg" viewBox="0 0 180 140" aria-hidden="true" focusable="false">
+    <svg className="chain-effect-svg lcd-chain-effect-svg" viewBox="0 0 180 140" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
           <stop offset="0" stopColor={palette.color} stopOpacity="0.9" />

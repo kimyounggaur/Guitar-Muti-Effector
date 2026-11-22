@@ -1,3 +1,4 @@
+import '../../styles/components/status-bar.css';
 type MasterStatusBarProps = {
   isAudioReady: boolean;
   isConnecting: boolean;

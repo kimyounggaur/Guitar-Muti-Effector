@@ -1,0 +1,151 @@
+.right-utility-panel {
+  display: grid;
+  text-align: center
+}
+
+.utility-readout,
+.tempo-readout,
+.master-volume-readout {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px
+}
+
+.right-utility-panel strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 950
+}
+
+.tempo-readout small {
+  font-size: var(--fs-xs);
+  font-weight: 900
+}
+
+.master-volume-readout {
+  justify-items: center;
+  gap: 8px
+}
+
+.tap-button,
+.tuner-hold-button {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 950;
+  box-shadow:
+    inset 0 -10px 16px rgba(0, 0, 0, 0.38),
+    0 8px 18px rgba(0, 0, 0, 0.26)
+}
+
+.screen-meter-pill,
+.screen-led,
+.screen-bpm,
+.screen-param-cell,
+.screen-chain-window,
+.utility-readout,
+.tempo-readout,
+.master-volume-readout,
+.master-status-item {
+  border-color: rgba(45, 39, 41, 0.16);
+  background: rgba(16, 18, 22, 0.82)
+}
+
+.tap-button,
+.tuner-hold-button,
+.status-panic-button {
+  border-color: rgba(45, 39, 41, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent),
+    var(--skin-black-800);
+  color: #f5f2ef
+}
+
+.tap-button,
+.tempo-readout strong {
+  color: var(--skin-red)
+}
+
+.status-panic-button {
+  border-color: rgba(255, 93, 84, 0.5);
+  color: #ffd5d0
+}
+
+.hardware-utility-panel .utility-readout,
+.hardware-utility-panel .tempo-readout,
+.hardware-utility-panel .master-volume-readout {
+  display: grid;
+  align-content: center;
+  min-height: 74px;
+  padding: 8px
+}
+
+.hardware-utility-panel .tempo-readout strong {
+  font-size: 1.35rem
+}
+
+.hardware-utility-panel .master-utility-knob strong {
+  font-size: var(--fs-xs)
+}
+
+.hardware-utility-panel .right-utility-panel {
+  align-content: stretch;
+  align-items: stretch;
+  min-height: auto;
+  gap: 8px;
+  padding: 10px;
+  grid-template-columns: minmax(110px, 1.3fr) minmax(90px, 1fr) minmax(116px, 1fr) minmax(80px, 1fr) minmax(120px, 1fr);
+  min-width: 0
+}
+
+.hardware-utility-panel .right-utility-panel > * { min-width: 0
+}
+
+.hardware-utility-panel .master-volume-readout { overflow: visible
+}
+
+.hardware-utility-panel .tap-button,
+.hardware-utility-panel .tuner-hold-button {
+  min-height: 74px;
+  padding: 0 8px; position: relative; z-index: 1
+}
+
+@media (max-width: 767px) {
+  .hardware-utility-panel .right-utility-panel { grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .hardware-utility-panel .right-utility-panel {
+    grid-template-columns: repeat(5, minmax(0, 1fr))
+  }
+
+}
+
+@media (max-width: 767px) {
+  .hardware-app :is(button,
+label,
+select,
+.master-status-item,
+.screen-param-cell,
+.patch-identity,
+.utility-readout,
+.tempo-readout,
+.master-volume-readout) { font-size: max(12px, 0.75rem)
+  }
+
+}
+
+.right-utility-panel .utility-readout > span,
+.right-utility-panel .tempo-readout > span,
+.right-utility-panel .tempo-readout > small,
+.right-utility-panel .master-volume-readout > span,
+.right-utility-panel .master-utility-knob > span,
+.master-status-bar .master-status-item > b {
+  color: var(--panel-fg-muted)
+}
+
+.right-utility-panel .utility-readout > strong,
+.right-utility-panel .master-utility-knob > strong {
+  color: var(--panel-fg)
+}

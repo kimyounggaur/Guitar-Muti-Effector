@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "e2e": "playwright test",
     "e2e:baseline": "node scripts/e2e-baseline.mjs",
-    "e2e:visual": "VISUAL=1 playwright test tests/e2e/visual.spec.ts"
+    "e2e:visual": "VISUAL=1 playwright test tests/e2e/visual.spec.ts",
+    "css:usage": "node scripts/css-usage.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

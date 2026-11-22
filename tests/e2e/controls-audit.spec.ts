@@ -39,7 +39,7 @@ test.describe('controls audit', () => {
     await select(page, 'DRIVE');
     const section = page.locator('.detail-section');
     await expect(section.getByText(/SPRING REVERB|Blend/)).toHaveCount(0);
-    const slot = section.locator('.amp5-model-slot > div');
+    const slot = section.locator('.drive-rack-model-slot > div');
     const model = await slot.textContent();
     await section.getByRole('button', { name: 'PRE MODEL next' }).click();
     await expect(slot).not.toHaveText(model ?? '');

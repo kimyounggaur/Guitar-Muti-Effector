@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CabinetMic, CabinetType, hasCustomCabinetIR, registerCustomCabinetIR } from '../../../audio/nodes/CabinetIREffect';
 import { Pedal, PedalParamValue } from '../../../audio/types';
 import KnobControl from '../../controls/KnobControl';
+import '../../../styles/components/cabinet.css';
 
 type CabinetIRParams = {
   cabinetType: CabinetType;

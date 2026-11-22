@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { playPreparedAudio } from './playPreparedAudio';
+import '../../styles/components/file-player.css';
 
 type UploadedTrack = {
   name: string;

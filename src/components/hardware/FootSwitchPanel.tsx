@@ -1,4 +1,5 @@
 import type { Pedal } from '../../audio/types';
+import '../../styles/components/footswitch.css';
 
 export const STOMP_PRESET_CATEGORIES = [
   'Clean',
