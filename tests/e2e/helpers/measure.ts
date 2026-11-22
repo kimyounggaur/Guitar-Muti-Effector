@@ -14,6 +14,8 @@ export type LayoutMetrics = {
   minFontSize: number;
   smallTouchTargets: number;
   lowContrastText: number;
+  /** First few low-contrast texts, to make a failure readable. */
+  lowContrastSamples: string[];
 };
 
 /** Measures the page in its current state. Runs inside the browser. */
@@ -34,6 +36,7 @@ export async function measureLayout(page: Page): Promise<LayoutMetrics> {
       const layers: ReturnType<typeof helpers.parseColor>[] = [];
       for (let node = el; node; node = node.parentElement) {
         const style = getComputedStyle(node);
+        if (style.display === 'contents') continue; // draws no box, so no background
         let color = helpers.parseColor(style.backgroundColor);
         // Gradients: approximate with the average of their colour stops.
         const stops = style.backgroundImage.match(/rgba?\([^)]+\)/g);
@@ -56,6 +59,7 @@ export async function measureLayout(page: Page): Promise<LayoutMetrics> {
     let under12 = 0;
     let minFont = Infinity;
     let lowContrast = 0;
+    const lowContrastSamples: string[] = [];
     for (const el of elements) {
       const style = getComputedStyle(el);
       const size = parseFloat(style.fontSize);
@@ -67,7 +71,10 @@ export async function measureLayout(page: Page): Promise<LayoutMetrics> {
       if (fg) {
         const bg = backgroundOf(el);
         const ratio = helpers.contrastRatio(helpers.blend(fg, bg), bg);
-        if (ratio < 4.5) lowContrast++;
+        if (ratio < 4.5) {
+          lowContrast++;
+          if (lowContrastSamples.length < 5) lowContrastSamples.push(`${el.tagName.toLowerCase()}.${el.className} "${(el.textContent ?? '').trim().slice(0, 24)}" ${ratio.toFixed(2)}`);
+        }
       }
     }
     const targets = Array.from(document.querySelectorAll('button, [role=slider], a, input, select, summary')).filter(isVisible);
@@ -94,6 +101,7 @@ export async function measureLayout(page: Page): Promise<LayoutMetrics> {
       minFontSize: Number.isFinite(minFont) ? minFont : 0,
       smallTouchTargets,
       lowContrastText: lowContrast,
+      lowContrastSamples,
     };
   });
 }

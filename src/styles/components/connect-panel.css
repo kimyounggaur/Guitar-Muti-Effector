@@ -126,5 +126,11 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr))
 }
 
-.hardware-primary-controls .connect-grid > * { min-width: 0
+.hardware-primary-controls .connect-grid > *,
+.hardware-primary-controls .connect-settings > * { min-width: 0
+}
+
+/* The input settings wrapper only matters on phones (mobile.css); elsewhere its children stay grid items. */
+.connect-settings {
+  display: contents
 }

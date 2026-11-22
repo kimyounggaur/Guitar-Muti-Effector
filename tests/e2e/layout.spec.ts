@@ -16,7 +16,32 @@ test('layout metrics', async ({ page }, testInfo) => {
   });
 
   expect(metrics.textUnder12px, 'text smaller than 12px').toBe(0);
-  expect(metrics.lowContrastText, 'text below 4.5:1 contrast').toBe(0);
+  expect(metrics.lowContrastText, `text below 4.5:1 contrast: ${metrics.lowContrastSamples.join(' | ')}`).toBe(0);
   expect(metrics.horizontalOverflow, `horizontal overflow ${metrics.overflowPx}px`).toBe(false);
   if (tap) expect(tap).toEqual({ center: true, left: true, right: true, top: true, bottom: true });
+
+  // P6c: the phone layout fits in four screens, keeps connect and PANIC in view, and has no touch target under 44px.
+  if (!isDesktop) {
+    expect(metrics.pageScreens, 'page length in screens').toBeLessThanOrEqual(4);
+    expect(await smallTouchTargets(page), 'touch targets under 44px').toEqual([]);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(100);
+    for (const selector of ['.connect-button', '.panic-button']) {
+      const box = await page.locator(selector).boundingBox();
+      expect(box, selector).not.toBeNull();
+      expect(box!.y, `${selector} stays in view after scrolling to the end`).toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height, `${selector} stays in view after scrolling to the end`).toBeLessThanOrEqual(844);
+    }
+  }
 });
+
+function smallTouchTargets(page: import('@playwright/test').Page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('button, a[href], input, select, summary, [role="slider"], [tabindex="0"]')]
+      .filter((element) => {
+        const rect = element.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && getComputedStyle(element).visibility !== 'hidden' && (rect.width < 44 || rect.height < 44);
+      })
+      .map((element) => `${element.tagName.toLowerCase()}.${element.className} ${Math.round(element.getBoundingClientRect().width)}x${Math.round(element.getBoundingClientRect().height)}`),
+  );
+}

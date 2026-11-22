@@ -14,19 +14,23 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 
 function ExpressionPedal({ value, targetLabel = 'VOLUME', masterPercent, onChange }: ExpressionPedalProps) {
   const [dragging, setDragging] = useState(false);
-  const dragOrigin = useRef<{ y: number; value: number } | null>(null);
+  const dragOrigin = useRef<{ x: number; y: number; value: number } | null>(null);
   const safeValue = clamp(value, 0, 100);
 
   const updateFromPointer = (event: PointerEvent<HTMLDivElement>) => {
     const origin = dragOrigin.current;
     if (!origin) return;
-    const distance = Math.max(event.currentTarget.getBoundingClientRect().height, 160);
-    onChange(Math.round(clamp(origin.value + ((origin.y - event.clientY) / distance) * 100, 0, 100)));
+    const rect = event.currentTarget.getBoundingClientRect();
+    // The phone layout draws the pedal as a horizontal bar: drag sideways there, up and down elsewhere.
+    const horizontal = rect.width > rect.height * 2;
+    const distance = Math.max(horizontal ? rect.width : rect.height, 160);
+    const moved = horizontal ? event.clientX - origin.x : origin.y - event.clientY;
+    onChange(Math.round(clamp(origin.value + (moved / distance) * 100, 0, 100)));
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
-    dragOrigin.current = { y: event.clientY, value: safeValue };
+    dragOrigin.current = { x: event.clientX, y: event.clientY, value: safeValue };
     event.currentTarget.setPointerCapture(event.pointerId);
     setDragging(true);
   };

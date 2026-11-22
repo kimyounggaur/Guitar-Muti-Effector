@@ -8,7 +8,8 @@ test.use({
 });
 
 // InputSafetyNotice is ConnectGuitarPanel's overload indicator (design §2.2 P1: PatchHeader and ConnectGuitarPanel only).
-const ALLOWED = new Set(['PatchHeader', 'MeterPill', 'ConnectGuitarPanel', 'InputSafetyNotice']);
+// MobileInputMeter is the input level bar of the phone top bar (P6c).
+const ALLOWED = new Set(['PatchHeader', 'MeterPill', 'ConnectGuitarPanel', 'InputSafetyNotice', 'MobileInputMeter']);
 
 test('P1: only meter components re-render while connected', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-1280', 'runs once');

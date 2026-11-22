@@ -1,0 +1,364 @@
+/* Phone layout (P6c, design §3.6 3, decision 4). Every rule here applies at 600px and below only;
+   wider screens keep the layout of the component files. DOM order is unchanged: the boxes are
+   rearranged with flex order. */
+
+@media (min-width: 601px) {
+  .hardware-app .mobile-only {
+    display: none !important
+  }
+}
+
+@media (max-width: 600px) {
+  /* One column; the frame, core and support wrappers step aside so their parts can be ordered. */
+  .hardware-app {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 8px 16px
+  }
+
+  .hardware-app .hardware-frame,
+  .hardware-app .hardware-core,
+  .hardware-app .hardware-support-panels:not(.hardware-primary-controls) {
+    display: contents
+  }
+
+  /* 1. Top bar: connect / stop, input level, PANIC. Stays at the top while scrolling. */
+  .hardware-app .hardware-primary-controls {
+    order: 1;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 88px;
+    align-items: center;
+    gap: 6px;
+    margin: 0 -8px;
+    padding: 4px 8px 2px;
+    border-radius: 0;
+    background: #17161a;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35)
+  }
+
+  .hardware-primary-controls .connect-section {
+    display: contents
+  }
+
+  .hardware-primary-controls .connect-section > .panel-heading,
+  .hardware-primary-controls .safety-card {
+    display: none
+  }
+
+  .hardware-primary-controls .connect-grid {
+    display: contents
+  }
+
+  .hardware-primary-controls .connection-card {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 44px 4px;
+    gap: 2px 4px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none
+  }
+
+  .hardware-primary-controls .connection-card > button {
+    grid-row: 1;
+    min-height: 44px;
+    height: 44px;
+    padding: 0 4px;
+    font-size: var(--fs-xs);
+    white-space: nowrap
+  }
+
+  .hardware-primary-controls .mobile-input-meter {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    position: relative;
+    display: block;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: #2e2c33
+  }
+
+  .hardware-primary-controls .mobile-input-meter i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: linear-gradient(90deg, #36f0ce, #ff5d54)
+  }
+
+  .hardware-primary-controls > .panic-button {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0 4px;
+    font-size: var(--fs-xs);
+    line-height: 1.1
+  }
+
+  /* Input settings fold into one toggle; the safety notes become one line before connecting. */
+  .hardware-primary-controls .connect-settings {
+    display: none
+  }
+
+  .hardware-primary-controls .connect-section.is-settings-open .connect-settings {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 8px;
+    padding: 4px 0
+  }
+
+  .hardware-primary-controls .mobile-safety-line {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0;
+    color: #f5f2ef;
+    font-size: var(--fs-xs)
+  }
+
+  .hardware-primary-controls .mobile-safety-line button {
+    min-height: 44px;
+    padding: 0 10px;
+    font-size: var(--fs-xs)
+  }
+
+  .hardware-primary-controls .connect-section.is-safety-open .safety-card {
+    grid-column: 1 / -1;
+    display: block
+  }
+
+  .hardware-primary-controls .error-message {
+    grid-column: 1 / -1;
+    margin: 0
+  }
+
+  /* 2. LCD: patch name and the chain on one horizontally scrolling line. */
+  .hardware-app .hardware-screen-bay {
+    order: 2
+  }
+
+  /* 3. Detail of the selected pedal, 4. foot switches, 5. master and TAP. */
+  .hardware-app .detail-section {
+    order: 3
+  }
+
+  .hardware-app .hardware-foot-bay {
+    order: 4
+  }
+
+  .hardware-app .hardware-utility-panel {
+    order: 5
+  }
+
+  .hardware-app .hardware-expression-bay {
+    order: 6
+  }
+
+  .hardware-app .hardware-status-bay {
+    order: 7
+  }
+
+  /* 6. Audio file player and 7. presets, both folded. */
+  .hardware-app .audio-file-player {
+    order: 8
+  }
+
+  .hardware-app .preset-section {
+    order: 9
+  }
+
+  .audio-file-player:not(.is-open) > :not(.panel-heading) {
+    display: none
+  }
+
+  .audio-file-player .panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px
+  }
+
+  .audio-file-player .mobile-panel-toggle {
+    margin-left: auto;
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: var(--fs-xs)
+  }
+
+  /* Decoration and duplicate controls stay off the phone screen. */
+  .hardware-app .hardware-screw,
+  .hardware-app .hardware-left-panel,
+  .hardware-app .hardware-knob-bay,
+  .hardware-app [class*='rack-ear'],
+  .hardware-app .rack-tuner-ear {
+    display: none
+  }
+
+  /* LCD: patch name, meters and the chain on one line that scrolls sideways. */
+  .hardware-app .central-screen,
+  .hardware-app .screen-bezel,
+  .hardware-app .screen-glass {
+    padding: 4px;
+    min-height: 0
+  }
+
+  .hardware-app .screen-param-strip,
+  .hardware-app .chain-order-controls,
+  .hardware-app .lcd-chain-toast,
+  .hardware-app .chain-effect-grip {
+    display: none
+  }
+
+  .hardware-app .screen-glass {
+    grid-template-rows: auto auto
+  }
+
+  .hardware-app .screen-glass .screen-chain-window,
+  .hardware-app .screen-glass:not(.is-preset-browser) .screen-chain-window {
+    min-height: 0
+  }
+
+  .hardware-app .patch-header {
+    gap: 4px
+  }
+
+  .hardware-app .lcd-chain-rail {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    padding-bottom: 4px
+  }
+
+  .hardware-app .lcd-chain-rail .chain-effect-shell {
+    flex: 0 0 76px;
+    scroll-snap-align: start
+  }
+
+  .hardware-app .chain-effect-svg-button,
+  .hardware-app .chain-effect-svg {
+    width: 76px;
+    height: 76px
+  }
+
+  .hardware-app .effect-chain-display,
+  .hardware-app .screen-chain-window,
+  .hardware-app .tone-chain-stage,
+  .hardware-app .lcd-chain-rail {
+    height: auto;
+    min-height: 0;
+    min-width: 0;
+    padding: 0
+  }
+
+  /* Detail panels: controls three to a row. */
+  .hardware-app .detail-section .tuner-controls,
+  .hardware-app .detail-section .rack-tuner-left,
+  .hardware-app .detail-section .rack-tuner-right {
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+  }
+
+  .hardware-app .detail-section .tuner-controls > .is-wide {
+    grid-column: 1 / -1
+  }
+
+  .hardware-app .detail-section .knob-control {
+    min-height: 0;
+    gap: 4px;
+    padding: 4px
+  }
+
+  .hardware-app .detail-section .knob-adjust {
+    gap: 2px
+  }
+
+  .hardware-app .rack-tuner-shell,
+  .hardware-app .rack-tuner-control-deck {
+    gap: 8px;
+    padding: 8px
+  }
+
+  /* Foot switches: two columns of labelled pads. */
+  .hardware-app .preset-stomp-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px
+  }
+
+  .hardware-app .stomp-category-switch {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    min-height: 48px;
+    padding: 4px 8px 4px 4px
+  }
+
+  .hardware-app .stomp-category-switch::before,
+  .hardware-app .stomp-category-switch strong,
+  .hardware-app .stomp-category-switch small {
+    display: none
+  }
+
+  .hardware-app .stomp-category-switch .footswitch-led {
+    order: 2
+  }
+
+  /* Expression pedal: a horizontal volume bar, still changed by dragging only. */
+  .hardware-app .expression-pedal-wrap {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    height: auto;
+    align-items: center;
+    gap: 8px;
+    min-height: 0;
+    padding: 8px
+  }
+
+  .hardware-app .expression-pedal {
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+    transform: none;
+    touch-action: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #36f0ce var(--expression-value), #2e2c33 var(--expression-value))
+  }
+
+  .hardware-app .expression-pedal::before,
+  .hardware-app .expression-pedal::after,
+  .hardware-app .expression-pedal i,
+  .hardware-app .expression-ceiling {
+    display: none
+  }
+
+  .hardware-app .expression-label {
+    gap: 2px
+  }
+
+  /* Every touch target is at least 44px. */
+  .hardware-app .master-utility-knob .knob-face {
+    min-width: 44px;
+    min-height: 44px
+  }
+
+  .hardware-app .preset-section summary {
+    display: flex;
+    align-items: center;
+    min-height: 44px
+  }
+
+  .hardware-app input[type='text'],
+  .hardware-app input[type='search'],
+  .hardware-app select {
+    min-height: 44px
+  }
+}

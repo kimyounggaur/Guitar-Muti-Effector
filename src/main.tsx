@@ -4,6 +4,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { AudioControllerProvider } from './app/AudioControllerContext';
+// Phone layout (max-width: 600px). Loaded after every component style so it can rearrange them.
+import './styles/mobile.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
