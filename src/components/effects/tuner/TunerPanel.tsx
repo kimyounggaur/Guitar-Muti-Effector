@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { emptyTunerReading, subscribeTuner, TunerReading } from '../../audio/nodes/TunerNode';
-import { Pedal, PedalParamValue } from '../../audio/types';
-import { isTunerMode, midiToFrequency, STANDARD_TUNINGS, TunerMode } from '../../audio/utils/pitch';
-import KnobControl from '../controls/KnobControl';
-import { useElementVisible } from '../../hooks/useElementVisible';
+import { emptyTunerReading, subscribeTuner, TunerReading } from '../../../audio/nodes/TunerNode';
+import { Pedal, PedalParamValue } from '../../../audio/types';
+import { isTunerMode, midiToFrequency, STANDARD_TUNINGS, TunerMode } from '../../../audio/utils/pitch';
+import KnobControl from '../../controls/KnobControl';
+import { useElementVisible } from '../../../hooks/useElementVisible';
 
 type TunerPanelProps = {
   pedal: Pedal;

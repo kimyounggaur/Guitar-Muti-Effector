@@ -12,3 +12,18 @@ test('full page matches the reference build', async ({ page }) => {
   await page.waitForTimeout(300);
   await expect(page).toHaveScreenshot('full-page.png', { fullPage: true, animations: 'disabled', caret: 'hide', maxDiffPixels: 0 });
 });
+
+// Every pedal's detail panel (desktop width only; the panels share their layout across widths).
+const PEDAL_TYPES = ['tuner', 'noiseGate', 'compressor', 'drive', 'ampEQ', 'cabinetIR', 'modulation', 'delay', 'reverb', 'looper', 'rhythm'];
+test('each pedal detail panel matches the reference build', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-1280', 'detail panels are compared once');
+  await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+  for (const type of PEDAL_TYPES) {
+    await page.locator(`.chain-effect-shell.type-${type} .chain-effect-main`).click();
+    const panel = page.locator('.detail-section').first();
+    await panel.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await expect(panel).toHaveScreenshot(`detail-${type}.png`, { animations: 'disabled', caret: 'hide', maxDiffPixels: 0 });
+  }
+});
