@@ -1,5 +1,8 @@
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
+import { PEDAL_SCHEMAS } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.ampEQ;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -56,37 +59,37 @@ export class AmpEQEffect extends BaseEffect {
     this.setMix(1);
 
     this.paramHandlers.set('lowCut', (value) =>
-      smoothParam(context, this.lowCut.frequency, clamp(asNumber(value, 70), 40, 160), 0.018),
+      smoothParam(context, this.lowCut.frequency, clamp(asNumber(value, S.lowCut.default), S.lowCut.min, S.lowCut.max), 0.018),
     );
     this.paramHandlers.set('bass', (value) =>
-      smoothParam(context, this.bass.gain, clamp(asNumber(value, 0), -12, 12), 0.018),
+      smoothParam(context, this.bass.gain, clamp(asNumber(value, S.bass.default), S.bass.min, S.bass.max), 0.018),
     );
     this.paramHandlers.set('bassDb', (value) =>
-      smoothParam(context, this.bass.gain, clamp(asNumber(value, 0), -12, 12), 0.018),
+      smoothParam(context, this.bass.gain, clamp(asNumber(value, S.bass.default), S.bass.min, S.bass.max), 0.018),
     );
     this.paramHandlers.set('mid', (value) =>
-      smoothParam(context, this.mid.gain, clamp(asNumber(value, 0), -12, 12), 0.018),
+      smoothParam(context, this.mid.gain, clamp(asNumber(value, S.mid.default), S.mid.min, S.mid.max), 0.018),
     );
     this.paramHandlers.set('midDb', (value) =>
-      smoothParam(context, this.mid.gain, clamp(asNumber(value, 0), -12, 12), 0.018),
+      smoothParam(context, this.mid.gain, clamp(asNumber(value, S.mid.default), S.mid.min, S.mid.max), 0.018),
     );
     this.paramHandlers.set('midFreq', (value) =>
-      smoothParam(context, this.mid.frequency, clamp(asNumber(value, 760), 250, 1500), 0.018),
+      smoothParam(context, this.mid.frequency, clamp(asNumber(value, S.midFreq.default), S.midFreq.min, S.midFreq.max), 0.018),
     );
     this.paramHandlers.set('midQ', (value) =>
-      smoothParam(context, this.mid.Q, clamp(asNumber(value, 0.9), 0.3, 4), 0.018),
+      smoothParam(context, this.mid.Q, clamp(asNumber(value, S.midQ.default), S.midQ.min, S.midQ.max), 0.018),
     );
     this.paramHandlers.set('treble', (value) =>
-      smoothParam(context, this.treble.gain, clamp(asNumber(value, 0), -12, 12), 0.018),
+      smoothParam(context, this.treble.gain, clamp(asNumber(value, S.treble.default), S.treble.min, S.treble.max), 0.018),
     );
     this.paramHandlers.set('trebleDb', (value) =>
-      smoothParam(context, this.treble.gain, clamp(asNumber(value, 0), -12, 12), 0.018),
+      smoothParam(context, this.treble.gain, clamp(asNumber(value, S.treble.default), S.treble.min, S.treble.max), 0.018),
     );
     this.paramHandlers.set('presence', (value) =>
-      smoothParam(context, this.presence.gain, clamp(asNumber(value, 0), -12, 12), 0.018),
+      smoothParam(context, this.presence.gain, clamp(asNumber(value, S.presence.default), S.presence.min, S.presence.max), 0.018),
     );
     this.paramHandlers.set('presenceDb', (value) =>
-      smoothParam(context, this.presence.gain, clamp(asNumber(value, 0), -12, 12), 0.018),
+      smoothParam(context, this.presence.gain, clamp(asNumber(value, S.presence.default), S.presence.min, S.presence.max), 0.018),
     );
     this.paramHandlers.set('level', (value) => {
       const gainDb = -24 + percentToUnit(asNumber(value, 72), 72) * 30;

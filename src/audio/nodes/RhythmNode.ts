@@ -1,4 +1,7 @@
 import { EffectNodeWrapper, PedalParamValue } from '../types';
+import { PEDAL_SCHEMAS, TEMPO } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.rhythm;
 
 export type RhythmPatternId =
   | 'metronome'
@@ -78,7 +81,7 @@ export class RhythmNode implements EffectNodeWrapper {
   readonly output: GainNode;
   private readonly passGain: GainNode;
   private readonly drumGain: GainNode;
-  private bpm = 120;
+  private bpm: number = TEMPO.default;
   private volume = 70;
   private patternId: RhythmPatternId = 'metronome';
   private isPlaying = false;
@@ -110,13 +113,12 @@ export class RhythmNode implements EffectNodeWrapper {
     safeDisconnect(this.output);
   }
 
-  setParam(name: string, value: PedalParamValue) {
-    if (name === 'bpm') {
-      this.bpm = clamp(Math.round(asNumber(value, 120)), 40, 240);
-      this.publish();
-      return;
-    }
+  setTempo(bpm: number) {
+    this.bpm = Math.min(TEMPO.max, Math.max(TEMPO.min, Math.round(Number.isFinite(bpm) ? bpm : TEMPO.default)));
+    this.publish();
+  }
 
+  setParam(name: string, value: PedalParamValue) {
     if (name === 'pattern') {
       this.patternId = readPatternId(value);
       this.currentStep = this.currentStep % getPattern(this.patternId).steps.length;
@@ -125,7 +127,7 @@ export class RhythmNode implements EffectNodeWrapper {
     }
 
     if (name === 'volume') {
-      this.volume = clamp(asNumber(value, 70), 0, 100);
+      this.volume = clamp(asNumber(value, S.volume.default), S.volume.min, S.volume.max);
       this.applyVolume(true);
       return;
     }

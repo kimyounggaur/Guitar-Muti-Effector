@@ -8,11 +8,13 @@ import {
 } from '../../audio/nodes/RhythmNode';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import { useTempoStore } from '../../store/tempoStore';
+import { PEDAL_SCHEMAS, TEMPO } from '../../audio/params/schema';
 import { useAudioStore } from '../../store/audioStore';
 import KnobControl from '../controls/KnobControl';
 
+const S = PEDAL_SCHEMAS.rhythm;
+
 type RhythmParams = {
-  bpm: number;
   pattern: RhythmPatternId;
   volume: number;
   playing: boolean;
@@ -47,27 +49,20 @@ function RhythmPanel({
   const tapTempo = useTempoStore((state) => state.tapTempo);
   const [reading, setReading] = useState<RhythmReading>(emptyRhythmReading);
   const audioReady = useAudioStore((state) => state.isAudioReady);
-  const params = useMemo(() => readRhythmParams(pedal.params, tempoBpm), [pedal.params, tempoBpm]);
+  const params = useMemo(() => readRhythmParams(pedal.params), [pedal.params]);
   const isPlaying = audioReady && reading.isPlaying;
 
   useEffect(() => subscribeRhythm(pedal.id, setReading), [pedal.id]);
 
-  useEffect(() => {
-    if (params.bpm !== tempoBpm) {
-      onParamChange(pedal.id, 'bpm', tempoBpm);
-    }
-  }, [onParamChange, params.bpm, pedal.id, tempoBpm]);
-
   const setParam = (name: string, value: PedalParamValue) => onParamChange(pedal.id, name, value);
 
+  // Tempo lives only in tempoStore; the engine forwards it to the rhythm node (design §3.2).
   const setBpm = (bpm: number) => {
-    const nextBpm = setTempoBpm(bpm);
-    setParam('bpm', nextBpm);
+    setTempoBpm(bpm);
   };
 
   const handleTap = () => {
-    const nextBpm = tapTempo();
-    setParam('bpm', nextBpm);
+    tapTempo();
   };
 
   const togglePlay = () => {
@@ -100,7 +95,7 @@ function RhythmPanel({
       <div className="rhythm-readout">
         <div>
           <span>BPM</span>
-          <strong>{Math.round(params.bpm)}</strong>
+          <strong>{Math.round(tempoBpm)}</strong>
           <small>{isPlaying ? '재생 중' : tapCount > 1 ? '탭 입력됨' : '정지'}</small>
         </div>
         <div className="beat-leds" aria-label="Beat indicator">
@@ -135,9 +130,9 @@ function RhythmPanel({
           <span>BPM</span>
           <input
             type="number"
-            min={40}
-            max={240}
-            value={Math.round(params.bpm)}
+            min={TEMPO.min}
+            max={TEMPO.max}
+            value={Math.round(tempoBpm)}
             onChange={(event) => setBpm(Number(event.target.value))}
           />
         </label>
@@ -154,7 +149,7 @@ function RhythmPanel({
             <option value="pop">Pop</option>
           </select>
         </label>
-        <RhythmSlider label="리듬 음량" value={params.volume} min={0} max={100} onChange={(value) => setParam('volume', value)} />
+        <RhythmSlider label="리듬 음량" value={params.volume} min={S.volume.min} max={S.volume.max} onChange={(value) => setParam('volume', value)} />
       </div>
 
       <div className="pedal-switches">
@@ -187,10 +182,9 @@ function RhythmSlider({ label, value, min, max, onChange }: RhythmSliderProps) {
   );
 }
 
-const readRhythmParams = (params: Pedal['params'], tempoBpm: number): RhythmParams => ({
-  bpm: readNumber(params.bpm, tempoBpm, 40, 240),
+const readRhythmParams = (params: Pedal['params']): RhythmParams => ({
   pattern: readPattern(params.pattern),
-  volume: readNumber(params.volume, 70, 0, 100),
+  volume: readNumber(params.volume, S.volume.default, S.volume.min, S.volume.max),
   playing: params.playing === true,
 });
 

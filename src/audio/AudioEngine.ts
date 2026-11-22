@@ -13,6 +13,7 @@ import { RhythmNode } from './nodes/RhythmNode';
 import { createSafetyLimiter, prepareSafetyLimiter } from './nodes/SafetyLimiterEffect';
 import { TunerNode } from './nodes/TunerNode';
 import { EffectNodeWrapper, Pedal, PedalParamValue, PedalType } from './types';
+import { TEMPO, clampTempo } from './params/schema';
 
 export type AudioEngineState = {
   sampleRate: number;
@@ -46,6 +47,8 @@ export class AudioEngine {
   // Volume pedal (decision S4-a): sits before the preset trim and can only attenuate (0..1).
   private expressionGain: GainNode | null = null;
   private expressionValue = 1;
+  /** Shared tempo (tempoStore is the source); passed to tempo-aware effects. */
+  private tempo: number = TEMPO.default;
   private presetTrimDb = 0;
   private safetyLimiter: AudioWorkletNode | null = null;
   private chainOutput: GainNode | null = null;
@@ -147,6 +150,11 @@ export class AudioEngine {
     const now = this.audioContext.currentTime;
     this.masterGain.gain.cancelScheduledValues(now);
     this.masterGain.gain.setTargetAtTime(volume, now, 0.015);
+  }
+
+  setTempo(bpm: number) {
+    this.tempo = clampTempo(bpm);
+    this.effectMap.forEach((effect) => effect.setTempo?.(this.tempo));
   }
 
   /** Expression (volume) pedal position, 0..1. Never boosts and never changes the master volume. */
@@ -488,6 +496,7 @@ export class AudioEngine {
     }
 
     const effect = this.createEffect(type, id);
+    effect.setTempo?.(this.tempo);
     this.effectMap.set(id, effect);
     return effect;
   }

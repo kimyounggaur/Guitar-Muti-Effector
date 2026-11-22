@@ -1,6 +1,9 @@
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
 import processorUrl from '../worklets/compressor-processor.ts?worker&url';
+import { PEDAL_SCHEMAS } from '../params/schema';
+
+const S = PEDAL_SCHEMAS.compressor;
 
 type ReductionListener = (reductionDb: number) => void;
 const reductionListeners = new Map<string, Set<ReductionListener>>();
@@ -53,15 +56,15 @@ export class CompressorEffect extends BaseEffect {
         reductionListeners.get(this.id)?.forEach((listener) => listener(this.isBypassed ? 0 : data.value));
       }
     };
-    this.paramHandlers.set('threshold', (v) => { this.threshold = clamp(asNumber(v, -28), -60, -10); this.applyCompression(); });
-    this.paramHandlers.set('thresholdDb', (v) => { this.threshold = clamp(asNumber(v, -28), -60, -10); this.applyCompression(); });
-    this.paramHandlers.set('ratio', (v) => { this.ratio = clamp(asNumber(v, 3.5), 1, 20); this.applyCompression(); });
-    this.paramHandlers.set('attack', (v) => this.send('attack', clamp(asNumber(v, 0.012), 0.001, 0.1)));
-    this.paramHandlers.set('release', (v) => this.send('release', clamp(asNumber(v, 0.22), 0.05, 1)));
-    this.paramHandlers.set('knee', (v) => this.send('knee', clamp(asNumber(v, 18), 0, 40)));
-    this.paramHandlers.set('sustain', (v) => { this.sustain = clamp(asNumber(v, 42), 0, 100); this.applyCompression(); this.applyLevel(); });
+    this.paramHandlers.set('threshold', (v) => { this.threshold = clamp(asNumber(v, S.threshold.default), S.threshold.min, S.threshold.max); this.applyCompression(); });
+    this.paramHandlers.set('thresholdDb', (v) => { this.threshold = clamp(asNumber(v, S.threshold.default), S.threshold.min, S.threshold.max); this.applyCompression(); });
+    this.paramHandlers.set('ratio', (v) => { this.ratio = clamp(asNumber(v, S.ratio.default), S.ratio.min, S.ratio.max); this.applyCompression(); });
+    this.paramHandlers.set('attack', (v) => this.send('attack', clamp(asNumber(v, S.attack.default), S.attack.min, S.attack.max)));
+    this.paramHandlers.set('release', (v) => this.send('release', clamp(asNumber(v, S.release.default), S.release.min, S.release.max)));
+    this.paramHandlers.set('knee', (v) => this.send('knee', clamp(asNumber(v, S.knee.default), S.knee.min, S.knee.max)));
+    this.paramHandlers.set('sustain', (v) => { this.sustain = clamp(asNumber(v, S.sustain.default), S.sustain.min, S.sustain.max); this.applyCompression(); this.applyLevel(); });
     this.paramHandlers.set('mix', (v) => this.setMix(percentToUnit(asNumber(v, 78))));
-    this.paramHandlers.set('level', (v) => { this.level = clamp(asNumber(v, 72), 0, 100); this.applyLevel(); });
+    this.paramHandlers.set('level', (v) => { this.level = clamp(asNumber(v, S.level.default), S.level.min, S.level.max); this.applyLevel(); });
     this.paramHandlers.set('makeupGainDb', (v) => this.setGainDb(clamp(asNumber(v, 0), -24, 4)));
   }
   override setBypass(bypassed: boolean) {

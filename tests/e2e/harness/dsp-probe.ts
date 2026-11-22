@@ -42,7 +42,7 @@ function stats(buffer: AudioBuffer | Float32Array, fromSeconds: number) {
   return { rmsDb: db(Math.sqrt(sum / count)), peakDb: db(peak) };
 }
 
-async function render(pedals: Pedal[], input: Float32Array, trimDb = 0) {
+async function render(pedals: Pedal[], input: Float32Array, trimDb = 0, tempoBpm = 120) {
   const offline = new OfflineAudioContext(2, input.length, RATE);
   const ctx = offline as unknown as AudioContext;
   await Promise.all([prepareNoiseGate(ctx), prepareCompressor(ctx)]);
@@ -57,6 +57,7 @@ async function render(pedals: Pedal[], input: Float32Array, trimDb = 0) {
     const Ctor = constructors[pedal.type];
     if (!Ctor) continue;
     const effect = new Ctor(ctx, pedal.id);
+    effect.setTempo?.(tempoBpm); // the engine forwards the shared tempo the same way
     for (const [name, value] of Object.entries(pedal.params)) effect.setParam(name, value);
     effect.setBypass(false);
     previous.connect(effect.input);
@@ -85,7 +86,7 @@ async function measureF3() {
   const input = noise(RATE * 3, -46);
   const rows = [];
   for (const preset of pickPresets()) {
-    const out = await render(withGate(preset.pedals, 'max'), input, preset.outputTrimDb);
+    const out = await render(withGate(preset.pedals, 'max'), input, preset.outputTrimDb, preset.tempoBpm);
     rows.push({ preset: preset.name, ...stats(out, 1) });
   }
   return rows;
@@ -97,7 +98,7 @@ async function measureQ1() {
   const all = factory();
   const rows = [];
   for (const preset of [all[0], all.find((p) => p.category === 'High Gain')!]) {
-    const out = await render(withGate(preset.pedals, 'bypass'), input);
+    const out = await render(withGate(preset.pedals, 'bypass'), input, 0, preset.tempoBpm);
     const o = stats(out, 0.5);
     rows.push({ preset: preset.name, inputRmsDb: inStats.rmsDb, outputRmsDb: o.rmsDb, gainDb: Math.round((o.rmsDb - inStats.rmsDb) * 100) / 100 });
   }

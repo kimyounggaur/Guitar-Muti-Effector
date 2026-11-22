@@ -220,14 +220,14 @@ const ambientBlueprint = (index: number): Array<[string, Partial<Pedal>]> => [
   ['amp-eq', { params: { lowCut: 70, bass: -1 + (index % 5), mid: -2 + (index % 5) * 0.7, treble: 2 + (index % 4), presence: 2 + (index % 5) } }],
   ['cabinet-ir', { params: { cabinetType: pick(['openBack', '2x12', '1x12'], index), mic: pick(['condenser', 'ribbon', 'mixed'], index), highCut: 7600 + (index % 6) * 500 } }],
   ['modulation', { bypassed: false, params: { mode: pick(['chorus', 'phaser', 'vibrato', 'flanger'], index), rate: 0.08 + (index % 6) * 0.12, depth: 36 + (index % 6) * 8, feedback: 0.1 + (index % 5) * 0.04, mix: 28 + (index % 6) * 5, stereoWidth: 70 + (index % 4) * 7 } }],
-  ['delay', { params: { mode: pick(['tape', 'pingpong', 'analog', 'digital'], index), timeMs: 520 + (index % 7) * 95, feedback: 0.36 + (index % 6) * 0.07, mix: 28 + (index % 6) * 5, tone: 42 + (index % 6) * 4, flutter: 18 + (index % 7) * 9, sync: index % 2 === 0, bpm: 68 + (index % 5) * 8, division: pick(['1/4', '1/8', 'dotted1/8'], index) } }],
+  ['delay', { params: { mode: pick(['tape', 'pingpong', 'analog', 'digital'], index), timeMs: 520 + (index % 7) * 95, feedback: 0.36 + (index % 6) * 0.07, mix: 28 + (index % 6) * 5, tone: 42 + (index % 6) * 4, flutter: 18 + (index % 7) * 9, sync: index % 2 === 0, division: pick(['1/4', '1/8', 'dotted1/8'], index) } }],
   ['reverb', { params: { mode: pick(['ambient', 'hall', 'plate'], index), decay: 3.2 + (index % 8) * 0.72, preDelay: 30 + (index % 6) * 15, lowCut: 120, highCut: 6200 + (index % 5) * 600, mix: 34 + (index % 7) * 4, level: 74 } }],
 ];
 
 const modulationBlueprint = (index: number): Array<[string, Partial<Pedal>]> => [
   ['drive', { bypassed: index % 5 !== 4, params: { mode: 'overdrive', drive: 12 + (index % 6) * 5, tone: 50, level: 72, mix: 32 } }],
   ['amp-eq', { params: { bass: 0 + (index % 4), mid: -1 + (index % 5) * 0.5, treble: 1 + (index % 5), presence: 1 + (index % 4) } }],
-  ['modulation', { bypassed: false, params: { mode: pick(['chorus', 'flanger', 'phaser', 'tremolo', 'vibrato'], index), rate: 0.15 + (index % 8) * 0.48, depth: 35 + (index % 8) * 7, feedback: 0.08 + (index % 7) * 0.08, mix: 28 + (index % 7) * 6, tone: 50 + (index % 6) * 6, stereoWidth: 50 + (index % 6) * 8, sync: index % 3 === 0, bpm: 90 + (index % 6) * 10, division: pick(['1/4', '1/8', 'dotted1/8', '1/16'], index) } }],
+  ['modulation', { bypassed: false, params: { mode: pick(['chorus', 'flanger', 'phaser', 'tremolo', 'vibrato'], index), rate: 0.15 + (index % 8) * 0.48, depth: 35 + (index % 8) * 7, feedback: 0.08 + (index % 7) * 0.08, mix: 28 + (index % 7) * 6, tone: 50 + (index % 6) * 6, stereoWidth: 50 + (index % 6) * 8, sync: index % 3 === 0, division: pick(['1/4', '1/8', 'dotted1/8', '1/16'], index) } }],
   ['delay', { params: { mode: pick(['digital', 'analog'], index), timeMs: 220 + (index % 5) * 60, feedback: 0.18 + (index % 4) * 0.05, mix: 12 + (index % 5) * 4 } }],
   ['reverb', { params: { mode: pick(['room', 'plate', 'hall'], index), decay: 1.0 + (index % 6) * 0.3, mix: 14 + (index % 5) * 3 } }],
 ];

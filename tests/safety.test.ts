@@ -294,3 +294,32 @@ test('expression pedal does not change master volume state', () => {
   engine.setExpression(1);
   assert.equal(engine.currentMasterVolume, before);
 });
+
+test('tempo reaches tempo-aware effects', () => {
+  const engine = new AudioEngine() as any;
+  const delay = new DelayEffect(new FakeContext() as unknown as AudioContext, 'delay') as any;
+  const received: number[] = [];
+  const plain = { setTempo: undefined, dispose() {} };
+  const recorder = { setTempo: (bpm: number) => received.push(bpm), dispose() {} };
+  engine.effectMap.set('delay', delay);
+  engine.effectMap.set('plain', plain);
+  engine.effectMap.set('rhythm', recorder);
+  delay.setParam('sync', true);
+  delay.setParam('division', '1/4');
+  engine.setTempo(90);
+  assert.deepEqual(received, [90]);
+  // 1/4 note at 90 BPM = 666.67 ms.
+  assert.ok(Math.abs(delay.monoDelay.delayTime.value - 60 / 90) < 1e-3, `delay ${delay.monoDelay.delayTime.value}`);
+  engine.setTempo(1000);
+  assert.equal(received.at(-1), 240);
+});
+
+test('preset load sets the tempo once and never stores it in pedal params', async () => {
+  const { usePresetStore } = await import('../src/store/presetStore');
+  const { normalizePedalParams } = await import('../src/audio/types');
+  for (const preset of usePresetStore.getState().presets) {
+    for (const pedal of preset.pedals) assert.ok(!('bpm' in pedal.params), `${preset.name} ${pedal.id} keeps bpm`);
+  }
+  // Legacy saved pedals with a bpm param are cleaned on load.
+  assert.deepEqual(normalizePedalParams({ bpm: 90, mix: 30 }, 'delay'), { mix: 30 });
+});

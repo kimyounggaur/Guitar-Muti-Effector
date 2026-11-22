@@ -3,7 +3,7 @@ import { Pedal, PedalParamValue, PedalType } from '../../audio/types';
 import { subscribeCompressorReduction } from '../../audio/nodes/CompressorEffect';
 import { useElementVisible } from '../../hooks/useElementVisible';
 import { usePedalStore } from '../../store/pedalStore';
-import { useTempoStore } from '../../store/tempoStore';
+import { getParamSpec } from '../../audio/params/schema';
 import KnobControl from '../controls/KnobControl';
 import AmpEQPedal from '../effects/AmpEQPedal';
 import TunerPanel from '../effects/TunerPanel';
@@ -128,8 +128,6 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
   const setSelectedPedal = usePedalStore((state) => state.setSelectedPedal);
   const resetPedals = usePedalStore((state) => state.resetPedals);
   const savePedalsToStorage = usePedalStore((state) => state.savePedalsToStorage);
-  const tempoBpm = useTempoStore((state) => state.bpm);
-  const setTempoBpm = useTempoStore((state) => state.setBpm);
   const selectedPedal = useMemo(
     () => pedals.find((pedal) => pedal.id === selectedPedalId) ?? pedals[0] ?? null,
     [pedals, selectedPedalId],
@@ -163,17 +161,8 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
   };
 
   const handleParamChange = (paramName: string, value: PedalParamValue) => {
-    if (paramName === 'bpm' && typeof value === 'number') {
-      setTempoBpm(value);
-    }
-
     updatePedalParam(selectedPedal.id, paramName, value);
     onPedalParamChanged?.(selectedPedal.id, paramName, value);
-
-    if (paramName === 'sync' && value === true) {
-      updatePedalParam(selectedPedal.id, 'bpm', tempoBpm);
-      onPedalParamChanged?.(selectedPedal.id, 'bpm', tempoBpm);
-    }
   };
 
   const handleReset = () => {
@@ -908,7 +897,7 @@ function DetailControl({ pedal, paramName, value, onChange }: DetailControlProps
   }
 
   if (typeof value === 'number') {
-    const range = getNumberRange(pedal.type, paramName, value);
+    const range = getNumberRange(pedal.type, paramName);
     return (
       <KnobControl
         className="detail-control"
@@ -959,83 +948,13 @@ function MiniGraph({ pedal }: { pedal: Pedal }) {
   );
 }
 
-const getNumberRange = (type: PedalType, name: string, value: number): NumberRange => {
-  if (name === 'threshold' || name === 'thresholdDb') {
-    return { min: -60, max: -10, step: 1, suffix: 'dB' };
+const getNumberRange = (type: PedalType, name: string): NumberRange => {
+  const spec = getParamSpec(type, name);
+  if (spec?.kind === 'number') {
+    const max = Math.min(spec.max, spec.safetyMax ?? Infinity);
+    const suffix = spec.unit && spec.unit !== '%' ? spec.unit : undefined;
+    return { min: spec.min, max, step: spec.uiStep ?? spec.step, suffix };
   }
-
-  if (name === 'ratio') {
-    return { min: 1, max: 20, step: 0.1 };
-  }
-
-  if (name === 'attack') {
-    return { min: 0.001, max: 0.1, step: 0.001, suffix: 's' };
-  }
-
-  if (name === 'release') {
-    return { min: 0.05, max: 1, step: 0.01, suffix: 's' };
-  }
-
-  if (name === 'knee') {
-    return { min: 0, max: 40, step: 1, suffix: 'dB' };
-  }
-
-  if (name === 'bias') {
-    return { min: -1, max: 1, step: 0.01 };
-  }
-
-  if (name === 'bass' || name === 'mid' || name === 'treble' || name === 'presence') {
-    return { min: -12, max: 12, step: 0.5, suffix: 'dB' };
-  }
-
-  if (name === 'midFreq') {
-    return { min: 250, max: 1500, step: 10, suffix: 'Hz' };
-  }
-
-  if (name === 'midQ') {
-    return { min: 0.3, max: 4, step: 0.1 };
-  }
-
-  if (name === 'lowCut') {
-    return { min: type === 'reverb' ? 20 : 40, max: type === 'reverb' ? 500 : 200, step: 1, suffix: 'Hz' };
-  }
-
-  if (name === 'highCut') {
-    return { min: type === 'cabinetIR' ? 3000 : 1000, max: 12000, step: 100, suffix: 'Hz' };
-  }
-
-  if (name === 'timeMs') {
-    return { min: 20, max: 2000, step: 10, suffix: 'ms' };
-  }
-
-  if (name === 'feedback') {
-    return type === 'delay' ? { min: 0, max: 0.85, step: 0.01 } : { min: 0, max: 100, step: 1 };
-  }
-
-  if (name === 'decay') {
-    return { min: 0.2, max: 10, step: 0.1, suffix: 's' };
-  }
-
-  if (name === 'preDelay') {
-    return { min: 0, max: 200, step: 1, suffix: 'ms' };
-  }
-
-  if (name === 'rate') {
-    return { min: 0.05, max: 20, step: 0.05, suffix: 'Hz' };
-  }
-
-  if (name === 'bpm') {
-    return { min: 40, max: 240, step: 1 };
-  }
-
-  if (name === 'referenceA4') {
-    return { min: 430, max: 450, step: 1, suffix: 'Hz' };
-  }
-
-  if (name === 'releaseMs') {
-    return { min: 20, max: 500, step: 5, suffix: 'ms' };
-  }
-
   return { min: 0, max: 100, step: 1 };
 };
 

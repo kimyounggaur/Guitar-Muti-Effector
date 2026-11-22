@@ -55,6 +55,7 @@ async function measure(preset: ReturnType<typeof usePresetStore.getState>['prese
     const Ctor = constructors[pedal.type];
     if (!Ctor) continue; // tuner, stopped looper and stopped rhythm are pass-through
     const effect = new Ctor(ctx, pedal.id);
+    effect.setTempo?.(preset.tempoBpm); // the engine forwards the shared tempo the same way
     for (const [name, value] of Object.entries(pedal.params)) effect.setParam(name, value);
     effect.setBypass(false);
     previous.connect(effect.input);
