@@ -18,6 +18,14 @@ HTTPS와 AudioWorklet을 지원하는 최신 브라우저가 필요합니다. �
 
 Node.js 22에서 `npm ci`, `npm run dev`를 실행합니다. `npm test`는 오디오 안전·워크릿·프리셋 회귀 검사를, `npm run build`는 타입 검사와 배포 빌드 및 오프라인 캐시 생성을 실행합니다. GitHub Pages는 `main`의 검사·빌드가 성공하면 배포됩니다.
 
+검사 명령은 다음과 같습니다.
+
+- `npm run lint`: ESLint와 화면 문구 검사(`scripts/check-strings.mjs`)를 실행합니다. 문구 검사는 컴포넌트에 한국어가 아니고 허용 목록(`src/i18n/ko.ts`의 `ALLOWED_ENGLISH`)에도 없는 영어 문구가 있으면 실패합니다. 화면 문구는 `src/i18n/ko.ts`에 추가하고 `t()`로 가져옵니다.
+- `npm run e2e`: Playwright 크롬으로 화면과 오디오를 검사합니다(휴대폰 390px, 데스크톱 1280·1440·1920px). 처음 한 번은 `npx playwright install chromium`이 필요합니다. 검사 전에 앱을 자동으로 빌드해 `vite preview`(4173 포트)로 띄우고, 오디오 측정은 개발 서버(5174 포트)를 씁니다. 화면 픽셀 비교는 `npm run e2e:visual`로 따로 실행합니다.
+- `npm run e2e:baseline`: 레이아웃 수치와 프리셋 출력 레벨을 다시 측정해 `tests/e2e/baseline.json`을 새로 씁니다. 기준선을 일부러 바꿀 때만 실행하고, 바뀐 이유를 PR에 적어 주세요.
+
+리팩토링 전후 비교는 [docs/refactoring-result.md](docs/refactoring-result.md)에, 사람이 직접 확인할 항목은 [docs/manual-checklist.md](docs/manual-checklist.md)에 있습니다.
+
 브라우저 개발 검증 페이지는 `tests/`에 있고 배포 빌드에는 포함되지 않습니다. 프리셋 측정 방법과 결과는 [tests/PRESET_CALIBRATION.md](tests/PRESET_CALIBRATION.md)에 있습니다.
 
 ## 음원과 검증 범위
