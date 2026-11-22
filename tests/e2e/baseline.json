@@ -1,0 +1,857 @@
+{
+  "recordedAt": "2026-11-22T17:05:53.323Z",
+  "layout": {
+    "desktop-1280": {
+      "project": "desktop-1280",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "pageScreens": 3.4,
+      "horizontalOverflow": true,
+      "overflowPx": 2,
+      "connectButtonTop": 0.13,
+      "panicButtonTop": 0.04,
+      "textElements": 998,
+      "textUnder11px": 737,
+      "textUnder12px": 774,
+      "minFontSize": 8,
+      "smallTouchTargets": 464,
+      "lowContrastText": 136,
+      "tapHitPoints": {
+        "center": true,
+        "left": true,
+        "right": true,
+        "top": true,
+        "bottom": true
+      }
+    },
+    "desktop-1440": {
+      "project": "desktop-1440",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "pageScreens": 3,
+      "horizontalOverflow": true,
+      "overflowPx": 3,
+      "connectButtonTop": 0.11,
+      "panicButtonTop": 0.04,
+      "textElements": 998,
+      "textUnder11px": 726,
+      "textUnder12px": 774,
+      "minFontSize": 8,
+      "smallTouchTargets": 464,
+      "lowContrastText": 136,
+      "tapHitPoints": {
+        "center": true,
+        "left": true,
+        "right": true,
+        "top": true,
+        "bottom": true
+      }
+    },
+    "desktop-1920": {
+      "project": "desktop-1920",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "pageScreens": 2.6,
+      "horizontalOverflow": true,
+      "overflowPx": 4,
+      "connectButtonTop": 0.09,
+      "panicButtonTop": 0.03,
+      "textElements": 998,
+      "textUnder11px": 726,
+      "textUnder12px": 763,
+      "minFontSize": 8,
+      "smallTouchTargets": 464,
+      "lowContrastText": 136,
+      "tapHitPoints": {
+        "center": true,
+        "left": true,
+        "right": true,
+        "top": true,
+        "bottom": true
+      }
+    },
+    "mobile-390": {
+      "project": "mobile-390",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pageScreens": 8.3,
+      "horizontalOverflow": false,
+      "overflowPx": 0,
+      "connectButtonTop": 0.19,
+      "panicButtonTop": 0.03,
+      "textElements": 1009,
+      "textUnder11px": 718,
+      "textUnder12px": 748,
+      "minFontSize": 8,
+      "smallTouchTargets": 4,
+      "lowContrastText": 136,
+      "tapHitPoints": null
+    }
+  },
+  "presets": [
+    {
+      "id": "factory-clean-01-studio-glass-clean",
+      "name": "Clean 01 · Clean / Room reverb",
+      "outputTrimDb": -2.94,
+      "peakDb": -30.34,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-clean-02-warm-combo-clean",
+      "name": "Clean 02 · Clean / Slapback delay / Plate reverb",
+      "outputTrimDb": -1.77,
+      "peakDb": -31.07,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-clean-03-jazz-neck-clean",
+      "name": "Clean 03 · Clean / Chorus mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -32.03,
+      "rmsDb": -46.26
+    },
+    {
+      "id": "factory-clean-04-country-snap-clean",
+      "name": "Clean 04 · Clean / Digital delay / Room reverb",
+      "outputTrimDb": 0,
+      "peakDb": -32.45,
+      "rmsDb": -47.48
+    },
+    {
+      "id": "factory-clean-05-funk-chime-clean",
+      "name": "Clean 05 · Clean / Plate reverb",
+      "outputTrimDb": -2.88,
+      "peakDb": -31.89,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-clean-06-crystal-chorus-clean",
+      "name": "Clean 06 · Clean / Chorus mod / Analog delay",
+      "outputTrimDb": -1.04,
+      "peakDb": -30.83,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-clean-07-nashville-plate-clean",
+      "name": "Clean 07 · Clean / Digital delay / Room reverb",
+      "outputTrimDb": -1.24,
+      "peakDb": -30.09,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-clean-08-fingerstyle-air",
+      "name": "Clean 08 · Clean / Slapback delay / Plate reverb",
+      "outputTrimDb": 0,
+      "peakDb": -30.79,
+      "rmsDb": -45.06
+    },
+    {
+      "id": "factory-clean-09-clean-boost-edge",
+      "name": "Clean 09 · Overdrive / Chorus mod / Spring reverb",
+      "outputTrimDb": -0.47,
+      "peakDb": -31.42,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-clean-10-direct-practice-clean",
+      "name": "Clean 10 · Clean / Digital delay / Room reverb",
+      "outputTrimDb": -0.81,
+      "peakDb": -30.78,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-clean-11-boutique-sparkle",
+      "name": "Clean 11 · Clean / Slapback delay / Plate reverb",
+      "outputTrimDb": -2.09,
+      "peakDb": -31.14,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-clean-12-midnight-clean",
+      "name": "Clean 12 · Clean / Chorus mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -32.26,
+      "rmsDb": -46.84
+    },
+    {
+      "id": "factory-bass-01-round-bass-di",
+      "name": "Bass 01 · Clean / Room reverb",
+      "outputTrimDb": -3.08,
+      "peakDb": -28.69,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-bass-02-vintage-bass-cab",
+      "name": "Bass 02 · Crunch / Chorus mod / Plate reverb",
+      "outputTrimDb": 0,
+      "peakDb": -31.03,
+      "rmsDb": -47.02
+    },
+    {
+      "id": "factory-bass-03-pick-bass-grind",
+      "name": "Bass 03 · Distortion / Tape delay / Room reverb",
+      "outputTrimDb": -14.39,
+      "peakDb": -32.48,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-bass-04-sub-foundation",
+      "name": "Bass 04 · Overdrive / Plate reverb",
+      "outputTrimDb": 0,
+      "peakDb": -26.75,
+      "rmsDb": -45.17
+    },
+    {
+      "id": "factory-bass-05-bright-finger-bass",
+      "name": "Bass 05 · Clean / Room reverb",
+      "outputTrimDb": -3.91,
+      "peakDb": -30.26,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-bass-06-bass-chorus-wide",
+      "name": "Bass 06 · Distortion / Chorus mod / Tape delay",
+      "outputTrimDb": -13.61,
+      "peakDb": -33.06,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-bass-07-motown-thump",
+      "name": "Bass 07 · Overdrive / Room reverb",
+      "outputTrimDb": -0.56,
+      "peakDb": -26.43,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-bass-08-modern-tight-bass",
+      "name": "Bass 08 · Crunch / Plate reverb",
+      "outputTrimDb": -10.88,
+      "peakDb": -28.46,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-bass-09-dub-delay-bass",
+      "name": "Bass 09 · Clean / Tape delay / Room reverb",
+      "outputTrimDb": -7.05,
+      "peakDb": -32.12,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-bass-10-fretless-bloom",
+      "name": "Bass 10 · Overdrive / Chorus mod / Plate reverb",
+      "outputTrimDb": 0,
+      "peakDb": -31.39,
+      "rmsDb": -49.12
+    },
+    {
+      "id": "factory-bass-11-tube-bass-drive",
+      "name": "Bass 11 · Crunch / Room reverb",
+      "outputTrimDb": 0,
+      "peakDb": -29.41,
+      "rmsDb": -45.08
+    },
+    {
+      "id": "factory-bass-12-studio-bass-comp",
+      "name": "Bass 12 · Distortion / Tape delay / Plate reverb",
+      "outputTrimDb": -13.36,
+      "peakDb": -33.39,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-01-blues-velvet-lead",
+      "name": "Lead 01 · Overdrive / Analog delay / Plate reverb",
+      "outputTrimDb": -4.31,
+      "peakDb": -31.16,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-02-singing-sustain-lead",
+      "name": "Lead 02 · Crunch / Digital delay / Spring reverb",
+      "outputTrimDb": -11.63,
+      "peakDb": -33.03,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-03-classic-delay-lead",
+      "name": "Lead 03 · Distortion / Tape delay / Hall reverb",
+      "outputTrimDb": -19.89,
+      "peakDb": -32.1,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-04-liquid-fusion-lead",
+      "name": "Lead 04 · Fuzz / Chorus mod / Pingpong delay",
+      "outputTrimDb": -21.45,
+      "peakDb": -34.78,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-05-arena-solo-lead",
+      "name": "Lead 05 · Overdrive / Analog delay / Spring reverb",
+      "outputTrimDb": -4.56,
+      "peakDb": -31.99,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-06-neck-pickup-lead",
+      "name": "Lead 06 · Crunch / Digital delay / Hall reverb",
+      "outputTrimDb": -16.65,
+      "peakDb": -32.77,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-07-smooth-legato-lead",
+      "name": "Lead 07 · Distortion / Tape delay / Plate reverb",
+      "outputTrimDb": -25,
+      "peakDb": -33.88,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-08-vintage-echo-lead",
+      "name": "Lead 08 · Fuzz / Phaser mod / Pingpong delay",
+      "outputTrimDb": -23.78,
+      "peakDb": -34.53,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-09-driven-fuzz-lead",
+      "name": "Lead 09 · Overdrive / Analog delay / Hall reverb",
+      "outputTrimDb": 0,
+      "peakDb": -31.99,
+      "rmsDb": -46.8
+    },
+    {
+      "id": "factory-lead-10-texas-bite-lead",
+      "name": "Lead 10 · Crunch / Digital delay / Plate reverb",
+      "outputTrimDb": -11.26,
+      "peakDb": -31.33,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-11-glass-slide-lead",
+      "name": "Lead 11 · Distortion / Tape delay / Spring reverb",
+      "outputTrimDb": -21.29,
+      "peakDb": -33.55,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-lead-12-modern-lead-cut",
+      "name": "Lead 12 · Fuzz / Vibrato mod / Pingpong delay",
+      "outputTrimDb": -23.53,
+      "peakDb": -33.83,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-01-classic-crunch-stack",
+      "name": "Crunch 01 · Crunch / Slapback delay / Room reverb",
+      "outputTrimDb": -11.06,
+      "peakDb": -30.83,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-02-brit-rhythm-crunch",
+      "name": "Crunch 02 · Crunch / Analog delay / Spring reverb",
+      "outputTrimDb": -14.56,
+      "peakDb": -32.19,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-03-open-chord-crunch",
+      "name": "Crunch 03 · Crunch / Phaser mod / Tape delay",
+      "outputTrimDb": -13.86,
+      "peakDb": -32.02,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-04-garage-combo-crunch",
+      "name": "Crunch 04 · Crunch / Slapback delay / Room reverb",
+      "outputTrimDb": -12.08,
+      "peakDb": -29.95,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-05-roots-rock-crunch",
+      "name": "Crunch 05 · Crunch / Analog delay / Spring reverb",
+      "outputTrimDb": -14.11,
+      "peakDb": -31.89,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-06-edge-breakup-crunch",
+      "name": "Crunch 06 · Crunch / Tape delay / Plate reverb",
+      "outputTrimDb": -23.02,
+      "peakDb": -31.81,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-07-indie-rhythm-crunch",
+      "name": "Crunch 07 · Crunch / Slapback delay / Room reverb",
+      "outputTrimDb": -17.89,
+      "peakDb": -31.01,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-08-classic-mid-push",
+      "name": "Crunch 08 · Crunch / Chorus mod / Analog delay",
+      "outputTrimDb": -19.22,
+      "peakDb": -32.92,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-09-warm-hair-crunch",
+      "name": "Crunch 09 · Crunch / Tape delay / Plate reverb",
+      "outputTrimDb": -12.25,
+      "peakDb": -32.37,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-10-alt-rock-crunch",
+      "name": "Crunch 10 · Crunch / Slapback delay / Room reverb",
+      "outputTrimDb": -7.84,
+      "peakDb": -29.4,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-11-power-pop-crunch",
+      "name": "Crunch 11 · Crunch / Analog delay / Spring reverb",
+      "outputTrimDb": -16.21,
+      "peakDb": -31.91,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-crunch-12-blues-crunch-bite",
+      "name": "Crunch 12 · Crunch / Tape delay / Plate reverb",
+      "outputTrimDb": -19.16,
+      "peakDb": -31.51,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-01-modern-tight-gain",
+      "name": "High Gain 01 · Distortion / Digital delay / Room reverb",
+      "outputTrimDb": -28.83,
+      "peakDb": -36.39,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-02-scooped-metal-wall",
+      "name": "High Gain 02 · Fuzz / Pingpong delay / Plate reverb",
+      "outputTrimDb": -31.44,
+      "peakDb": -36.13,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-03-djent-gate-stack",
+      "name": "High Gain 03 · Crunch / Analog delay / Room reverb",
+      "outputTrimDb": -25.56,
+      "peakDb": -32.48,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-04-high-gain-lead",
+      "name": "High Gain 04 · Distortion / Digital delay / Plate reverb",
+      "outputTrimDb": -31.22,
+      "peakDb": -35.85,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-05-drop-tune-rhythm",
+      "name": "High Gain 05 · Fuzz / Phaser mod / Pingpong delay",
+      "outputTrimDb": -32.59,
+      "peakDb": -36.07,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-06-thrash-cut",
+      "name": "High Gain 06 · Crunch / Analog delay / Plate reverb",
+      "outputTrimDb": -27.55,
+      "peakDb": -32.63,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-07-doom-saturation",
+      "name": "High Gain 07 · Distortion / Digital delay / Room reverb",
+      "outputTrimDb": -30.09,
+      "peakDb": -35.76,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-08-prog-metal-focus",
+      "name": "High Gain 08 · Fuzz / Pingpong delay / Plate reverb",
+      "outputTrimDb": -30.3,
+      "peakDb": -35.86,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-09-hardcore-bite",
+      "name": "High Gain 09 · Crunch / Analog delay / Room reverb",
+      "outputTrimDb": -26.34,
+      "peakDb": -32.07,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-10-liquid-shred-gain",
+      "name": "High Gain 10 · Distortion / Digital delay / Plate reverb",
+      "outputTrimDb": -32.1,
+      "peakDb": -35.96,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-11-dark-high-gain",
+      "name": "High Gain 11 · Fuzz / Phaser mod / Pingpong delay",
+      "outputTrimDb": -29.42,
+      "peakDb": -36.34,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-high-gain-12-bright-4x12-fire",
+      "name": "High Gain 12 · Crunch / Analog delay / Plate reverb",
+      "outputTrimDb": -25.57,
+      "peakDb": -32.1,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-ambient-01-shimmerless-cloud",
+      "name": "Ambient 01 · Clean / Chorus mod / Tape delay",
+      "outputTrimDb": 0,
+      "peakDb": -35.8,
+      "rmsDb": -49.63
+    },
+    {
+      "id": "factory-ambient-02-tape-halo-clean",
+      "name": "Ambient 02 · Clean / Phaser mod / Pingpong delay",
+      "outputTrimDb": 0,
+      "peakDb": -37.53,
+      "rmsDb": -50.32
+    },
+    {
+      "id": "factory-ambient-03-dotted-eighth-sky",
+      "name": "Ambient 03 · Clean / Vibrato mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -38.64,
+      "rmsDb": -52.87
+    },
+    {
+      "id": "factory-ambient-04-slow-motion-pad",
+      "name": "Ambient 04 · Overdrive / Flanger mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -44.09,
+      "rmsDb": -56.01
+    },
+    {
+      "id": "factory-ambient-05-deep-hall-swell",
+      "name": "Ambient 05 · Clean / Chorus mod / Tape delay",
+      "outputTrimDb": 0,
+      "peakDb": -36.14,
+      "rmsDb": -47.92
+    },
+    {
+      "id": "factory-ambient-06-stereo-wash-lead",
+      "name": "Ambient 06 · Clean / Phaser mod / Pingpong delay",
+      "outputTrimDb": 0,
+      "peakDb": -43.43,
+      "rmsDb": -56.88
+    },
+    {
+      "id": "factory-ambient-07-dream-plate-echo",
+      "name": "Ambient 07 · Clean / Vibrato mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -36.99,
+      "rmsDb": -49.51
+    },
+    {
+      "id": "factory-ambient-08-ambient-trem-bed",
+      "name": "Ambient 08 · Overdrive / Flanger mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -40.83,
+      "rmsDb": -54.09
+    },
+    {
+      "id": "factory-ambient-09-cathedral-clean",
+      "name": "Ambient 09 · Clean / Chorus mod / Tape delay",
+      "outputTrimDb": 0,
+      "peakDb": -38.94,
+      "rmsDb": -52.22
+    },
+    {
+      "id": "factory-ambient-10-reverse-like-bloom",
+      "name": "Ambient 10 · Clean / Phaser mod / Pingpong delay",
+      "outputTrimDb": 0,
+      "peakDb": -37.03,
+      "rmsDb": -51.03
+    },
+    {
+      "id": "factory-ambient-11-soft-focus-loop",
+      "name": "Ambient 11 · Clean / Vibrato mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -40.75,
+      "rmsDb": -51.49
+    },
+    {
+      "id": "factory-ambient-12-midnight-atmosphere",
+      "name": "Ambient 12 · Overdrive / Flanger mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -47.26,
+      "rmsDb": -58.76
+    },
+    {
+      "id": "factory-modulation-01-wide-chorus-clean",
+      "name": "Modulation 01 · Clean / Chorus mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -33.33,
+      "rmsDb": -46.32
+    },
+    {
+      "id": "factory-modulation-02-jet-flanger-rhythm",
+      "name": "Modulation 02 · Clean / Flanger mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -34.26,
+      "rmsDb": -48.07
+    },
+    {
+      "id": "factory-modulation-03-four-stage-phaser",
+      "name": "Modulation 03 · Clean / Phaser mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -33.04,
+      "rmsDb": -47.58
+    },
+    {
+      "id": "factory-modulation-04-brown-trem-pulse",
+      "name": "Modulation 04 · Clean / Tremolo mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -33.74,
+      "rmsDb": -46.91
+    },
+    {
+      "id": "factory-modulation-05-deep-vibrato-lead",
+      "name": "Modulation 05 · Overdrive / Vibrato mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -42.18,
+      "rmsDb": -57.78
+    },
+    {
+      "id": "factory-modulation-06-rotary-like-sweep",
+      "name": "Modulation 06 · Clean / Chorus mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -33.57,
+      "rmsDb": -47.64
+    },
+    {
+      "id": "factory-modulation-07-slow-chorus-pad",
+      "name": "Modulation 07 · Clean / Flanger mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -33.7,
+      "rmsDb": -48.45
+    },
+    {
+      "id": "factory-modulation-08-fast-trem-chop",
+      "name": "Modulation 08 · Clean / Phaser mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -31.38,
+      "rmsDb": -45.77
+    },
+    {
+      "id": "factory-modulation-09-liquid-phaser-lead",
+      "name": "Modulation 09 · Clean / Tremolo mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -33.69,
+      "rmsDb": -47.16
+    },
+    {
+      "id": "factory-modulation-10-tape-wobble-mod",
+      "name": "Modulation 10 · Overdrive / Vibrato mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -43.18,
+      "rmsDb": -56.29
+    },
+    {
+      "id": "factory-modulation-11-stereo-motion-clean",
+      "name": "Modulation 11 · Clean / Chorus mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -32.62,
+      "rmsDb": -46.33
+    },
+    {
+      "id": "factory-modulation-12-subtle-ensemble",
+      "name": "Modulation 12 · Clean / Flanger mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -34.06,
+      "rmsDb": -47.41
+    },
+    {
+      "id": "factory-fx-01-robot-gate-pulse",
+      "name": "FX 01 · Fuzz / Flanger mod / Tape delay",
+      "outputTrimDb": 0,
+      "peakDb": -33.96,
+      "rmsDb": -49.05
+    },
+    {
+      "id": "factory-fx-02-filter-telephone",
+      "name": "FX 02 · Clean / Phaser mod / Pingpong delay",
+      "outputTrimDb": 0,
+      "peakDb": -36.07,
+      "rmsDb": -49.73
+    },
+    {
+      "id": "factory-fx-03-lo-fi-cabinet-fx",
+      "name": "FX 03 · Overdrive / Tremolo mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -33.01,
+      "rmsDb": -47.84
+    },
+    {
+      "id": "factory-fx-04-ping-pong-warp",
+      "name": "FX 04 · Fuzz / Vibrato mod / Analog delay",
+      "outputTrimDb": -8.93,
+      "peakDb": -31.58,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-fx-05-spring-crash-echo",
+      "name": "FX 05 · Clean / Chorus mod / Tape delay",
+      "outputTrimDb": 0,
+      "peakDb": -41.46,
+      "rmsDb": -55.16
+    },
+    {
+      "id": "factory-fx-06-trem-delay-chop",
+      "name": "FX 06 · Overdrive / Flanger mod / Pingpong delay",
+      "outputTrimDb": 0,
+      "peakDb": -31.78,
+      "rmsDb": -45.87
+    },
+    {
+      "id": "factory-fx-07-fuzz-texture",
+      "name": "FX 07 · Fuzz / Phaser mod / Digital delay",
+      "outputTrimDb": -9.34,
+      "peakDb": -33.14,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-fx-08-ghost-slap-machine",
+      "name": "FX 08 · Clean / Tremolo mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -36.88,
+      "rmsDb": -50.06
+    },
+    {
+      "id": "factory-fx-09-ringless-sci-fi",
+      "name": "FX 09 · Overdrive / Vibrato mod / Tape delay",
+      "outputTrimDb": -7.99,
+      "peakDb": -31.81,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-fx-10-dub-feedback-throw",
+      "name": "FX 10 · Fuzz / Chorus mod / Pingpong delay",
+      "outputTrimDb": -1.47,
+      "peakDb": -29.26,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-fx-11-broken-tape-deck",
+      "name": "FX 11 · Clean / Flanger mod / Digital delay",
+      "outputTrimDb": 0,
+      "peakDb": -36.03,
+      "rmsDb": -48.29
+    },
+    {
+      "id": "factory-fx-12-glitch-rhythm-bed",
+      "name": "FX 12 · Overdrive / Phaser mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -38.07,
+      "rmsDb": -50.55
+    },
+    {
+      "id": "factory-experimental-01-fuzz-experiment",
+      "name": "Experimental 01 · Fuzz / Vibrato mod / Tape delay",
+      "outputTrimDb": -10.25,
+      "peakDb": -32.68,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-02-voltage-starve",
+      "name": "Experimental 02 · Distortion / Flanger mod / Pingpong delay",
+      "outputTrimDb": -14.57,
+      "peakDb": -31.95,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-03-sub-oscillation-dirt",
+      "name": "Experimental 03 · Crunch / Phaser mod / Digital delay",
+      "outputTrimDb": -11.57,
+      "peakDb": -32.11,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-04-alien-vibrato-wash",
+      "name": "Experimental 04 · Overdrive / Tremolo mod / Analog delay",
+      "outputTrimDb": -3.66,
+      "peakDb": -29.38,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-05-broken-radio-lead",
+      "name": "Experimental 05 · Fuzz / Chorus mod / Tape delay",
+      "outputTrimDb": -17.26,
+      "peakDb": -32.78,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-06-granular-like-echo",
+      "name": "Experimental 06 · Distortion / Vibrato mod / Pingpong delay",
+      "outputTrimDb": -15.01,
+      "peakDb": -32.01,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-07-deep-reese-guitar",
+      "name": "Experimental 07 · Crunch / Flanger mod / Digital delay",
+      "outputTrimDb": -11.69,
+      "peakDb": -26.6,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-08-pitch-drift-texture",
+      "name": "Experimental 08 · Overdrive / Phaser mod / Analog delay",
+      "outputTrimDb": 0,
+      "peakDb": -33.87,
+      "rmsDb": -48
+    },
+    {
+      "id": "factory-experimental-09-square-solo-voice",
+      "name": "Experimental 09 · Fuzz / Tremolo mod / Tape delay",
+      "outputTrimDb": -17.98,
+      "peakDb": -32.11,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-10-noise-bloom-pad",
+      "name": "Experimental 10 · Distortion / Chorus mod / Pingpong delay",
+      "outputTrimDb": -20.11,
+      "peakDb": -33.59,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-11-dark-wavetable-bite",
+      "name": "Experimental 11 · Crunch / Vibrato mod / Digital delay",
+      "outputTrimDb": -12.4,
+      "peakDb": -31.1,
+      "rmsDb": -45
+    },
+    {
+      "id": "factory-experimental-12-acid-ladder-bite",
+      "name": "Experimental 12 · Overdrive / Flanger mod / Analog delay",
+      "outputTrimDb": -5.63,
+      "peakDb": -29.44,
+      "rmsDb": -45
+    }
+  ]
+}
