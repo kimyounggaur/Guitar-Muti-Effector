@@ -1,4 +1,5 @@
 import { useAudioStore } from '../../store/audioStore';
+import { t } from '../../i18n/ko';
 
 type PatchHeaderProps = {
   bank: string;
@@ -19,7 +20,7 @@ function PatchHeader({ bank, patch, patchName, bpm, isAudioReady }: PatchHeaderP
         </span>
         <strong>{patchName}</strong>
       </div>
-      <div className="patch-meters" aria-label="Input and output status">
+      <div className="patch-meters" aria-label={t('panel.lcd.meters')}>
         <MeterPill label="IN" valueDb={inputMeter.rmsDb} />
         <MeterPill label="OUT" valueDb={outputMeter.rmsDb} />
         <span className={isAudioReady ? 'screen-led is-live' : 'screen-led'}>{isAudioReady ? 'LIVE' : 'IDLE'}</span>

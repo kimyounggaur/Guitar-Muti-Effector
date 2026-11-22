@@ -1,3 +1,4 @@
+import { AudioEngineError, cancelled } from './errors';
 import { PassthroughEffect } from './nodes/BaseEffect';
 import { AmpEQEffect } from './nodes/AmpEQEffect';
 import { CabinetIREffect } from './nodes/CabinetIREffect';
@@ -58,7 +59,7 @@ export class AudioEngine {
   private currentChainKey = '';
   private currentPedalParams = new Map<string, Record<string, PedalParamValue>>();
   private currentMasterVolume = 0.35;
-  private errorHandler: ((message: string) => void) | null = null;
+  private errorHandler: ((error: AudioEngineError) => void) | null = null;
   private inputEndedHandler: (() => void) | null = null;
   private trackListeners: Array<{ track: MediaStreamTrack; handler: () => void }> = [];
   private pendingRebuildTimer = 0;
@@ -110,7 +111,7 @@ export class AudioEngine {
     this.assertCurrent(generation);
 
     if (!this.audioContext || !this.masterGain) {
-      throw new Error('AudioContext is not ready.');
+      throw new AudioEngineError('engineNotReady');
     }
 
     if (this.mediaElement !== mediaElement) {
@@ -198,7 +199,7 @@ export class AudioEngine {
     return this.outputMeter?.read() ?? emptyMeterReading;
   }
 
-  setErrorHandler(handler: ((message: string) => void) | null) {
+  setErrorHandler(handler: ((error: AudioEngineError) => void) | null) {
     this.errorHandler = handler;
   }
 
@@ -208,13 +209,13 @@ export class AudioEngine {
 
   async setOutputDevice(deviceId: string): Promise<void> {
     const context = this.audioContext;
-    if (!context || context.state === 'closed') throw new Error('먼저 기타 또는 오디오 파일을 연결해 주세요.');
+    if (!context || context.state === 'closed') throw new AudioEngineError('contextClosed');
     const setSinkId = (context as AudioContext & { setSinkId?: (id: string) => Promise<void> }).setSinkId;
-    if (!setSinkId) throw new Error('이 브라우저는 앱에서 출력 장치 선택을 지원하지 않습니다. 운영체제의 소리 설정에서 변경해 주세요.');
+    if (!setSinkId) throw new AudioEngineError('outputNotSupported');
     const generation = this.operationGeneration;
     await setSinkId.call(context, deviceId || '');
     this.assertCurrent(generation);
-    if (this.audioContext !== context) throw new DOMException('오디오 연결이 취소되었습니다.', 'AbortError');
+    if (this.audioContext !== context) throw cancelled();
   }
 
   rebuildChain(pedals: Pedal[]) {
@@ -270,7 +271,7 @@ export class AudioEngine {
         this.fadeMaster(this.currentMasterVolume, 0.02);
       } catch (error) {
         this.panicDisconnect();
-        this.errorHandler?.(error instanceof Error ? error.message : 'Could not rebuild audio chain.');
+        this.errorHandler?.(new AudioEngineError('rebuildFailed', error));
       }
     }, 24);
   }
@@ -339,7 +340,7 @@ export class AudioEngine {
   }
 
   private assertCurrent(generation: number) {
-    if (generation !== this.operationGeneration) throw new DOMException('오디오 연결이 취소되었습니다.', 'AbortError');
+    if (generation !== this.operationGeneration) throw cancelled();
   }
 
   private async ensureContext(generation: number) {
@@ -353,7 +354,7 @@ export class AudioEngine {
     try {
       await Promise.all([prepareNoiseGate(context), prepareCompressor(context), prepareSafetyLimiter(context)]);
       this.assertCurrent(generation);
-      if (this.audioContext !== context) throw new DOMException('오디오 연결이 취소되었습니다.', 'AbortError');
+      if (this.audioContext !== context) throw cancelled();
     } catch (error) {
       if (this.audioContext === context) this.audioContext = null;
       if (context.state !== 'closed') await context.close().catch(() => {});
@@ -383,7 +384,7 @@ export class AudioEngine {
 
   private async replaceStream(selectedDeviceId: string, generation: number) {
     if (!this.audioContext) {
-      throw new Error('AudioContext is not ready.');
+      throw new AudioEngineError('engineNotReady');
     }
 
     this.stopTracks();
@@ -393,7 +394,7 @@ export class AudioEngine {
     const stream = await navigator.mediaDevices.getUserMedia(createInputConstraints(selectedDeviceId));
     if (generation !== this.operationGeneration || this.audioContext !== context) {
       stream.getTracks().forEach((track) => track.stop());
-      throw new DOMException('오디오 연결이 취소되었습니다.', 'AbortError');
+      throw cancelled();
     }
     this.stream = stream;
     this.source = context.createMediaStreamSource(stream);
@@ -503,7 +504,7 @@ export class AudioEngine {
 
   private createEffect(type: PedalType, id: string): EffectNodeWrapper {
     if (!this.audioContext) {
-      throw new Error('AudioContext is not ready.');
+      throw new AudioEngineError('engineNotReady');
     }
 
     if (type === 'noiseGate') {

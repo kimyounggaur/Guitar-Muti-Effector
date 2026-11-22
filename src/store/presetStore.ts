@@ -6,6 +6,7 @@ import { exportUserPresets, importPresets } from '../presets/io';
 import { mergeWithFactoryLibrary, migrateLegacyPresetList, normalizeUserPresetList } from '../presets/migrate';
 import type { PedalboardPreset, PresetOrigin, PresetSnapshot } from '../presets/types';
 import { loadUserPresets, saveUserPresets } from './persistence';
+import { t } from '../i18n/ko';
 
 export type { PedalboardPreset, PresetOrigin, PresetSnapshot };
 export { getFactoryPresetCategories, migrateLegacyPresetList, normalizeUserPresetList };
@@ -49,7 +50,7 @@ export const usePresetStore = create<PresetStore>((set, get) => ({
     const preset = buildPreset(createId(), name, snapshot, nowIso(), nowIso(), {
       category: 'User Presets',
       origin: 'user',
-      description: 'Saved from the current pedalboard state.',
+      description: t('preset.defaultDescription'),
       tags: ['user'],
     });
     const presets = [preset, ...get().presets];

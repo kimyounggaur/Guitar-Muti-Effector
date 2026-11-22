@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 import '../../styles/components/expression.css';
+import { t } from '../../i18n/ko';
 
 type ExpressionPedalProps = {
   value: number;
@@ -51,12 +52,12 @@ function ExpressionPedal({ value, targetLabel = 'VOLUME', masterPercent, onChang
   };
 
   return (
-    <section className="expression-pedal-wrap" aria-label="Expression pedal">
+    <section className="expression-pedal-wrap" aria-label={t('panel.expression.region')}>
       <div
         className={`expression-pedal ${dragging ? 'is-dragging' : ''}`}
         role="slider"
         tabIndex={0}
-        aria-label={`${targetLabel} expression`}
+        aria-label={t('panel.expression.slider', { target: targetLabel })}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={safeValue}
@@ -71,10 +72,10 @@ function ExpressionPedal({ value, targetLabel = 'VOLUME', masterPercent, onChang
         <i aria-hidden="true" />
       </div>
       <div className="expression-label">
-        <span>EXP PEDAL</span>
+        <span>{t('panel.expression.lettering')}</span>
         <strong>{targetLabel}</strong>
         <small>{safeValue}%</small>
-        {masterPercent !== undefined ? <small className="expression-ceiling">볼륨 페달 · 마스터 {masterPercent}% 이하</small> : null}
+        {masterPercent !== undefined ? <small className="expression-ceiling">{t('panel.expression.ceiling', { percent: masterPercent })}</small> : null}
       </div>
     </section>
   );

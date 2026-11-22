@@ -1,0 +1,35 @@
+/* Toast (P6d): one line at the bottom centre, above the phone's sticky bar and the page. */
+.app-toast-region {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 60;
+  transform: translateX(-50%);
+  pointer-events: none
+}
+
+.app-toast {
+  margin: 0;
+  padding: 10px 16px;
+  border: 1px solid #36f0ce;
+  border-radius: 8px;
+  background: #17161a;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  color: #f5f2ef;
+  font-size: var(--fs-md);
+  white-space: nowrap;
+  animation: app-toast-in 160ms ease-out
+}
+
+@keyframes app-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px)
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-toast {
+    animation: none
+  }
+}

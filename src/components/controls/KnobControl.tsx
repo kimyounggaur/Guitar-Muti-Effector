@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 import '../../styles/components/knob.css';
+import { t } from '../../i18n/ko';
 
 type KnobControlProps = {
   label: string;
@@ -121,9 +122,9 @@ function KnobControl({
         {formattedValue}
         {suffix}
       </strong>
-      <div className="knob-adjust" aria-label={`${label} 값 조절`}>
-        <button type="button" disabled={disabled || safeValue <= min} aria-label={`${label} 줄이기`} onClick={() => commit(safeValue - step)}>−</button>
-        <button type="button" disabled={disabled || safeValue >= max} aria-label={`${label} 늘리기`} onClick={() => commit(safeValue + step)}>+</button>
+      <div className="knob-adjust" aria-label={t('panel.knob.adjust', { label })}>
+        <button type="button" disabled={disabled || safeValue <= min} aria-label={t('panel.knob.decrease', { label })} onClick={() => commit(safeValue - step)}>−</button>
+        <button type="button" disabled={disabled || safeValue >= max} aria-label={t('panel.knob.increase', { label })} onClick={() => commit(safeValue + step)}>+</button>
       </div>
     </div>
   );

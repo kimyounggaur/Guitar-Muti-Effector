@@ -4,6 +4,7 @@ import { emptyLooperReading, LooperReading, subscribeLooper } from '../../../aud
 import { Pedal, PedalParamValue } from '../../../audio/types';
 import KnobControl from '../../controls/KnobControl';
 import '../../../styles/components/looper.css';
+import { t } from '../../../i18n/ko';
 
 type LooperParams = {
   level: number;
@@ -46,8 +47,8 @@ function LooperPanel({
   const unavailable = reading.state === 'loading' || reading.state === 'error' || !pedal.enabled || pedal.bypassed;
   const sendCommand = (command: string) => {
     if (unavailable) return;
-    if (command === 'clear' && reading.hasLoop && !window.confirm('녹음된 루프를 지울까요?')) return;
-    if (command === 'record' && reading.hasLoop && reading.state !== 'recording' && !window.confirm('기존 루프를 지우고 새로 녹음할까요?')) return;
+    if (command === 'clear' && reading.hasLoop && !window.confirm(t('confirm.clearLoop'))) return;
+    if (command === 'record' && reading.hasLoop && reading.state !== 'recording' && !window.confirm(t('confirm.rerecordLoop'))) return;
     onParamChange(pedal.id, '__looperCommand', command);
   };
 
@@ -61,15 +62,15 @@ function LooperPanel({
         {dragListeners ? (<button
           type="button"
           className="drag-handle"
-          aria-label={`Move ${pedal.name}`}
+          aria-label={t('panel.detail.move', { name: pedal.name })}
           {...dragAttributes}
           {...dragListeners}
         >
           ≡
         </button>) : null}
         <button type="button" className="pedal-select looper-display" onClick={() => onSelect(pedal.id)}>
-          <span>루프 녹음기</span>
-          <strong>LOOPER</strong>
+          <span>{t('panel.looper.title')}</span>
+          <strong>{t('panel.looper.lettering')}</strong>
           <em>{formatLooperState(reading.state)}</em>
         </button>
       </div>
@@ -80,19 +81,19 @@ function LooperPanel({
           style={{ '--progress': `${Math.max(0, Math.min(1, reading.progress)) * 360}deg` } as CSSProperties}
         >
           <strong>{reading.hasLoop ? `${reading.durationSec.toFixed(1)}s` : '--'}</strong>
-          <span>{reading.hasLoop ? `${Math.round(reading.progress * 100)}%` : '비어 있음'}</span>
+          <span>{reading.hasLoop ? `${Math.round(reading.progress * 100)}%` : t('panel.common.empty')}</span>
         </div>
         <div className="looper-status">
-          <span>상태</span>
+          <span>{t('panel.looper.state')}</span>
           <strong>{formatLooperState(reading.state)}</strong>
           <small>
-            {params.halfSpeed ? '반속 재생 · ' : ''}
-            {params.reverse ? '역방향' : reading.canUndo ? '되돌리기 가능' : reading.hasLoop ? '루프 준비됨' : '녹음 없음'}
+            {params.halfSpeed ? t('panel.looper.halfSpeedPrefix') : ''}
+            {params.reverse ? t('panel.looper.reverseShort') : reading.canUndo ? t('panel.looper.undoAvailable') : reading.hasLoop ? t('panel.looper.ready') : t('panel.looper.noRecording')}
           </small>
         </div>
       </div>
 
-      {unavailable && <p role="status">{reading.state === 'error' ? '루퍼를 시작하지 못했습니다. 브라우저와 오디오 연결을 확인해 주세요.' : !pedal.enabled || pedal.bypassed ? '루퍼를 켜고 바이패스를 해제해 주세요.' : '기타 또는 오디오를 연결하면 루퍼를 사용할 수 있습니다.'}</p>}
+      {unavailable && <p role="status">{reading.state === 'error' ? t('error.looperFailed') : !pedal.enabled || pedal.bypassed ? t('panel.looper.enableHint') : t('panel.looper.connectHint')}</p>}
       <div className="looper-footswitches">
         <button
           type="button"
@@ -100,7 +101,8 @@ function LooperPanel({
           disabled={unavailable}
           onClick={() => sendCommand('record')}
         >
-          녹음
+          
+          {t('panel.looper.record')}
         </button>
         <button
           type="button"
@@ -108,7 +110,8 @@ function LooperPanel({
           disabled={unavailable || !reading.hasLoop}
           onClick={() => sendCommand('play')}
         >
-          재생
+          
+          {t('panel.common.play')}
         </button>
         <button
           type="button"
@@ -116,19 +119,23 @@ function LooperPanel({
           disabled={unavailable}
           onClick={() => sendCommand('overdub')}
         >
-          겹쳐 녹음
+          
+          {t('panel.looper.overdub')}
         </button>
       </div>
 
       <div className="looper-actions">
         <button type="button" disabled={unavailable} onClick={() => sendCommand('stop')}>
-          정지
+          
+          {t('panel.common.stop')}
         </button>
         <button type="button" onClick={() => sendCommand('undo')} disabled={unavailable || !reading.canUndo}>
-          되돌리기
+          
+          {t('panel.looper.undo')}
         </button>
         <button type="button" className="is-danger" disabled={unavailable || !reading.hasLoop} onClick={() => sendCommand('clear')}>
-          지우기
+          
+          {t('panel.looper.clear')}
         </button>
       </div>
 
@@ -149,38 +156,38 @@ function LooperPanel({
           onChange={(value) => setParam('feedback', value)}
         />
         <label className="looper-control is-wide">
-          <span>길이 맞춤</span>
+          <span>{t('param.looper.quantize')}</span>
           <select value={params.quantize} onChange={(event) => setParam('quantize', event.target.value)}>
-            <option value="off">사용 안 함</option>
-            <option value="1bar">1마디</option>
-            <option value="2bar">2마디</option>
-            <option value="4bar">4마디</option>
+            <option value="off">{t('panel.looper.quantizeOff')}</option>
+            <option value="1bar">{t('panel.looper.bar1')}</option>
+            <option value="2bar">{t('panel.looper.bar2')}</option>
+            <option value="4bar">{t('panel.looper.bar4')}</option>
           </select>
         </label>
       </div>
 
-      <p>길이 맞춤은 현재 템포의 4/4 마디 기준입니다. 지정 길이보다 짧은 녹음은 원래 길이를 유지합니다.</p>
+      <p>{t('panel.looper.quantizeNote')}</p>
       <div className="looper-toggles">
         <label>
-          <span>반속 재생</span>
+          <span>{t('param.looper.halfSpeed')}</span>
           <input type="checkbox" checked={params.halfSpeed} onChange={(event) => setParam('halfSpeed', event.target.checked)} />
         </label>
         <label>
-          <span>역방향 재생</span>
+          <span>{t('param.looper.reverse')}</span>
           <input type="checkbox" checked={params.reverse} onChange={(event) => setParam('reverse', event.target.checked)} />
         </label>
       </div>
 
       <div className="pedal-switches">
         <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-          {pedal.enabled ? '켜짐' : '꺼짐'}
+          {pedal.enabled ? t('panel.common.on') : t('panel.common.off')}
         </button>
         <button
           type="button"
           className={pedal.bypassed ? 'is-bypassed' : ''}
           onClick={() => onBypass(pedal.id, !pedal.bypassed)}
         >
-          {pedal.bypassed ? '바이패스 해제' : '바이패스'}
+          {pedal.bypassed ? t('panel.common.unbypass') : t('panel.common.bypass')}
         </button>
       </div>
     </article>

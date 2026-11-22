@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { playPreparedAudio } from './playPreparedAudio';
 import '../../styles/components/file-player.css';
+import { t } from '../../i18n/ko';
 
 type UploadedTrack = {
   name: string;
@@ -77,8 +78,8 @@ function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFi
       if (!await playPreparedAudio(audio, () => audioRef.current, onPreparePlayback)) return;
       setIsPlaying(true);
       setErrorMessage('');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '재생을 시작할 수 없습니다.');
+    } catch {
+      setErrorMessage(t('error.playback'));
     }
   };
 
@@ -114,17 +115,17 @@ function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFi
   };
 
   return (
-    <section className={`audio-file-player ${mobileOpen ? 'is-open' : ''}`} aria-label="Uploaded audio player">
+    <section className={`audio-file-player ${mobileOpen ? 'is-open' : ''}`} aria-label={t('panel.player.region')}>
       <div className="panel-heading">
-        <span>Audio File</span>
-        <strong>{track ? track.name : 'No track loaded'}</strong>
+        <span>{t('panel.player.title')}</span>
+        <strong>{track ? track.name : t('panel.player.noTrack')}</strong>
         <button className="mobile-only mobile-panel-toggle" type="button" aria-expanded={mobileOpen} onClick={() => setMobileOpen((open) => !open)}>
-          {mobileOpen ? '접기' : '펼치기'}
+          {mobileOpen ? t('panel.common.collapse') : t('panel.common.expand')}
         </button>
       </div>
 
       <label className="audio-upload-control">
-        <span>음원 업로드</span>
+        <span>{t('panel.player.upload')}</span>
         <input type="file" accept="audio/*" onChange={handleFileChange} />
       </label>
 
@@ -143,7 +144,7 @@ function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFi
       <div className="audio-track-display">
         <div className="audio-time-row">
           <span>{formatTime(currentTime)}</span>
-          <strong>{isPlaying ? 'FX PLAY' : track ? (isEffectChainReady ? 'FX READY' : 'READY') : 'EMPTY'}</strong>
+          <strong>{isPlaying ? t('panel.player.statusPlaying') : track ? (isEffectChainReady ? t('panel.player.statusReady') : t('panel.player.statusLoaded')) : t('panel.common.empty')}</strong>
           <span>{formatTime(duration)}</span>
         </div>
         <div className="audio-progress-track" aria-hidden="true">
@@ -152,24 +153,30 @@ function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFi
       </div>
 
       <p className="audio-player-hint">
-        재생 시 업로드 음원이 현재 LCD 이펙터 체인을 통과합니다.
+        
+        {t('panel.player.chainNote')}
       </p>
 
       <div className="audio-transport-buttons">
         <button type="button" onClick={() => handleSeek(-seekStepSeconds)} disabled={!track}>
-          뒤로 10초
+          
+          {t('panel.player.back10')}
         </button>
         <button type="button" onClick={handlePlay} disabled={!track || isPlaying}>
-          재생
+          
+          {t('panel.common.play')}
         </button>
         <button type="button" onClick={handlePause} disabled={!track || !isPlaying}>
-          일시정지
+          
+          {t('panel.common.pause')}
         </button>
         <button type="button" onClick={handleStop} disabled={!track}>
-          정지
+          
+          {t('panel.common.stop')}
         </button>
         <button type="button" onClick={() => handleSeek(seekStepSeconds)} disabled={!track}>
-          앞으로 10초
+          
+          {t('panel.player.forward10')}
         </button>
       </div>
 

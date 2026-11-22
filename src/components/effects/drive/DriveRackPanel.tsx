@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { Pedal, PedalParamValue } from '../../../audio/types';
 import { clampNumber, percentFromRange, readNumberParam } from '../common/paramFormat';
 import '../../../styles/components/rack-drive.css';
+import { t } from '../../../i18n/ko';
 
 type DriveRackPanelProps = {
   pedal: Pedal;
@@ -66,7 +67,7 @@ export default function DriveRackPanel({ pedal, onToggle, onBypass, onParamChang
         <div className="drive-rack-match-row">
           <button type="button" className={mix >= 98 ? 'is-matched' : ''} onClick={() => onParamChange('mix', mix >= 98 ? 72 : 100)} aria-pressed={mix >= 98}>
             <i aria-hidden="true" />
-            <span>WET 100%</span>
+            <span>{t('panel.drive.wet')}</span>
           </button>
           <span className={mix >= 98 ? 'is-lit' : ''} aria-hidden="true" />
         </div>
@@ -117,10 +118,10 @@ function DriveModelSlot({ label, value, onStepDown, onStepUp }: DriveModelSlotPr
     <div className="drive-rack-model-slot">
       <div>{value}</div>
       <span>{label}</span>
-      <button type="button" className="is-up" onClick={onStepUp} aria-label={`${label} next`}>
+      <button type="button" className="is-up" onClick={onStepUp} aria-label={t('panel.drive.next', { label })}>
         <i aria-hidden="true" />
       </button>
-      <button type="button" className="is-down" onClick={onStepDown} aria-label={`${label} previous`}>
+      <button type="button" className="is-down" onClick={onStepDown} aria-label={t('panel.drive.previous', { label })}>
         <i aria-hidden="true" />
       </button>
     </div>

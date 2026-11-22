@@ -98,7 +98,7 @@
 | U5 터치 조작 | ✅ [측정] | 노브 터치 드래그 비활성 + +/− 버튼, 순서 변경용 "← 앞 / 뒤 →" 버튼. 390px에서 44px 미만 터치 대상 **4개**(이전 483개) | 4개 확인 |
 | U6 확인 절차 | ✅ [코드] | 초기화·덮어쓰기·삭제·루프 지우기에 확인 창. 공장 프리셋은 항상 코드에서 로드 | `window.confirm`을 앱 안 대화상자로 교체(선택) |
 | U7 내보내기 중복 | ✅ [코드] | 사용자 프리셋만 JSON 파일로 저장, 가져올 때 같은 ID 건너뜀 | — |
-| U8 언어 혼용 | 🟡 [코드] | 주요 문구 한국어화, 권한 거부 안내 있음. **영어 대체 문구 10곳 남음**(`'Could not connect guitar input.'`, `'AudioContext is not ready.'` 등), 화면에 `INPUT DEVICE`, `Default system input` | 문구 사전(§3.7) |
+| U8 언어 혼용 | ✅ [코드][테스트] | P6d: 화면 문구를 `src/i18n/ko.ts` 한 곳에서 가져옴. 엔진 오류는 `AudioEngineError(code)` → `toUserMessage` 로 한국어 안내. `'Could not …'`/`'AudioContext is not …'` 0건. `scripts/check-strings.mjs`(npm run lint) 와 `tests/messages.test.ts` 로 검사. 영어로 남긴 표기는 `ALLOWED_ENGLISH` 허용 목록과 랙 패널 글자 | — |
 | U9 이름·아이콘 | ✅ [코드] | 탭 제목·화면 이름 "Guitar Multi-effector"로 통일, favicon·아이콘 있음 | — |
 
 #### 4순위 — 성능
@@ -137,8 +137,8 @@
 
 | 상태 | 개수 | 항목 |
 | --- | --- | --- |
-| ✅ 해결 | 35 | S1 S2 S3 S4 S5 S6 S7 F1 F2 F3 F4 F5 F6 F7 F9 F10 U2 U5 U6 U7 U9 P1 P2 P3 Q1 Q2 Q3 Q4 Q5 Q6 Q7 M1 M2 M4 M6 (F1·F3·U2는 작은 후속 있음) |
-| 🟡 부분 해결 | 7 | F8 U1 U3 U8 P4 M3 M5 |
+| ✅ 해결 | 36 | S1 S2 S3 S4 S5 S6 S7 F1 F2 F3 F4 F5 F6 F7 F9 F10 U2 U5 U6 U7 U8 U9 P1 P2 P3 Q1 Q2 Q3 Q4 Q5 Q6 Q7 M1 M2 M4 M6 (F1·F3·U2는 작은 후속 있음) |
+| 🟡 부분 해결 | 6 | F8 U1 U3 P4 M3 M5 |
 | 🔍 재측정 필요 | 0 | — (P1, 2026-11-22에 모두 측정) |
 | ❌ 남음 | 1 | U4 |
 

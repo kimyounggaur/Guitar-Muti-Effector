@@ -18,10 +18,12 @@ import MasterStatusBar from './components/hardware/MasterStatusBar';
 import RightUtilityPanel from './components/hardware/RightUtilityPanel';
 import PedalDetailPanel from './components/pedalboard/PedalDetailPanel';
 import PresetPanel from './components/preset/PresetPanel';
+import ToastHost from './components/common/Toast';
 import { useAudioStore } from './store/audioStore';
 import { usePedalStore } from './store/pedalStore';
 import { PedalboardPreset, usePresetStore } from './store/presetStore';
 import { useTempoStore } from './store/tempoStore';
+import { t } from './i18n/ko';
 
 function App() {
   const controller = useAudioController();
@@ -95,7 +97,7 @@ function App() {
           onDeviceChange={controller.switchInput}
           onOutputDeviceChange={controller.setOutputDevice}
         />
-        <button type="button" className="panic-button" onClick={controller.panic}>긴급 음소거 · PANIC</button>
+        <button type="button" className="panic-button" onClick={controller.panic}>{t('panel.app.panic')}</button>
       </div>
       <HardwareFrame
         leftPanel={<LeftModePanel onOpenBoard={() => setActivePresetCategory(null)} />}
@@ -186,6 +188,7 @@ function App() {
         <AudioFilePlayerPanel isEffectChainReady={isAudioReady} onPreparePlayback={controller.prepareUploadedAudio} />
         <PresetPanel onLoadPreset={controller.loadPreset} />
       </div>
+      <ToastHost />
     </main>
   );
 }

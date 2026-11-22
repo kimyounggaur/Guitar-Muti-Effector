@@ -3,6 +3,7 @@ import { usePedalStore } from '../../store/pedalStore';
 import { useTempoStore } from '../../store/tempoStore';
 import { getParamSpec, TEMPO } from '../../audio/params/schema';
 import KnobControl from '../controls/KnobControl';
+import { t } from '../../i18n/ko';
 
 type ControlKnobPanelProps = {
   selectedPedal: Pedal | null;
@@ -42,7 +43,7 @@ function ControlKnobPanel({ selectedPedal, onPedalParamChanged }: ControlKnobPan
   };
 
   return (
-    <section className="control-knob-panel" aria-label="Selected effect parameters">
+    <section className="control-knob-panel" aria-label={t('panel.knobs.region')}>
       {Array.from({ length: 4 }).map((_, index) => {
         const control = controls[index];
         const value = !selectedPedal || !control ? null : control.name === TEMPO_CONTROL ? tempoBpm : selectedPedal.params[control.name];

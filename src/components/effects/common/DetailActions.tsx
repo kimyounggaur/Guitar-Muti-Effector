@@ -1,4 +1,5 @@
 import { saveSessionNow } from '../../../store/persistence';
+import { t } from '../../../i18n/ko';
 
 type DetailActionsProps = {
   className?: string;
@@ -12,14 +13,17 @@ export default function DetailActions({ className = '', onReset, onTuner }: Deta
   return (
     <div className={`detail-actions${className ? ` ${className}` : ''}`}>
       <button type="button" onClick={saveSessionNow}>
-        페달 설정 저장
+        
+        {t('panel.detail.save')}
       </button>
       <button type="button" onClick={onReset}>
-        전체 초기화
+        
+        {t('panel.detail.resetAll')}
       </button>
       {onTuner ? (
         <button type="button" onClick={onTuner}>
-          튜너
+          
+          {t('pedal.tuner.name')}
         </button>
       ) : null}
     </div>

@@ -13,6 +13,7 @@ import NoiseGateRackPanel from '../effects/noiseGate/NoiseGateRackPanel';
 import RhythmPanel from '../effects/rhythm/RhythmPanel';
 import TunerPanel from '../effects/tuner/TunerPanel';
 import '../../styles/components/detail-panel.css';
+import { t } from '../../i18n/ko';
 
 type PedalDetailPanelProps = {
   onPedalToggled?: (pedals: Pedal[]) => void;
@@ -34,8 +35,8 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
 
   if (!pedal) {
     return (
-      <section className="detail-section" aria-label="페달 상세 설정">
-        <div className="detail-empty">설정할 페달을 선택해 주세요.</div>
+      <section className="detail-section" aria-label={t('panel.detail.sectionRegion')}>
+        <div className="detail-empty">{t('panel.detail.empty')}</div>
       </section>
     );
   }
@@ -49,7 +50,7 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
     onPedalParamChanged?.(pedal.id, paramName, value);
   };
   const handleReset = () => {
-    if (!window.confirm('모든 페달 설정을 초기화하시겠습니까?')) return;
+    if (!window.confirm(t('confirm.resetAll'))) return;
     store.resetPedals();
     rebuild();
   };
@@ -72,22 +73,22 @@ function PedalDetailPanel({ onPedalToggled, onPedalBypassChanged, onPedalParamCh
         if (name === '__looperCommand') onPedalParamChanged?.(pedal.id, name, value);
         else handleParamChange(name, value);
       };
-      return <section ref={scrollTargetRef('looper')} className="detail-section" aria-label="루퍼 조작"><LooperPanel {...card} onParamChange={onParamChange} /></section>;
+      return <section ref={scrollTargetRef('looper')} className="detail-section" aria-label={t('panel.detail.looperRegion')}><LooperPanel {...card} onParamChange={onParamChange} /></section>;
     }
     case 'cabinetIR':
-      return <section className="detail-section" aria-label="캐비닛 IR 설정"><CabinetIRPedal {...card} /></section>;
+      return <section className="detail-section" aria-label={t('panel.detail.cabinetRegion')}><CabinetIRPedal {...card} /></section>;
     case 'rhythm':
-      return <section className="detail-section" aria-label="리듬 설정"><RhythmPanel {...card} /></section>;
+      return <section className="detail-section" aria-label={t('panel.detail.rhythmRegion')}><RhythmPanel {...card} /></section>;
     case 'ampEQ':
-      return <section className="detail-section amp-eq-detail-section" aria-label="Amp EQ detail"><AmpEQPedal {...card} />{actions('amp-eq-detail-actions')}</section>;
+      return <section className="detail-section amp-eq-detail-section" aria-label={t('panel.detail.ampEqRegion')}><AmpEQPedal {...card} />{actions('amp-eq-detail-actions')}</section>;
     case 'tuner':
-      return <section ref={scrollTargetRef('tuner')} className="detail-section tuner-detail-section" aria-label="Tuner detail"><TunerPanel {...card} />{actions('tuner-detail-actions', false)}</section>;
+      return <section ref={scrollTargetRef('tuner')} className="detail-section tuner-detail-section" aria-label={t('panel.detail.tunerRegion')}><TunerPanel {...card} />{actions('tuner-detail-actions', false)}</section>;
     case 'noiseGate':
-      return <section className="detail-section noise-gate-detail-section" aria-label="Noise Gate detail"><NoiseGateRackPanel {...rack} />{actions('noise-gate-detail-actions')}</section>;
+      return <section className="detail-section noise-gate-detail-section" aria-label={t('panel.detail.noiseGateRegion')}><NoiseGateRackPanel {...rack} />{actions('noise-gate-detail-actions')}</section>;
     case 'compressor':
-      return <section className="detail-section compressor-detail-section" aria-label="Compressor detail"><CompressorRackPanel {...rack} />{actions('compressor-detail-actions')}</section>;
+      return <section className="detail-section compressor-detail-section" aria-label={t('panel.detail.compressorRegion')}><CompressorRackPanel {...rack} />{actions('compressor-detail-actions')}</section>;
     case 'drive':
-      return <section className="detail-section drive-rack-detail-section" aria-label="Drive detail"><DriveRackPanel {...rack} />{actions('drive-rack-detail-actions')}</section>;
+      return <section className="detail-section drive-rack-detail-section" aria-label={t('panel.detail.driveRegion')}><DriveRackPanel {...rack} />{actions('drive-rack-detail-actions')}</section>;
     default:
       return <GenericPedalDetail {...rack} actions={actions('')} />;
   }

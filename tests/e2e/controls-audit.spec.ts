@@ -41,14 +41,14 @@ test.describe('controls audit', () => {
     await expect(section.getByText(/SPRING REVERB|Blend/)).toHaveCount(0);
     const slot = section.locator('.drive-rack-model-slot > div');
     const model = await slot.textContent();
-    await section.getByRole('button', { name: 'PRE MODEL next' }).click();
+    await section.getByRole('button', { name: 'PRE MODEL 다음' }).click();
     await expect(slot).not.toHaveText(model ?? '');
   });
 
   test('compressor: GR meter present, no +10/+4 switch', async ({ page }) => {
     await select(page, 'COMP');
     const section = page.locator('.detail-section');
-    await expect(section.locator('.comp-rack-vu-meter')).toHaveAttribute('aria-label', /Gain reduction/);
+    await expect(section.locator('.comp-rack-vu-meter')).toHaveAttribute('aria-label', /게인 감소/);
     await expect(section.getByRole('button', { name: /^\+10|^\+4/ })).toHaveCount(0);
   });
 

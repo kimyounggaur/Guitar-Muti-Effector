@@ -3,6 +3,7 @@ import { CabinetMic, CabinetType, hasCustomCabinetIR, registerCustomCabinetIR } 
 import { Pedal, PedalParamValue } from '../../../audio/types';
 import KnobControl from '../../controls/KnobControl';
 import '../../../styles/components/cabinet.css';
+import { t } from '../../../i18n/ko';
 
 type CabinetIRParams = {
   cabinetType: CabinetType;
@@ -84,61 +85,61 @@ function CabinetIRPedal({
         {dragListeners ? (<button
           type="button"
           className="drag-handle"
-          aria-label={`Move ${pedal.name}`}
+          aria-label={t('panel.detail.move', { name: pedal.name })}
           {...dragAttributes}
           {...dragListeners}
         >
           ≡
         </button>) : null}
         <button type="button" className="pedal-select cabinet-display" onClick={() => onSelect(pedal.id)}>
-          <span>스피커 캐비닛</span>
-          <strong>CAB IR</strong>
+          <span>{t('panel.cabinet.title')}</span>
+          <strong>{t('panel.cabinet.lettering')}</strong>
           <em>{formatCabinetLabel(params)}</em>
         </button>
       </div>
 
-      <canvas ref={canvasRef} className="cabinet-curve-canvas" width="580" height="146" aria-label="캐비닛 필터 예상 곡선" />
+      <canvas ref={canvasRef} className="cabinet-curve-canvas" width="580" height="146" aria-label={t('panel.cabinet.curve')} />
 
       <div className="cabinet-row">
         <label className="cabinet-control is-wide">
-          <span>캐비닛</span>
+          <span>{t('param.cabinetIR.cabinetType')}</span>
           <select value={params.cabinetType} onChange={(event) => setParam('cabinetType', event.target.value)}>
-            <option value="1x12">1x12 · 합성</option>
-            <option value="2x12">2x12 · 합성</option>
-            <option value="4x12">4x12</option>
-            <option value="openBack">Open Back · 합성</option>
-            <option value="custom" disabled={!hasCustomCabinetIR(pedal.id) && params.cabinetType !== 'custom'}>사용자 IR</option>
+            <option value="1x12">{t('panel.cabinet.type1x12')}</option>
+            <option value="2x12">{t('panel.cabinet.type2x12')}</option>
+            <option value="4x12">{t('panel.cabinet.type4x12')}</option>
+            <option value="openBack">{t('panel.cabinet.typeOpenBack')}</option>
+            <option value="custom" disabled={!hasCustomCabinetIR(pedal.id) && params.cabinetType !== 'custom'}>{t('panel.cabinet.typeCustom')}</option>
           </select>
         </label>
         <label className="cabinet-control is-wide">
-          <span>마이크</span>
+          <span>{t('param.cabinetIR.mic')}</span>
           <select value={params.mic} onChange={(event) => setParam('mic', event.target.value)}>
-            <option value="dynamic">Dynamic</option>
-            <option value="ribbon">Ribbon · 합성</option>
-            <option value="condenser">Condenser · 합성</option>
-            <option value="mixed">Mixed</option>
+            <option value="dynamic">{t('panel.cabinet.micDynamic')}</option>
+            <option value="ribbon">{t('panel.cabinet.micRibbon')}</option>
+            <option value="condenser">{t('panel.cabinet.micCondenser')}</option>
+            <option value="mixed">{t('panel.cabinet.micMixed')}</option>
           </select>
         </label>
       </div>
 
       <p className="ir-source-note">
         <span className={`ir-source-badge ${irSource(params) === 'recorded' ? 'is-recorded' : ''}`}>
-          {irSource(params) === 'recorded' ? '실제 녹음 IR' : irSource(params) === 'custom' ? '사용자 IR' : '합성'}
+          {irSource(params) === 'recorded' ? t('panel.cabinet.recorded') : irSource(params) === 'custom' ? t('panel.cabinet.typeCustom') : t('panel.common.synthetic')}
         </span>
-        {irSource(params) === 'synthetic' ? ' 이 조합은 앱이 만든 합성 응답을 사용합니다. 실제 녹음 IR은 4x12 + Dynamic·Mixed입니다.' : null}
+        {irSource(params) === 'synthetic' ? t('panel.cabinet.syntheticNote') : null}
       </p>
 
       <label className="ir-upload">
-        <span>사용자 IR 파일 (WAV)</span>
+        <span>{t('panel.cabinet.customFile')}</span>
         <input
           type="file"
           accept="audio/wav,audio/wave,.wav"
           onChange={(event) => void handleIRUpload(event.target.files?.[0])}
         />
-        <strong>{uploadName || (hasCustomCabinetIR(pedal.id) ? params.customIRName.split(':')[0] : '파일 선택')}</strong>
+        <strong>{uploadName || (hasCustomCabinetIR(pedal.id) ? params.customIRName.split(':')[0] : t('panel.cabinet.chooseFile'))}</strong>
       </label>
 
-      <p role="status">{uploadStatus || (params.cabinetType === 'custom' && !hasCustomCabinetIR(pedal.id) ? '사용자 IR이 없습니다. 다시 선택해 주세요. 현재 합성 캐비닛을 사용합니다.' : '사용자 IR은 현재 브라우저 탭에서만 유지됩니다.')}</p>
+      <p role="status">{uploadStatus || (params.cabinetType === 'custom' && !hasCustomCabinetIR(pedal.id) ? t('panel.cabinet.customMissing') : t('panel.cabinet.customTabOnly'))}</p>
       <div className="cabinet-controls">
         <CabSlider
           label="LowCut"
@@ -163,14 +164,14 @@ function CabinetIRPedal({
 
       <div className="pedal-switches">
         <button type="button" className={pedal.enabled ? 'is-active' : ''} onClick={() => onToggle(pedal.id)}>
-          {pedal.enabled ? '켜짐' : '꺼짐'}
+          {pedal.enabled ? t('panel.common.on') : t('panel.common.off')}
         </button>
         <button
           type="button"
           className={pedal.bypassed ? 'is-bypassed' : ''}
           onClick={() => onBypass(pedal.id, !pedal.bypassed)}
         >
-          {pedal.bypassed ? '바이패스 해제' : '바이패스'}
+          {pedal.bypassed ? t('panel.common.unbypass') : t('panel.common.bypass')}
         </button>
       </div>
     </article>

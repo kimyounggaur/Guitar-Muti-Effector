@@ -20,6 +20,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Pedal, PedalType } from '../../audio/types';
 import { usePedalStore } from '../../store/pedalStore';
 import '../../styles/components/chain-display.css';
+import { t } from '../../i18n/ko';
 
 type EffectChainDisplayProps = {
   pedals: Pedal[];
@@ -117,7 +118,7 @@ function EffectChainDisplay({
   };
 
   return (
-    <div className="effect-chain-display" aria-label="Effect signal chain">
+    <div className="effect-chain-display" aria-label={t('panel.chain.region')}>
       <div className="tone-chain-stage">
         <span className="tone-chain-jack is-input" aria-hidden="true">
           <i />
@@ -149,12 +150,12 @@ function EffectChainDisplay({
           <i />
         </span>
       </div>
-      <div className="chain-order-controls" aria-label="선택한 이펙트 순서 변경">
-        <span>{selectedName ? `${selectedName} 순서` : '이펙트를 선택하세요'}</span>
-        <button type="button" disabled={selectedIndex <= 0} onClick={() => moveSelected(-1)} aria-label={`${selectedName} 앞쪽으로 이동`}>← 앞</button>
-        <button type="button" disabled={selectedIndex < 0 || selectedIndex >= pedals.length - 1} onClick={() => moveSelected(1)} aria-label={`${selectedName} 뒤쪽으로 이동`}>뒤 →</button>
+      <div className="chain-order-controls" aria-label={t('panel.chain.reorder')}>
+        <span>{selectedName ? `${selectedName} 순서` : t('panel.chain.selectFirst')}</span>
+        <button type="button" disabled={selectedIndex <= 0} onClick={() => moveSelected(-1)} aria-label={t('panel.chain.moveEarlier', { name: selectedName })}>{t('panel.chain.earlier')}</button>
+        <button type="button" disabled={selectedIndex < 0 || selectedIndex >= pedals.length - 1} onClick={() => moveSelected(1)} aria-label={t('panel.chain.moveLater', { name: selectedName })}>{t('panel.chain.later')}</button>
       </div>
-      <span className={`lcd-chain-toast ${updated ? 'is-visible' : ''}`} role="status">Signal Chain Updated</span>
+      <span className={`lcd-chain-toast ${updated ? 'is-visible' : ''}`} role="status">{t('panel.chain.updated')}</span>
     </div>
   );
 }
@@ -186,13 +187,13 @@ function SortableEffectBlock({ pedal, selected, onSelect, onToggle }: SortableEf
       style={style}
     >
       <span className="chain-effect-lcd-label" title={pedal.name} aria-label={pedal.name}>
-        {shortLabels[pedal.type]}
+        {t(`pedal.${pedal.type}.short`)}
       </span>
       <button
         type="button"
         className="chain-effect-main chain-effect-svg-button"
         aria-pressed={selected}
-        aria-label={`${pedal.name} 설정 선택`}
+        aria-label={t('panel.chain.select', { name: pedal.name })}
         onClick={() => onSelect(pedal.id)}
       >
         <EffectBlockSvg pedal={pedal} palette={palette} selected={selected} />
@@ -202,9 +203,9 @@ function SortableEffectBlock({ pedal, selected, onSelect, onToggle }: SortableEf
         className="chain-effect-grip"
         {...attributes}
         {...listeners}
-        aria-label={`Toggle ${pedal.name} ${active ? 'off' : 'on'}`}
+        aria-label={t(active ? 'panel.chain.toggleOff' : 'panel.chain.toggleOn', { name: pedal.name })}
         aria-pressed={active}
-        title={`Toggle ${pedal.name}`}
+        title={t('panel.chain.toggleTitle', { name: pedal.name })}
         onClick={() => onToggle(pedal.id)}
       >
         <span className="chain-effect-switch-icon" aria-hidden="true" />
@@ -306,7 +307,7 @@ function EffectBlockSvg({ pedal, palette, selected }: EffectBlockSvgProps) {
       <path className="effect-svg-chip-lines" d="M101 92H111M101 96H111M101 100H108" />
 
       <text className="effect-svg-short-label" x="90" y="29" textAnchor="middle">
-        {shortLabels[pedal.type]}
+        {t(`pedal.${pedal.type}.short`)}
       </text>
       <text className="effect-svg-name" x="90" y="126" textAnchor="middle">
         {name}
@@ -320,20 +321,6 @@ function EffectBlockSvg({ pedal, palette, selected }: EffectBlockSvgProps) {
 }
 
 const truncateLabel = (label: string, maxLength: number) => (label.length > maxLength ? `${label.slice(0, maxLength - 3)}...` : label);
-
-const shortLabels: Record<PedalType, string> = {
-  tuner: 'TUN',
-  noiseGate: 'GATE',
-  compressor: 'COMP',
-  drive: 'DRV',
-  ampEQ: 'AMP',
-  cabinetIR: 'CAB',
-  modulation: 'MOD',
-  delay: 'DLY',
-  reverb: 'REV',
-  looper: 'LOOP',
-  rhythm: 'RHY',
-};
 
 const effectIconPaths: Record<PedalType, string> = {
   tuner: 'M45 73H67L79 59L91 88L103 64L113 73H135',

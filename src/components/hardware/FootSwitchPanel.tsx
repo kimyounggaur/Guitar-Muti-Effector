@@ -1,5 +1,6 @@
 import type { Pedal } from '../../audio/types';
 import '../../styles/components/footswitch.css';
+import { t } from '../../i18n/ko';
 
 export const STOMP_PRESET_CATEGORIES = [
   'Clean',
@@ -43,15 +44,16 @@ function FootSwitchPanel({
   const switchCount = Math.max(categories.length, effectPedals.length);
 
   return (
-    <section className={`foot-switch-panel preset-stomp-panel is-${mode}-mode`} aria-label="풋스위치">
-      <div className="stomp-mode-toggle-row" aria-label="풋스위치 모드">
+    <section className={`foot-switch-panel preset-stomp-panel is-${mode}-mode`} aria-label={t('panel.footswitch.region')}>
+      <div className="stomp-mode-toggle-row" aria-label={t('panel.footswitch.mode')}>
         <button
           type="button"
           className={mode === 'effects' ? 'is-active' : ''}
           onClick={() => onModeChanged('effects')}
           aria-pressed={mode === 'effects'}
         >
-          이펙트
+          
+          {t('panel.footswitch.effects')}
         </button>
         <button
           type="button"
@@ -59,7 +61,8 @@ function FootSwitchPanel({
           onClick={() => onModeChanged('presets')}
           aria-pressed={mode === 'presets'}
         >
-          프리셋
+          
+          {t('panel.footswitch.presets')}
         </button>
       </div>
 

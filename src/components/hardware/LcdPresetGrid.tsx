@@ -1,5 +1,6 @@
 import { PedalboardPreset } from '../../store/presetStore';
 import { StompPresetCategory } from './FootSwitchPanel';
+import { formatCategory, t, tDynamic } from '../../i18n/ko';
 
 type LcdPresetGridProps = {
   category: StompPresetCategory;
@@ -11,14 +12,15 @@ type LcdPresetGridProps = {
 
 function LcdPresetGrid({ category, presets, activePresetId, onLoadPreset, onClose }: LcdPresetGridProps) {
   return (
-    <section className="lcd-preset-grid-view" aria-label={`${category} preset list`}>
+    <section className="lcd-preset-grid-view" aria-label={t('panel.lcdPresets.region', { category: formatCategory(category) })}>
       <header className="lcd-preset-grid-header">
         <div>
-          <span>Preset Stomp Library</span>
-          <strong>{category}</strong>
+          <span>{t('panel.lcdPresets.title')}</span>
+          <strong>{formatCategory(category)}</strong>
         </div>
         <button type="button" onClick={onClose}>
-          Effect Board
+          
+          {t('panel.lcdPresets.board')}
         </button>
       </header>
 
@@ -35,15 +37,15 @@ function LcdPresetGrid({ category, presets, activePresetId, onLoadPreset, onClos
                 {category.slice(0, 3).toUpperCase()}-{String(index + 1).padStart(3, '0')}
               </span>
               <strong>{preset.name}</strong>
-              <small>{preset.origin.toUpperCase()}</small>
-              <em>{preset.description || 'Ready to load this preset into the pedalboard.'}</em>
+              <small>{tDynamic(`preset.origin.${preset.origin}`, preset.origin)}</small>
+              <em>{preset.description || t('panel.lcdPresets.defaultDescription')}</em>
             </button>
           ))}
         </div>
       ) : (
         <div className="lcd-preset-empty">
-          <strong>No presets</strong>
-          <span>Save a user preset to fill this switch bank.</span>
+          <strong>{t('panel.lcdPresets.empty')}</strong>
+          <span>{t('panel.lcdPresets.emptyHint')}</span>
         </div>
       )}
     </section>

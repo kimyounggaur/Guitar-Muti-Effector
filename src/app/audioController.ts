@@ -1,6 +1,9 @@
 // Audio orchestration moved out of App.tsx (design §3.5). Bodies are the previous App handlers, unchanged.
 // Only this file and AudioControllerContext.tsx may import the AudioEngine.
 import type { AudioEngine } from '../audio/AudioEngine';
+import { cancelled } from '../audio/errors';
+import { t } from '../i18n/ko';
+import { toUserMessage } from './userMessage';
 import type { InputChannel, Pedal, PedalParamValue } from '../audio/types';
 import { useAudioStore } from '../store/audioStore';
 import { usePedalStore } from '../store/pedalStore';
@@ -15,12 +18,11 @@ export function createAudioController(engine: AudioEngine) {
   let operation = 0;
 
   /**
-   * Shared runner: new generation → connecting → task → (error: message if still current) → idle if still current.
+   * Shared runner: new generation → connecting → task → (error: Korean message if still current) → idle if still current.
    * checkOnError is false only for stop, which always reported its error.
    */
   const run = async (
     task: (isCurrent: () => boolean) => Promise<void>,
-    fallbackMessage: string,
     { onError, checkOnError = true }: { onError?: () => void; checkOnError?: boolean } = {},
   ) => {
     const current = ++operation;
@@ -32,7 +34,7 @@ export function createAudioController(engine: AudioEngine) {
     } catch (error) {
       if (checkOnError && !isCurrent()) return;
       onError?.();
-      audio().setErrorMessage(error instanceof Error ? error.message : fallbackMessage);
+      audio().setErrorMessage(toUserMessage(error));
     } finally {
       if (isCurrent()) audio().setIsConnecting(false);
     }
@@ -47,13 +49,14 @@ export function createAudioController(engine: AudioEngine) {
     try {
       engine.rebuildChain(pedals);
     } catch (error) {
-      audio().setErrorMessage(error instanceof Error ? error.message : 'Could not rebuild audio chain.');
+      console.error(error);
+      audio().setErrorMessage(t('error.rebuildFailed'));
     }
   };
 
   const connect = async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
-      audio().setErrorMessage('이 브라우저는 오디오 입력을 지원하지 않습니다. HTTPS 주소에서 최신 Chrome 또는 Safari로 다시 열어 주세요.');
+      audio().setErrorMessage(t('error.noAudioInput'));
       return;
     }
 
@@ -68,7 +71,7 @@ export function createAudioController(engine: AudioEngine) {
       audio().setAudioReady(true);
       engine.rebuildChain(usePedalStore.getState().pedals);
       await refreshInputDevices();
-    }, 'Could not connect guitar input.', { onError: () => audio().setAudioReady(false) });
+    }, { onError: () => audio().setAudioReady(false) });
   };
 
   const switchInput = async (deviceId: string) => {
@@ -86,7 +89,7 @@ export function createAudioController(engine: AudioEngine) {
       audio().setLatencyHint(state.latencyHint);
       engine.rebuildChain(usePedalStore.getState().pedals);
       await refreshInputDevices();
-    }, 'Could not switch input device.', { onError: () => audio().setAudioReady(false) });
+    }, { onError: () => audio().setAudioReady(false) });
   };
 
   const stop = () =>
@@ -94,7 +97,7 @@ export function createAudioController(engine: AudioEngine) {
       await engine.stop();
       if (!isCurrent()) return;
       audio().resetAudioState();
-    }, 'Could not stop audio.', { checkOnError: false });
+    }, { checkOnError: false });
 
   const panic = async () => {
     const current = ++operation;
@@ -106,7 +109,7 @@ export function createAudioController(engine: AudioEngine) {
     audio().resetAudioState();
     audio().setIsConnecting(true);
     try { await engine.stop(); }
-    catch { audio().setErrorMessage('오디오를 정지하는 중 오류가 발생했습니다. 입력 장치를 확인해 주세요.'); }
+    catch { audio().setErrorMessage(t('error.stopFailed')); }
     finally { if (current === operation) audio().setIsConnecting(false); }
   };
 
@@ -117,14 +120,14 @@ export function createAudioController(engine: AudioEngine) {
 
     try {
       const state = await engine.connectUploadedAudio(audioElement, 0, usePedalStore.getState().pedals);
-      if (current !== operation) throw new DOMException('오디오 연결이 취소되었습니다.', 'AbortError');
+      if (current !== operation) throw cancelled();
       engine.setMasterVolume(audio().masterVolume);
       audio().setSampleRate(state.sampleRate);
       audio().setLatencyHint(state.latencyHint);
       audio().setAudioReady(true);
     } catch (error) {
       if (current !== operation) throw error;
-      const message = error instanceof Error ? error.message : 'Could not route uploaded audio through effects.';
+      const message = toUserMessage(error);
       audio().setAudioReady(false);
       audio().setErrorMessage(message);
       throw new Error(message);
@@ -200,12 +203,15 @@ export function createAudioController(engine: AudioEngine) {
 
   /** Engine events and store → engine subscriptions. Returns the detach function. */
   const attach = () => {
-    engine.setErrorHandler(audio().setErrorMessage);
+    engine.setErrorHandler((error) => {
+      console.error(error.cause ?? error);
+      audio().setErrorMessage(toUserMessage(error));
+    });
     engine.setInputEndedHandler(() => {
       ++operation;
       audio().resetAudioState();
       audio().setMasterVolume(0);
-      audio().setErrorMessage('입력 장치 연결이 끊겨 오디오를 정지했습니다. 장치를 확인하고 다시 연결해 주세요.');
+      audio().setErrorMessage(t('error.inputEnded'));
     });
     // The tempo lives in tempoStore only; the engine forwards it to tempo-aware effects.
     engine.setTempo(useTempoStore.getState().bpm);

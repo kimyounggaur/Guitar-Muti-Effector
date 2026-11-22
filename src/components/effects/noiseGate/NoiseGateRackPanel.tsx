@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { Pedal, PedalParamValue } from '../../../audio/types';
 import { clampNumber, percentFromRange, readNumberParam } from '../common/paramFormat';
 import '../../../styles/components/rack-noise-gate.css';
+import { t } from '../../../i18n/ko';
 
 type NoiseGateRackPanelProps = {
   pedal: Pedal;
@@ -34,7 +35,7 @@ export default function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamC
           ))}
         </div>
         <label className="noise-rack-fader">
-          <span>Threshold</span>
+          <span>{t('param.noiseGate.thresholdDb')}</span>
           <input
             type="range"
             min="-60"
@@ -42,7 +43,7 @@ export default function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamC
             step="1"
             value={threshold}
             onChange={(event) => onParamChange('thresholdDb', Number(event.target.value))}
-            aria-label="Noise gate threshold"
+            aria-label={t('panel.noiseGate.thresholdLabel')}
             style={{ '--noise-fader-fill': `${thresholdPercent}%` } as CSSProperties}
           />
           <strong>{Math.round(threshold)}dB</strong>
@@ -50,25 +51,27 @@ export default function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamC
       </div>
 
       <div className="noise-rack-brand">
-        <span>TL</span>
-        <strong>NOISE REDUCER</strong>
+        <span>{t('panel.noiseGate.lettering1')}</span>
+        <strong>{t('panel.noiseGate.lettering2')}</strong>
       </div>
 
-      <div className="noise-rack-status" aria-label={`Noise gate status ${gateState}`}>
+      <div className="noise-rack-status" aria-label={t('panel.noiseGate.status', { state: gateState })}>
         <span className={pedal.enabled && !pedal.bypassed ? 'is-lit' : ''}>
           <i aria-hidden="true" />
-          Online
+          
+          {t('panel.noiseGate.online')}
         </span>
         <span className={pedal.bypassed || !pedal.enabled ? 'is-lit is-bypass' : ''}>
           <i aria-hidden="true" />
-          Bypass
+          
+          {t('panel.common.bypassLettering')}
         </span>
       </div>
 
       <button type="button" className={`noise-rack-auto ${pedal.enabled ? 'is-on' : ''}`} onClick={onToggle}>
         <i aria-hidden="true">ON</i>
-        <span>게이트 켜기</span>
-        <strong>{pedal.enabled ? '켜짐' : '꺼짐'}</strong>
+        <span>{t('panel.noiseGate.enable')}</span>
+        <strong>{pedal.enabled ? t('panel.common.on') : t('panel.common.off')}</strong>
       </button>
 
       <div className="noise-rack-knobs">
@@ -101,10 +104,10 @@ export default function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamC
         />
       </div>
 
-      <aside className="noise-easy-gate" aria-label="Easy Gate quick controls">
+      <aside className="noise-easy-gate" aria-label={t('panel.noiseGate.quick')}>
         <span className="noise-easy-pin is-left" aria-hidden="true" />
         <span className="noise-easy-pin is-right" aria-hidden="true" />
-        <div className="noise-easy-title">EASY GATE</div>
+        <div className="noise-easy-title">{t('panel.noiseGate.lettering3')}</div>
         <RackDial
           label="Sensitivity"
           value={sensitivity}
@@ -114,8 +117,8 @@ export default function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamC
           suffix=""
           onChange={(value) => onParamChange('thresholdDb', -60 + (value / 100) * 50)}
         />
-        <div className="noise-hard-soft" aria-label="Hard soft gate preset">
-          <span>Hard</span>
+        <div className="noise-hard-soft" aria-label={t('panel.noiseGate.hardSoft')}>
+          <span>{t('panel.noiseGate.hard')}</span>
           <button
             type="button"
             className={hardMode ? 'is-hard' : ''}
@@ -124,7 +127,7 @@ export default function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamC
           >
             <i aria-hidden="true" />
           </button>
-          <span>Soft</span>
+          <span>{t('panel.noiseGate.soft')}</span>
           <strong>{Math.round(threshold)}</strong>
         </div>
         <button

@@ -1,5 +1,6 @@
 import KnobControl from '../controls/KnobControl';
 import '../../styles/components/right-panel.css';
+import { t } from '../../i18n/ko';
 
 type RightUtilityPanelProps = {
   bpm: number;
@@ -21,18 +22,18 @@ function RightUtilityPanel({
   onTuner,
 }: RightUtilityPanelProps) {
   return (
-    <section className="right-utility-panel" aria-label="Tempo and tuner utilities">
+    <section className="right-utility-panel" aria-label={t('panel.utility.region')}>
       <div className="utility-readout">
-        <span>PEDAL</span>
+        <span>{t('panel.utility.pedal')}</span>
         <strong>{selectedPedalName}</strong>
       </div>
       <div className="tempo-readout">
-        <span>TEMPO</span>
+        <span>{t('panel.utility.tempo')}</span>
         <strong>{Math.round(bpm)}</strong>
         <small>{tapCount > 1 ? `${tapCount}회 탭` : 'BPM'}</small>
       </div>
       <div className="master-volume-readout">
-        <span>MASTER</span>
+        <span>{t('panel.utility.master')}</span>
         <KnobControl
           className="master-utility-knob"
           label="음량"
@@ -48,7 +49,8 @@ function RightUtilityPanel({
         TAP
       </button>
       <button type="button" className="tuner-hold-button" onClick={onTuner}>
-        튜너 열기
+        
+        {t('panel.utility.openTuner')}
       </button>
     </section>
   );
