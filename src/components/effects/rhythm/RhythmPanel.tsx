@@ -11,6 +11,7 @@ import { useTempoStore } from '../../../store/tempoStore';
 import { PEDAL_SCHEMAS, TEMPO } from '../../../audio/params/schema';
 import { useAudioStore } from '../../../store/audioStore';
 import KnobControl from '../../controls/KnobControl';
+import '../../../styles/components/rhythm.css';
 
 const S = PEDAL_SCHEMAS.rhythm;
 

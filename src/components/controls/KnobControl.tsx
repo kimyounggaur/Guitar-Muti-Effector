@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
+import '../../styles/components/knob.css';
 
 type KnobControlProps = {
   label: string;

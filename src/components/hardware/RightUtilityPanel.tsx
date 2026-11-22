@@ -1,4 +1,5 @@
 import KnobControl from '../controls/KnobControl';
+import '../../styles/components/right-panel.css';
 
 type RightUtilityPanelProps = {
   bpm: number;

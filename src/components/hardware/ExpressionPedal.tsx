@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
+import '../../styles/components/expression.css';
 
 type ExpressionPedalProps = {
   value: number;

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { scrollTargetRef } from '../../app/scrollTargets';
 import { Pedal, PedalParamValue } from '../../audio/types';
 import PatchHeader from './PatchHeader';
+import '../../styles/components/lcd.css';
 
 type CentralScreenProps = {
   patchName: string;

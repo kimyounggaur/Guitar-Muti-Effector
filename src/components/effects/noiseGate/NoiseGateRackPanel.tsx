@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { Pedal, PedalParamValue } from '../../../audio/types';
 import { clampNumber, percentFromRange, readNumberParam } from '../common/paramFormat';
+import '../../../styles/components/rack-noise-gate.css';
 
 type NoiseGateRackPanelProps = {
   pedal: Pedal;

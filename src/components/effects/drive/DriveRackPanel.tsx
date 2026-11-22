@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { Pedal, PedalParamValue } from '../../../audio/types';
 import { clampNumber, percentFromRange, readNumberParam } from '../common/paramFormat';
+import '../../../styles/components/rack-drive.css';
 
 type DriveRackPanelProps = {
   pedal: Pedal;
@@ -32,37 +33,37 @@ export default function DriveRackPanel({ pedal, onToggle, onBypass, onParamChang
   };
 
   return (
-    <div className={`amp5-drive-module is-${mode} ${pedal.enabled && !pedal.bypassed ? 'is-online' : ''}`}>
-      <span className="amp5-corner is-left" aria-hidden="true" />
-      <span className="amp5-corner is-right" aria-hidden="true" />
+    <div className={`drive-rack-drive-module is-${mode} ${pedal.enabled && !pedal.bypassed ? 'is-online' : ''}`}>
+      <span className="drive-rack-corner is-left" aria-hidden="true" />
+      <span className="drive-rack-corner is-right" aria-hidden="true" />
 
-      <div className="amp5-input-strip">
-        <span className={`amp5-status-lamp ${pedal.enabled ? 'is-lit' : ''}`} aria-hidden="true" />
-        <button type="button" className={`amp5-mini-toggle ${pedal.enabled ? 'is-on' : ''}`} onClick={onToggle} aria-pressed={pedal.enabled}>
+      <div className="drive-rack-input-strip">
+        <span className={`drive-rack-status-lamp ${pedal.enabled ? 'is-lit' : ''}`} aria-hidden="true" />
+        <button type="button" className={`drive-rack-mini-toggle ${pedal.enabled ? 'is-on' : ''}`} onClick={onToggle} aria-pressed={pedal.enabled}>
           <i aria-hidden="true" />
           <span>ON</span>
         </button>
-        <button type="button" className={`amp5-bypass-toggle ${pedal.bypassed ? 'is-bypassed' : ''}`} onClick={onBypass} aria-pressed={pedal.bypassed}>
+        <button type="button" className={`drive-rack-bypass-toggle ${pedal.bypassed ? 'is-bypassed' : ''}`} onClick={onBypass} aria-pressed={pedal.bypassed}>
           <i aria-hidden="true" />
           <span>BYPASS</span>
         </button>
-        <span className="amp5-cable-jack" aria-hidden="true" />
+        <span className="drive-rack-cable-jack" aria-hidden="true" />
       </div>
 
-      <div className="amp5-panel-section amp5-pre-section">
+      <div className="drive-rack-panel-section drive-rack-pre-section">
         <DriveRackKnob label="Gain" value={drive} min={0} max={100} step={1} onChange={(value) => onParamChange('drive', value)} />
         <DriveModelSlot label="PRE MODEL" value={modeLabel} onStepDown={() => changeModeBy(-1)} onStepUp={() => changeModeBy(1)} />
       </div>
 
-      <div className="amp5-panel-section amp5-eq-section">
+      <div className="drive-rack-panel-section drive-rack-eq-section">
         <DriveRackKnob label="Tone" value={tone} min={0} max={100} step={1} onChange={(value) => onParamChange('tone', value)} />
         <DriveRackKnob label="Bias" value={bias} min={-1} max={1} step={0.01} onChange={(value) => onParamChange('bias', value)} />
         <DriveRackKnob label="Mix" value={mix} min={0} max={100} step={1} onChange={(value) => onParamChange('mix', value)} />
       </div>
 
-      <div className="amp5-panel-section amp5-output-section">
+      <div className="drive-rack-panel-section drive-rack-output-section">
         <DriveRackKnob label="Volume" value={level} min={0} max={100} step={1} onChange={(value) => onParamChange('level', value)} />
-        <div className="amp5-match-row">
+        <div className="drive-rack-match-row">
           <button type="button" className={mix >= 98 ? 'is-matched' : ''} onClick={() => onParamChange('mix', mix >= 98 ? 72 : 100)} aria-pressed={mix >= 98}>
             <i aria-hidden="true" />
             <span>WET 100%</span>
@@ -71,7 +72,7 @@ export default function DriveRackPanel({ pedal, onToggle, onBypass, onParamChang
         </div>
       </div>
 
-      <div className="amp5-bottom-rail" aria-hidden="true">
+      <div className="drive-rack-bottom-rail" aria-hidden="true">
         <span />
         <span />
       </div>
@@ -95,7 +96,7 @@ function DriveRackKnob({ label, value, min, max, step, onChange }: DriveRackKnob
   const displayValue = min < 0 ? Math.round(clamped * 100) / 100 : Math.round(clamped);
 
   return (
-    <label className="amp5-knob" style={{ '--amp5-knob-angle': `${angle}deg` } as CSSProperties}>
+    <label className="drive-rack-knob" style={{ '--drive-rack-knob-angle': `${angle}deg` } as CSSProperties}>
       <input type="range" min={min} max={max} step={step} value={clamped} onChange={(event) => onChange(Number(event.target.value))} aria-label={label} />
       <i aria-hidden="true" />
       <span>{label}</span>
@@ -113,7 +114,7 @@ type DriveModelSlotProps = {
 
 function DriveModelSlot({ label, value, onStepDown, onStepUp }: DriveModelSlotProps) {
   return (
-    <div className="amp5-model-slot">
+    <div className="drive-rack-model-slot">
       <div>{value}</div>
       <span>{label}</span>
       <button type="button" className="is-up" onClick={onStepUp} aria-label={`${label} next`}>

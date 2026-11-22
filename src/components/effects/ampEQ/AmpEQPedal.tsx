@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Pedal, PedalParamValue } from '../../../audio/types';
 import KnobControl from '../../controls/KnobControl';
+import '../../../styles/components/amp-eq.css';
 
 type AmpEQParams = {
   lowCut: number;

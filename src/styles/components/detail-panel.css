@@ -1,0 +1,448 @@
+.eyebrow {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase
+}
+
+.pedal-switches button.is-active {
+  border-color: rgba(53, 208, 163, 0.58);
+  color: var(--text);
+  box-shadow:
+    inset 0 8px 16px rgba(255, 255, 255, 0.08),
+    inset 0 -12px 22px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(53, 208, 163, 0.22),
+    0 0 22px rgba(53, 208, 163, 0.22)
+}
+
+.pedal-switches button.is-active::before {
+  border-color: rgba(53, 208, 163, 0.5)
+}
+
+.pedal-switches button.is-active::after {
+  background: var(--accent);
+  box-shadow: 0 0 16px rgba(53, 208, 163, 0.76)
+}
+
+.pedal-switches button.is-bypassed {
+  border-color: rgba(246, 200, 95, 0.6);
+  color: #ffe1a1
+}
+
+.pedal-switches button.is-bypassed::before {
+  border-color: rgba(246, 200, 95, 0.52)
+}
+
+.pedal-switches button.is-bypassed::after {
+  background: #f6c85f;
+  box-shadow: 0 0 16px rgba(246, 200, 95, 0.72)
+}
+
+.detail-section,
+.preset-section {
+  padding: 16px
+}
+
+.detail-actions button,
+.preset-save-panel button,
+.preset-actions button,
+.preset-io-actions button,
+.preset-io-footer button {
+  min-height: 48px;
+  cursor: pointer
+}
+
+.detail-section {
+  min-width: 0
+}
+
+.detail-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px
+}
+
+.detail-header h2 {
+  letter-spacing: 0;
+  margin: 0;
+  font-size: clamp(1.7rem, 3vw, 2.7rem)
+}
+
+.detail-header p {
+  margin: 8px 0 0;
+  color: var(--muted)
+}
+
+.detail-status,
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px
+}
+
+.detail-status {
+  gap: 18px;
+  justify-content: flex-end
+}
+
+.detail-status button,
+.detail-actions button {
+  min-width: 112px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-strong);
+  color: var(--muted);
+  font-weight: 900
+}
+
+.detail-status button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  width: 78px;
+  aspect-ratio: 1;
+  border-color: rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 28%, rgba(255, 255, 255, 0.2), transparent 20%),
+    radial-gradient(circle at 50% 58%, #242c28 0 44%, #121716 46% 100%);
+  box-shadow:
+    inset 0 8px 16px rgba(255, 255, 255, 0.06),
+    inset 0 -12px 22px rgba(0, 0, 0, 0.44),
+    0 10px 22px rgba(0, 0, 0, 0.3);
+  font-size: var(--fs-xs);
+  text-transform: uppercase
+}
+
+.detail-status button::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%
+}
+
+.detail-status button::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  width: 9px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #3f4944;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)
+}
+
+.detail-status button.is-active {
+  border-color: rgba(53, 208, 163, 0.56);
+  color: var(--text)
+}
+
+.detail-status button.is-active::before {
+  border-color: rgba(53, 208, 163, 0.5)
+}
+
+.detail-status button.is-active::after {
+  background: var(--accent);
+  box-shadow: 0 0 16px rgba(53, 208, 163, 0.76)
+}
+
+.detail-status button.is-bypassed {
+  border-color: rgba(246, 200, 95, 0.58);
+  color: #ffe1a1
+}
+
+.detail-status button.is-bypassed::before {
+  border-color: rgba(246, 200, 95, 0.52)
+}
+
+.detail-status button.is-bypassed::after {
+  background: #f6c85f;
+  box-shadow: 0 0 16px rgba(246, 200, 95, 0.72)
+}
+
+.detail-body {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.28fr);
+  gap: 14px;
+  align-items: start
+}
+
+.mini-graph {
+  position: sticky;
+  top: 126px;
+  display: grid;
+  gap: 10px;
+  min-height: 220px;
+  border: 1px solid rgba(124, 214, 255, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(124, 214, 255, 0.08), transparent),
+    #0b0f0e;
+  padding: 14px
+}
+
+.mini-graph svg {
+  width: 100%;
+  min-height: 152px
+}
+
+.graph-grid {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1
+}
+
+.graph-fill {
+  fill: rgba(53, 208, 163, 0.12)
+}
+
+.graph-line {
+  fill: none;
+  stroke: #7cd6ff;
+  stroke-linecap: round;
+  stroke-width: 4
+}
+
+.mini-graph.type-drive .graph-line {
+  stroke: #ff8b7f
+}
+
+.mini-graph.type-rhythm .graph-line,
+.mini-graph.type-looper .graph-line {
+  stroke: #f6c85f
+}
+
+.mini-graph span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase
+}
+
+.detail-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px
+}
+
+.detail-control,
+.detail-select,
+.detail-toggle {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: #0d1110;
+  padding: 12px
+}
+
+.detail-select select,
+.detail-select input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-strong);
+  color: var(--text);
+  padding: 0 12px
+}
+
+.detail-toggle {
+  grid-template-columns: 1fr auto;
+  align-items: center
+}
+
+.detail-toggle input {
+  width: 28px;
+  height: 28px;
+  accent-color: var(--accent)
+}
+
+.detail-actions {
+  justify-content: flex-end;
+  margin-top: 14px
+}
+
+.detail-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  color: var(--muted)
+}
+
+@media (max-width: 1180px) {
+  .mini-graph {
+    position: static
+  }
+
+}
+
+@media (max-width: 900px) {
+  .connect-grid,
+.detail-body {
+    grid-template-columns: 1fr
+  }
+
+  .detail-controls {
+    grid-template-columns: 1fr
+  }
+
+  .detail-header {
+    align-items: stretch;
+    flex-direction: column
+  }
+
+}
+
+.knob-control {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 148px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0)),
+    #0d1110;
+  padding: 12px
+}
+
+.hardware-support-panels .detail-section {
+  grid-column: 1 / -1
+}
+
+.hardware-support-panels .amp-eq-detail-section {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0
+}
+
+.classic-eq-module .pedal-switches button,
+.amp-eq-detail-actions button {
+  border-color: rgba(23, 18, 12, 0.24);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent),
+    #181818;
+  color: #f6d66c
+}
+
+.amp-eq-detail-actions {
+  margin-top: 12px
+}
+
+.hardware-support-panels .tuner-detail-section {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0
+}
+
+.tuner-detail-actions {
+  margin-top: 12px
+}
+
+.tuner-detail-actions button {
+  border-color: rgba(154, 124, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent),
+    #09090d;
+  color: #d6c7ff
+}
+
+.hardware-support-panels .drive-rack-detail-section {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0
+}
+
+.drive-rack-detail-actions {
+  margin-top: 12px
+}
+
+.drive-rack-detail-actions button {
+  border-color: rgba(255, 228, 96, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 236, 116, 0.12), transparent),
+    #13110b;
+  color: #f5e58b
+}
+
+.hardware-support-panels .compressor-detail-section {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0
+}
+
+.compressor-detail-actions {
+  margin-top: 12px
+}
+
+.compressor-detail-actions button {
+  border-color: rgba(92, 69, 39, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), transparent),
+    #2c2924;
+  color: #f5ecd9
+}
+
+.hardware-support-panels .noise-gate-detail-section {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0
+}
+
+.noise-gate-detail-actions {
+  margin-top: 12px
+}
+
+.noise-gate-detail-actions button {
+  border-color: rgba(54, 240, 206, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent),
+    #090b0c;
+  color: #cff8f2
+}
+
+.ir-source-note {
+  margin: 8px 0;
+  color: #c9dbe6;
+  font-size: 12px;
+  line-height: 1.4
+}
+
+.ir-source-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid #8fb3c7;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800
+}
+
+.detail-section > .ir-source-note,
+.detail-section > .ir-source-note .ir-source-badge {
+  color: #3a2424;
+  border-color: #7a5656
+}
+
+.hardware-support-panels .detail-section.tuner-detail-section {
+  overflow-x: clip
+}

@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { emptyLooperReading, LooperReading, subscribeLooper } from '../../../audio/nodes/LooperNode';
 import { Pedal, PedalParamValue } from '../../../audio/types';
 import KnobControl from '../../controls/KnobControl';
+import '../../../styles/components/looper.css';
 
 type LooperParams = {
   level: number;
