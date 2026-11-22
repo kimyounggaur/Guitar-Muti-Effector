@@ -105,7 +105,7 @@ function FootSwitchPanel({
           >
             <span className="stomp-label-strip">
               <b>{switchLabel}</b>
-              <em>{switchName}</em>
+              <em title={switchName}>{shortSwitchName(switchName)}</em>
             </span>
             <span className="footswitch-led" aria-hidden="true" />
             <strong>{switchName}</strong>
@@ -124,3 +124,16 @@ const getSwitchLabel = (index: number) => {
 };
 
 export default FootSwitchPanel;
+
+// The label strip fits about eight capital letters at 12px; longer names use a short form (full name in title).
+const SHORT_SWITCH_NAMES: Record<string, string> = {
+  Modulation: 'MOD',
+  Experimental: 'EXP',
+  'User Presets': 'USER',
+  'High Gain': 'HI-GAIN',
+  'Noise Gate': 'GATE',
+  Compressor: 'COMP',
+  'Cabinet IR': 'CAB IR',
+};
+const shortSwitchName = (name: string) => SHORT_SWITCH_NAMES[name] ?? (name.length > 8 ? name.slice(0, 6) : name);
+

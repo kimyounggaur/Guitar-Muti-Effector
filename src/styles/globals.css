@@ -68,7 +68,7 @@ input {
 .meter-shell span,
 .device-selector span {
   color: var(--dim);
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -280,7 +280,7 @@ input {
     inset 0 -12px 22px rgba(0, 0, 0, 0.44),
     0 10px 22px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
   text-transform: uppercase;
   transition:
@@ -438,7 +438,7 @@ input {
 .looper-progress span {
   margin-top: -34px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .looper-status {
@@ -750,7 +750,7 @@ input {
 
 .tuning-guide small {
   color: var(--dim);
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
 }
 
@@ -977,7 +977,7 @@ input {
 .preset-card span,
 .preset-import-export span {
   color: var(--dim);
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -1398,7 +1398,7 @@ input {
     inset 0 8px 16px rgba(255, 255, 255, 0.06),
     inset 0 -12px 22px rgba(0, 0, 0, 0.44),
     0 10px 22px rgba(0, 0, 0, 0.3);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   text-transform: uppercase;
 }
 
@@ -1628,7 +1628,7 @@ input {
 .knob-control > span {
   justify-self: start;
   color: var(--dim);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 950;
   letter-spacing: 0.04em;
   text-transform: uppercase;
