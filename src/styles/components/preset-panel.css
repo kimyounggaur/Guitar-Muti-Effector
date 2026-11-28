@@ -1,23 +1,19 @@
-.preset-save-panel,
 .preset-card,
 .preset-import-export {
   border-radius: 8px
 }
 
-.preset-save-panel span,
 .preset-card span,
 .preset-import-export span {
   font-weight: 900;
   text-transform: uppercase
 }
 
-.preset-save-panel input,
 .preset-card input {
   min-height: 44px;
   padding: 0 12px
 }
 
-.preset-save-panel button:disabled,
 .preset-io-footer button:disabled {
   cursor: not-allowed;
   opacity: 0.5
@@ -111,8 +107,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1)
 }
 
-.preset-tools-panel > span,
-.preset-output-panel > span {
+.preset-tools-panel > span {
   color: #56f0ff;
   font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
   font-size: 0.78rem;
@@ -287,8 +282,7 @@
   padding: 0 10px
 }
 
-.preset-tools-panel,
-.preset-output-panel {
+.preset-tools-panel {
   padding: 10px 8px
 }
 

@@ -3,7 +3,7 @@
 // State pseudo-classes (:hover, :focus, :disabled …), :not() and pseudo-elements are removed before matching,
 // so :hover / ::before rules count as used when their element exists. :is() / :where() / :has() are kept.
 // A rule inside @media counts only at a width where the media query applies.
-import { spawn } from 'node:child_process';
+import { preview as vitePreview } from 'vite';
 import { chromium } from 'playwright';
 
 export const WIDTHS = [
@@ -19,53 +19,54 @@ export const PEDAL_TYPES = ['tuner', 'noiseGate', 'compressor', 'drive', 'ampEQ'
 /** Drives the page through the states whose styles must stay, calling record() in each. */
 export async function visitStates(page, record) {
   await record('start');
+  const selectPedal = async (type) => {
+    await page.locator(`.chain-effect-shell.type-${type} .chain-effect-main`).click();
+    await page.locator(`.chain-effect-shell.type-${type} .chain-effect-main[aria-pressed="true"]`).waitFor();
+  };
   for (const type of PEDAL_TYPES) {
-    const block = page.locator(`.chain-effect-shell.type-${type} .chain-effect-main`).first();
-    if (await block.count()) {
-      await block.click();
-      await page.waitForTimeout(80);
-      await record(`detail:${type}`);
-    }
+    await selectPedal(type);
+    await record(`detail:${type}`);
   }
-  const effects = page.getByRole('button', { name: '이펙트', exact: true });
-  if (await effects.count()) {
-    await effects.click();
-    await record('footswitch:effects');
-    // Turn two effects off so the disabled styles are seen, then back on.
-    const switches = page.locator('.stomp-category-switch');
-    for (const index of [0, 1]) await switches.nth(index).click();
-    await page.waitForTimeout(80);
-    await record('footswitch:effects-off');
-    for (const index of [0, 1]) await switches.nth(index).click();
-    await page.getByRole('button', { name: '프리셋', exact: true }).click();
-  }
-  const category = page.locator('.stomp-category-switch').first();
-  if (await category.count()) {
-    await category.click();
-    await page.waitForTimeout(80);
-    await record('lcd:preset-grid');
-  }
+  await page.getByRole('button', { name: '이펙트', exact: true }).click();
+  await record('footswitch:effects');
+  const switches = page.locator('.stomp-category-switch');
+  // Select concrete switches before toggling: the matched list changes as each turns off.
+  const enabledIndices = await switches.evaluateAll((buttons) => buttons.flatMap((button, index) =>
+    !button.disabled && button.getAttribute('aria-pressed') === 'true' ? [index] : []));
+  if (enabledIndices.length === 0) throw new Error('No enabled footswitches to exercise');
+  for (const index of enabledIndices.slice(0, 2)) await switches.nth(index).click();
+  await record('footswitch:effects-off');
+  for (const index of enabledIndices.slice(0, 2)) await switches.nth(index).click();
+  await page.getByRole('button', { name: '프리셋', exact: true }).click();
+  await switches.first().click();
+  await page.locator('.lcd-preset-grid-view').waitFor();
+  await record('lcd:preset-grid');
+  await page.getByRole('button', { name: '이펙트 보드', exact: true }).click();
+
   await page.evaluate(() => document.querySelectorAll('details').forEach((details) => { details.open = true; }));
   await record('presets-open');
-  const firstPreset = page.locator('.preset-card').first();
-  if (await firstPreset.count()) {
-    await firstPreset.click();
-    await record('preset-selected');
+  await page.locator('.preset-category-list button').first().click();
+  const preset = page.locator('.preset-card:not(.is-active) .preset-title-button').first();
+  await preset.click();
+  await record('preset-selected');
+
+  const settings = page.locator('.mobile-settings-toggle');
+  if (await settings.isVisible()) {
+    await settings.click();
+    await record('settings-open');
+    await settings.click();
+    const safety = page.locator('.mobile-safety-line button');
+    await safety.click();
+    await record('safety-open');
+    await safety.click();
   }
-  // With a fake microphone (see launchBrowser) the connected states can be seen too.
-  const connect = page.locator('.connect-button');
-  if (await connect.isEnabled()) {
-    await connect.click();
-    await page.waitForTimeout(600);
-    await record('connected');
-    for (const type of ['tuner', 'looper', 'rhythm']) {
-      const block = page.locator(`.chain-effect-shell.type-${type} .chain-effect-main`).first();
-      if (await block.count()) {
-        await block.click();
-        await page.waitForTimeout(300);
-        await record(`connected:${type}`);
-      }
-    }
+
+  await page.locator('.connect-button').click();
+  await page.locator('.connect-section .panel-heading strong').filter({ hasText: '오디오 연결됨' }).waitFor({ state: 'attached' });
+  await record('connected');
+  for (const type of ['tuner', 'looper', 'rhythm']) {
+    await selectPedal(type);
+    await record(`connected:${type}`);
   }
 }
 
@@ -115,14 +116,9 @@ function collectRulesInPage() {
 }
 
 export async function startPreview(port = 4176) {
-  const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], { stdio: 'ignore', shell: process.platform === 'win32' });
-  const url = `http://localhost:${port}/`;
-  for (let i = 0; i < 100; i++) {
-    try { if ((await fetch(url)).ok) return { url, stop: () => server.kill() }; } catch { /* not up yet */ }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  server.kill();
-  throw new Error('vite preview did not start');
+  const host = '127.0.0.1';
+  const server = await vitePreview({ preview: { host, port, strictPort: true }, logLevel: 'error' });
+  return { url: `http://${host}:${port}/`, stop: () => server.close() };
 }
 
 /** Returns a boolean per item: true when it matched in any state at any width. */
@@ -160,6 +156,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.log(`\n${unused.length} unused of ${items.length} selectors`);
     }
   } finally {
-    preview.stop();
+    await preview.stop();
   }
 }

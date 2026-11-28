@@ -11,27 +11,6 @@
   cursor: pointer
 }
 
-.chain-effect-main span {
-  color: var(--effect-color);
-  font-size: var(--fs-xs);
-  font-weight: 950
-}
-
-.chain-effect-main strong {
-  font-size: 0.82rem;
-  font-weight: 950;
-  line-height: 1.1;
-  text-align: center
-}
-
-.chain-effect-main i {
-  width: 14px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--effect-color);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--effect-color) 70%, transparent)
-}
-
 .chain-effect-switch-icon {
   width: 11px;
   height: 2px;

@@ -1,14 +1,11 @@
 .connect-section,
-.pedal-card,
-.pedal-placeholder {
+.pedal-card {
   border: 1px solid var(--line);
   border-radius: 8px
 }
 
 .panel-heading span,
 .pedal-card span,
-.pedal-placeholder span,
-.meter-shell span,
 .device-selector span {
   color: var(--dim);
   font-size: var(--fs-xs);
