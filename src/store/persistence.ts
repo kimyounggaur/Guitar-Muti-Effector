@@ -5,7 +5,7 @@ import { clampTempo } from '../audio/params/schema';
 import { readLocal, removeLocal, writeLocal } from './safeStorage';
 import { useAudioStore } from './audioStore';
 import { usePedalStore } from './pedalStore';
-import { migrateLegacyPresetList, normalizeUserPresetList } from '../presets/migrate';
+import { isPresetRecord, migrateLegacyPresetList, normalizeUserPresetList, presetListFrom } from '../presets/migrate';
 import type { PedalboardPreset } from '../presets/types';
 import { usePresetStore } from './presetStore';
 import { useTempoStore } from './tempoStore';
@@ -70,19 +70,35 @@ const toSession = (value: unknown): SessionV3 | null => {
   return session;
 };
 
-/** Write, then read back: only a value that parses again counts as stored. */
+/** v2 supersedes the v1 pedal snapshot. Keep the raw value until the copy is verified. */
+const readLegacySessions = () => {
+  const v2 = readLocal(LEGACY.sessionV2);
+  const v1 = readLocal(LEGACY.pedalsV1);
+  const pedals = parse(v1);
+  return [
+    { key: LEGACY.sessionV2, raw: v2, session: toSession(parse(v2)) },
+    { key: LEGACY.pedalsV1, raw: v1, session: Array.isArray(pedals)
+      ? toSession({ pedals, activePresetId: null, outputTrimDb: 0, presetName: '이전 작업 설정' })
+      : null },
+  ];
+};
+
+/** Verify that storage returned the complete serialized copy before removing its source. */
 const writeVerified = (key: string, value: unknown): boolean => {
   const json = JSON.stringify(value);
   if (!writeLocal(key, json)) return false;
-  return parse(readLocal(key)) !== null;
+  return readLocal(key) === json;
 };
 
 export function loadSession(): SessionV3 | null {
-  return toSession(parse(readLocal(KEYS.session)));
+  return toSession(parse(readLocal(KEYS.session)))
+    ?? readLegacySessions().find((source) => source.session)?.session
+    ?? null;
 }
 
 export function loadUserPresets(): PedalboardPreset[] {
-  return normalizeUserPresetList(parse(readLocal(KEYS.userPresets)));
+  const current = presetListFrom(parse(readLocal(KEYS.userPresets)));
+  return current ? normalizeUserPresetList(current) : migrateLegacyPresetList(parse(readLocal(LEGACY.presets)));
 }
 
 export function saveUserPresets(presets: PedalboardPreset[]): boolean {
@@ -94,36 +110,28 @@ export function migrateLegacyStorage(): { migrated: string[]; kept: string[] } {
   const migrated: string[] = [];
   const kept: string[] = [];
 
+  const finish = (key: string, raw: string, copied: boolean) => {
+    // A malformed source, failed copy or newer edit in another tab must survive.
+    if (copied && readLocal(key) === raw && removeLocal(key)) migrated.push(key);
+    else kept.push(key);
+  };
+
   if (readLocal(KEYS.session) === null) {
-    const v2 = readLocal(LEGACY.sessionV2);
-    const v1 = readLocal(LEGACY.pedalsV1);
-    let session = v2 !== null ? toSession(parse(v2)) : null;
-    if (!session && v1 !== null) {
-      const pedals = parse(v1);
-      session = Array.isArray(pedals) ? toSession({ pedals, activePresetId: null, outputTrimDb: 0, presetName: '이전 작업 설정' }) : null;
-    }
-    if (session) {
-      const sources = [v2 !== null ? LEGACY.sessionV2 : null, v1 !== null ? LEGACY.pedalsV1 : null].filter(Boolean) as string[];
-      if (writeVerified(KEYS.session, session)) {
-        // The v1 key only ever held an older copy of the same board, so it goes with the v2 session.
-        sources.forEach((key) => removeLocal(key));
-        migrated.push(...sources);
-      } else {
-        kept.push(...sources);
-      }
+    const sources = readLegacySessions();
+    const session = sources.find((source) => source.session)?.session;
+    const copied = Boolean(session && writeVerified(KEYS.session, session));
+    for (const source of sources) {
+      if (source.raw !== null) finish(source.key, source.raw, copied && source.session !== null);
     }
   }
 
   if (readLocal(KEYS.userPresets) === null) {
-    const legacyPresets = readLocal(LEGACY.presets);
-    if (legacyPresets !== null) {
-      const presets = migrateLegacyPresetList(parse(legacyPresets));
-      if (writeVerified(KEYS.userPresets, { version: 3, presets })) {
-        removeLocal(LEGACY.presets);
-        migrated.push(LEGACY.presets);
-      } else {
-        kept.push(LEGACY.presets);
-      }
+    const raw = readLocal(LEGACY.presets);
+    if (raw !== null) {
+      const list = presetListFrom(parse(raw));
+      const copied = list !== null && list.every(isPresetRecord)
+        && writeVerified(KEYS.userPresets, { version: 3, presets: migrateLegacyPresetList(list) });
+      finish(LEGACY.presets, raw, copied);
     }
   }
 
@@ -173,7 +181,8 @@ const currentSession = (): SessionV3 => {
 /** Save the current session right away (e.g. the "페달 설정 저장" buttons). */
 export function saveSessionNow(): boolean {
   const json = JSON.stringify(currentSession());
-  if (json.length > SIZE_WARNING_BYTES) console.warn(`Saved session is ${Math.round(json.length / 1024)} KB (over 50 KB).`);
+  const bytes = new TextEncoder().encode(json).byteLength;
+  if (bytes > SIZE_WARNING_BYTES) console.warn(`Saved session is ${Math.round(bytes / 1024)} KB (over 50 KB).`);
   return writeLocal(KEYS.session, json);
 }
 

@@ -10,7 +10,7 @@ export const writeLocal = (key: string, value: string): boolean => {
     return false;
   }
 };
-export const removeLocal = (key: string): void => {
-  try { window.localStorage.removeItem(key); }
-  catch { /* Leaving an old key behind is harmless. */ }
+export const removeLocal = (key: string): boolean => {
+  try { window.localStorage.removeItem(key); return true; }
+  catch { return false; }
 };
