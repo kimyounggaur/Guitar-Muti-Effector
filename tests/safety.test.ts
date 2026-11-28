@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { AudioEngine } from '../src/audio/AudioEngine';
+import { CabinetIREffect } from '../src/audio/nodes/CabinetIREffect';
+import { ModulationEffect } from '../src/audio/nodes/ModulationEffect';
+import { ReverbEffect } from '../src/audio/nodes/ReverbEffect';
 import { DelayEffect } from '../src/audio/nodes/DelayEffect';
 import { createDriveCurve, DRIVE_MODES } from '../src/audio/utils/curves';
 import { readLocal, writeLocal } from '../src/store/safeStorage';
@@ -47,6 +50,27 @@ test('delay feedback stays bounded in every mode with nonresonant loop filters',
   assert.equal(limiters.length, 3);
   for (const limiter of limiters) assert.ok(Math.max(...limiter.curve.map(Math.abs)) <= 0.801);
   effect.dispose();
+});
+
+test('the last mix knob step is one percent wet on all four ratio-compatible effects', () => {
+  class MixContext extends FakeContext {
+    sampleRate = 8000;
+    createConvolver() { return new FakeNode(); }
+    createBuffer(numberOfChannels: number, length: number) {
+      const channels = Array.from({ length: numberOfChannels }, () => new Float32Array(length));
+      return { numberOfChannels, getChannelData: (index: number) => channels[index] };
+    }
+  }
+  for (const Effect of [DelayEffect, ModulationEffect, ReverbEffect, CabinetIREffect]) {
+    const effect = new Effect(new MixContext() as unknown as AudioContext, Effect.name);
+    for (const percent of [100, 2, 1, 0]) {
+      effect.setParam('mix', percent);
+      assert.equal(effect['wetGain'].gain.value, percent / 100, Effect.name);
+      assert.equal(effect['dryGain'].gain.value, 1 - percent / 100, Effect.name);
+    }
+    // Cancel the cabinet's asynchronous IR crossfade before the mock context is released.
+    if (effect instanceof CabinetIREffect) effect.dispose();
+  }
 });
 
 test('drive bias does not emit a DC offset for silence', () => {

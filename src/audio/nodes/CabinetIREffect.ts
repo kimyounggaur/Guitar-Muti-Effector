@@ -1,6 +1,6 @@
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
-import { PEDAL_SCHEMAS } from '../params/schema';
+import { clampNumberParam, PEDAL_SCHEMAS } from '../params/schema';
 
 const S = PEDAL_SCHEMAS.cabinetIR;
 
@@ -69,7 +69,7 @@ export class CabinetIREffect extends BaseEffect {
   constructor(context: AudioContext, id: string) {
     super(context, id, 'cabinetIR');
     this.activeLane = this.createLane(createSyntheticCabinetImpulse(context, this.cabinetType, this.mic), 1);
-    this.setMix(1);
+    this.setMix(S.mix.default / 100);
     this.applyLaneParams(this.activeLane, false);
     void this.loadCabinetBuffer();
 
@@ -96,10 +96,7 @@ export class CabinetIREffect extends BaseEffect {
       this.highCutFrequency = clamp(asNumber(value, S.highCut.default), S.highCut.min, S.highCut.max);
       smoothParam(context, this.activeLane.highCut.frequency, this.highCutFrequency, 0.018);
     });
-    this.paramHandlers.set('mix', (value) => {
-      const numberValue = asNumber(value, 100);
-      this.setMix(numberValue <= 1 ? numberValue : percentToUnit(numberValue, 100));
-    });
+    this.paramHandlers.set('mix', (value) => this.setMix(clampNumberParam(S.mix, value) / 100));
     this.paramHandlers.set('level', (value) => {
       this.level = clamp(asNumber(value, S.level.default), S.level.min, S.level.max);
       smoothParam(context, this.activeLane.levelGain.gain, this.levelToGain(), 0.018);

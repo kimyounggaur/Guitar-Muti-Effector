@@ -1,6 +1,6 @@
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
-import { PEDAL_SCHEMAS, TEMPO, clampTempo } from '../params/schema';
+import { clampNumberParam, PEDAL_SCHEMAS, TEMPO, clampTempo } from '../params/schema';
 
 const S = PEDAL_SCHEMAS.modulation;
 
@@ -91,7 +91,7 @@ export class ModulationEffect extends BaseEffect {
     this.applyAll(false);
     this.lfo.type = 'sine';
     this.lfo.start();
-    this.setMix(0.42);
+    this.setMix(S.mix.default / 100);
   }
 
   override dispose() {
@@ -218,10 +218,7 @@ export class ModulationEffect extends BaseEffect {
       this.feedback = clamp(asNumber(value, S.feedback.default), S.feedback.min, S.feedback.max);
       this.applyFeedback();
     });
-    this.paramHandlers.set('mix', (value) => {
-      const numberValue = asNumber(value, 42);
-      this.setMix(numberValue <= 1 ? numberValue : percentToUnit(numberValue, 42));
-    });
+    this.paramHandlers.set('mix', (value) => this.setMix(clampNumberParam(S.mix, value) / 100));
     this.paramHandlers.set('tone', (value) => {
       this.tone = clamp(asNumber(value, S.tone.default), S.tone.min, S.tone.max);
       this.applyTone();

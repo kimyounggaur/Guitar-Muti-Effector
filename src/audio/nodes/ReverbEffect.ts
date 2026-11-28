@@ -6,7 +6,7 @@ import {
   readReverbMode,
 } from '../utils/impulse';
 import { BaseEffect } from './BaseEffect';
-import { PEDAL_SCHEMAS } from '../params/schema';
+import { clampNumberParam, PEDAL_SCHEMAS } from '../params/schema';
 
 const S = PEDAL_SCHEMAS.reverb;
 
@@ -57,7 +57,7 @@ export class ReverbEffect extends BaseEffect {
   constructor(context: AudioContext, id: string) {
     super(context, id, 'reverb');
     this.activeLane = this.createLane(createSyntheticReverbImpulse(context, this.mode, this.decay), 1);
-    this.setMix(0.24);
+    this.setMix(S.mix.default / 100);
     this.applyLaneParams(this.activeLane, false);
 
     this.paramHandlers.set('mode', (value) => {
@@ -89,10 +89,7 @@ export class ReverbEffect extends BaseEffect {
       this.highCutFrequency = clamp(12000 - clamp(asNumber(value, 0.4), 0, 1) * 9000, 1000, 12000);
       smoothParam(context, this.activeLane.highCut.frequency, this.highCutFrequency, 0.018);
     });
-    this.paramHandlers.set('mix', (value) => {
-      const numberValue = asNumber(value, 24);
-      this.setMix(numberValue <= 1 ? numberValue : percentToUnit(numberValue, 24));
-    });
+    this.paramHandlers.set('mix', (value) => this.setMix(clampNumberParam(S.mix, value) / 100));
     this.paramHandlers.set('level', (value) => {
       this.level = clamp(asNumber(value, S.level.default), S.level.min, S.level.max);
       smoothParam(context, this.activeLane.levelGain.gain, this.levelToGain(), 0.018);

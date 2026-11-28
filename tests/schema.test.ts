@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PEDAL_SCHEMAS, TEMPO, clampParam, clampTempo, defaultParams } from '../src/audio/params/schema';
-import { createDefaultPedals, type PedalType } from '../src/audio/types';
+import { createDefaultPedals, normalizePedals, type PedalType } from '../src/audio/types';
 
 const PEDAL_TYPES: PedalType[] = ['tuner', 'noiseGate', 'compressor', 'drive', 'ampEQ', 'cabinetIR', 'modulation', 'delay', 'reverb', 'looper', 'rhythm'];
 
@@ -66,4 +66,17 @@ test('108 factory presets are already inside the schema ranges', async () => {
       }
     }
   }
+});
+
+test('stored ratio mixes migrate once, while a contemporary 1 percent setting stays at 1', () => {
+  const legacy = normalizePedals([
+    { id: 'delay', type: 'delay', params: { timeMs: 320, feedback: 0.28, mix: 0.22 } },
+    { id: 'reverb', type: 'reverb', params: { size: 0.45, damping: 0.4, mix: 0.18 } },
+    { id: 'cabinet-ir', type: 'cabinetIR', params: { cabinet: 'Cab IR', mix: 1 } },
+  ]);
+  assert.deepEqual(legacy.slice(0, 3).map((pedal) => pedal.params.mix), [22, 18, 100]);
+  assert.deepEqual(normalizePedals(legacy), legacy);
+
+  for (const pedal of legacy.slice(0, 3)) pedal.params.mix = 1;
+  assert.deepEqual(normalizePedals(legacy).slice(0, 3).map((pedal) => pedal.params.mix), [1, 1, 1]);
 });
