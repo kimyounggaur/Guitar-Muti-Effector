@@ -138,3 +138,54 @@ test('saved presets never include factory presets', () => {
   assert.equal(stored.presets.length, 1);
   assert.equal(stored.presets[0].origin, 'user');
 });
+
+test('a full store still restores the readable legacy session and user presets', () => {
+  const preset = legacyPresetList()[0];
+  storage.data.set(LEGACY.presets, JSON.stringify([preset]));
+  storage.data.set(LEGACY.sessionV2, JSON.stringify({ pedals: customPedals(), activePresetId: preset.id, masterVolume: 0.17 }));
+  storage.failWrites = 'quota';
+
+  migrateLegacyStorage();
+  hydrateFromSession(loadSession());
+
+  assert.equal(usePresetStore.getState().activePresetId, preset.id);
+  assert.equal(useAudioStore.getState().masterVolume, 0.17);
+  assert.equal(useTempoStore.getState().bpm, 96);
+  assert.equal(storage.data.has(KEYS.session), false);
+
+  storage.failWrites = 'none';
+  assert.equal(saveSessionNow(), true);
+  migrateLegacyStorage();
+  assert.equal(loadSession()?.activePresetId, preset.id);
+  assert.equal(loadUserPresets()[0].id, preset.id);
+});
+
+test('a damaged v2 source is kept when the v1 board can be recovered', () => {
+  storage.data.set(LEGACY.sessionV2, '{broken');
+  storage.data.set(LEGACY.pedalsV1, JSON.stringify(customPedals()));
+
+  const result = migrateLegacyStorage();
+
+  assert.deepEqual(result, { migrated: [LEGACY.pedalsV1], kept: [LEGACY.sessionV2] });
+  assert.equal(loadSession()?.tempoBpm, 96);
+  assert.equal(storage.data.get(LEGACY.sessionV2), '{broken');
+});
+
+test('an unreadable legacy preset list is preserved without creating an empty replacement', () => {
+  const raw = '{"presets":';
+  storage.data.set(LEGACY.presets, raw);
+
+  assert.deepEqual(migrateLegacyStorage(), { migrated: [], kept: [LEGACY.presets] });
+  assert.equal(storage.data.get(LEGACY.presets), raw);
+  assert.equal(storage.data.has(KEYS.userPresets), false);
+});
+
+test('valid presets in a partly damaged legacy list remain playable and the original is kept', () => {
+  const user = legacyPresetList()[0];
+  const raw = JSON.stringify([user, { name: 42, pedals: [] }]);
+  storage.data.set(LEGACY.presets, raw);
+
+  assert.deepEqual(migrateLegacyStorage(), { migrated: [], kept: [LEGACY.presets] });
+  assert.deepEqual(loadUserPresets().map((preset) => preset.id), [user.id]);
+  assert.equal(storage.data.get(LEGACY.presets), raw);
+});
