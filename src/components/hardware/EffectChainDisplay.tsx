@@ -151,7 +151,7 @@ function EffectChainDisplay({
         </span>
       </div>
       <div className="chain-order-controls" aria-label={t('panel.chain.reorder')}>
-        <span>{selectedName ? `${selectedName} 순서` : t('panel.chain.selectFirst')}</span>
+        <span>{selectedName ? t('panel.chain.order', { name: selectedName }) : t('panel.chain.selectFirst')}</span>
         <button type="button" disabled={selectedIndex <= 0} onClick={() => moveSelected(-1)} aria-label={t('panel.chain.moveEarlier', { name: selectedName })}>{t('panel.chain.earlier')}</button>
         <button type="button" disabled={selectedIndex < 0 || selectedIndex >= pedals.length - 1} onClick={() => moveSelected(1)} aria-label={t('panel.chain.moveLater', { name: selectedName })}>{t('panel.chain.later')}</button>
       </div>

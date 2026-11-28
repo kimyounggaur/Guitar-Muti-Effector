@@ -250,7 +250,7 @@ function AmpEQPedal({
       <div className="classic-eq-lower-controls">
         <span>{t('panel.ampEq.freqQ')}</span>
         <EQSlider
-          label="Mid Freq"
+          label={t('panel.ampEq.midFrequencyLettering')}
           value={params.midFreq}
           min={250}
           max={1500}

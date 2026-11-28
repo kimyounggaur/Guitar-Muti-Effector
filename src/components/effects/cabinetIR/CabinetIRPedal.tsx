@@ -60,18 +60,24 @@ function CabinetIRPedal({
     }
 
     try {
-      if (file.size > 10 * 1024 * 1024) throw new Error('IR 파일은 10MB 이하여야 합니다.');
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadStatus(t('error.irSize'));
+        return;
+      }
       const data = await file.arrayBuffer();
       const decoder = new OfflineAudioContext(1, 1, 44100);
       const decoded = await decoder.decodeAudioData(data.slice(0));
-      if (!decoded.length || decoded.duration > 10) throw new Error('IR 길이는 10초 이하여야 합니다.');
+      if (!decoded.length || decoded.duration > 10) {
+        setUploadStatus(t('error.irDuration'));
+        return;
+      }
       const token = registerCustomCabinetIR(pedal.id, file.name, data);
       setUploadName(file.name);
       setParam('cabinetType', 'custom');
       setParam('customIRName', token);
-      setUploadStatus('사용자 IR을 적용했습니다. 새로고침하면 다시 선택해 주세요.');
-    } catch (error) {
-      setUploadStatus(error instanceof Error && error.message.includes('IR ') ? error.message : 'WAV 파일을 읽을 수 없습니다. 올바른 오디오 파일을 선택해 주세요.');
+      setUploadStatus(t('panel.cabinet.irLoaded'));
+    } catch {
+      setUploadStatus(t('error.irDecode'));
     }
   };
 
@@ -142,7 +148,7 @@ function CabinetIRPedal({
       <p role="status">{uploadStatus || (params.cabinetType === 'custom' && !hasCustomCabinetIR(pedal.id) ? t('panel.cabinet.customMissing') : t('panel.cabinet.customTabOnly'))}</p>
       <div className="cabinet-controls">
         <CabSlider
-          label="LowCut"
+          label={t('panel.cabinet.lowCutLettering')}
           value={params.lowCut}
           min={40}
           max={200}
@@ -150,7 +156,7 @@ function CabinetIRPedal({
           onChange={(value) => setParam('lowCut', value)}
         />
         <CabSlider
-          label="HighCut"
+          label={t('panel.cabinet.highCutLettering')}
           value={params.highCut}
           min={3000}
           max={12000}
@@ -159,7 +165,7 @@ function CabinetIRPedal({
           onChange={(value) => setParam('highCut', value)}
         />
         <CabSlider label="Mix" value={params.mix} min={0} max={100} onChange={(value) => setParam('mix', value)} />
-        <CabSlider label="출력 음량" value={params.level} min={0} max={100} onChange={(value) => setParam('level', value)} />
+        <CabSlider label={t('panel.cabinet.outputVolume')} value={params.level} min={0} max={100} onChange={(value) => setParam('level', value)} />
       </div>
 
       <div className="pedal-switches">

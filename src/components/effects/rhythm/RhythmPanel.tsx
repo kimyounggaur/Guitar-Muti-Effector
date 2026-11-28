@@ -151,7 +151,7 @@ function RhythmPanel({
             <option value="pop">{t('panel.rhythm.pop')}</option>
           </select>
         </label>
-        <RhythmSlider label="리듬 음량" value={params.volume} min={S.volume.min} max={S.volume.max} onChange={(value) => setParam('volume', value)} />
+        <RhythmSlider label={t('panel.rhythm.volume')} value={params.volume} min={S.volume.min} max={S.volume.max} onChange={(value) => setParam('volume', value)} />
       </div>
 
       <div className="pedal-switches">

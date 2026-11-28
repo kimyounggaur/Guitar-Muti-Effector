@@ -23,11 +23,11 @@ function MasterStatusBar({
 }: MasterStatusBarProps) {
   return (
     <section className="master-status-bar" aria-label={t('panel.status.region')}>
-      <StatusItem label="오디오" value={isConnecting ? '연결 중' : isAudioReady ? '연결됨' : '연결 안 됨'} live={isAudioReady} />
-      <StatusItem label="입력" value={inputDeviceName} />
-      <StatusItem label="샘플레이트" value={sampleRate > 0 ? `${sampleRate} Hz` : '--'} />
-      <StatusItem label="출력 지연" value={latencyHint} />
-      <StatusItem label="마스터" value={`${Math.round(masterVolume * 100)}%`} />
+      <StatusItem label={t('panel.status.audio')} value={isConnecting ? t('panel.status.connecting') : isAudioReady ? t('panel.status.connected') : t('panel.status.disconnected')} live={isAudioReady} />
+      <StatusItem label={t('panel.connect.title')} value={inputDeviceName} />
+      <StatusItem label={t('panel.status.sampleRate')} value={sampleRate > 0 ? `${sampleRate} Hz` : '--'} />
+      <StatusItem label={t('panel.status.latency')} value={latencyHint} />
+      <StatusItem label={t('panel.utility.master')} value={`${Math.round(masterVolume * 100)}%`} />
       {errorMessage ? <strong className="status-error">{errorMessage}</strong> : null}
       <button type="button" className="status-panic-button" onClick={onPanic}>
         
