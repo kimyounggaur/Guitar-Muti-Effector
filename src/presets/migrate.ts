@@ -43,13 +43,14 @@ export const inferCategory = (name: string) => {
   return 'Clean';
 };
 
-export const normalizePreset = (value: unknown, fallbackOrigin: PresetOrigin): PedalboardPreset | null => {
-  if (!value || typeof value !== 'object') {
-    return null;
-  }
+export function isPresetRecord(value: unknown): value is Record<string, unknown> & { name: string; pedals: unknown[] } {
+  return value !== null && typeof value === 'object'
+    && 'name' in value && typeof value.name === 'string' && value.name.length > 0
+    && 'pedals' in value && Array.isArray(value.pedals);
+}
 
-  const candidate = value as Partial<PedalboardPreset>;
-  if (!candidate.name || !Array.isArray(candidate.pedals)) {
+export const normalizePreset = (candidate: unknown, fallbackOrigin: PresetOrigin): PedalboardPreset | null => {
+  if (!isPresetRecord(candidate)) {
     return null;
   }
 
