@@ -47,6 +47,22 @@ test('layout metrics', async ({ page }, testInfo) => {
   }
 });
 
+test('every open pedal fits the phone and has touch targets of at least 44px', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.startsWith('mobile'), 'mobile layout only');
+  await page.goto('/');
+  const selectors = page.locator('.chain-effect-main');
+  await expect(selectors).toHaveCount(11);
+
+  for (const select of await selectors.all()) {
+    await select.click();
+    await expect(select).toHaveAttribute('aria-pressed', 'true');
+    const selection = await select.getAttribute('aria-label');
+    expect(await smallTouchTargets(page), `${selection} touch targets`).toEqual([]);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow, `${selection} horizontal overflow`).toBe(0);
+  }
+});
+
 function smallTouchTargets(page: import('@playwright/test').Page) {
   return page.evaluate(() =>
     [...document.querySelectorAll<HTMLElement>('button, a[href], input, select, summary, [role="slider"], [tabindex="0"]')]

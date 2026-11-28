@@ -66,7 +66,7 @@ export async function visitStates(page, record) {
   }
 
   await page.locator('.connect-button').click();
-  await page.locator('.stop-button:enabled').waitFor();
+  await page.locator('.screen-led.is-live').waitFor({ state: 'attached' });
   await record('connected');
   for (const type of ['tuner', 'looper', 'rhythm']) {
     await selectPedal(type);
