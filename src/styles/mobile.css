@@ -244,6 +244,24 @@
     padding: 8px
   }
 
+  .detail-section input[type='checkbox'] {
+    min-width: 44px;
+    min-height: 44px
+  }
+
+  .detail-section .noise-rack-fader input {
+    min-width: 44px
+  }
+
+  .detail-section .comp-rack-trim input,
+  .detail-section .rhythm-control input {
+    min-height: 44px
+  }
+
+  .detail-section .rhythm-controls {
+    grid-template-columns: repeat(auto-fit, minmax(min(136px, 100%), 1fr))
+  }
+
   /* Foot switches: two columns of labelled pads. */
   .hardware-app .preset-stomp-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
