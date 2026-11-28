@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 import '../../styles/components/knob.css';
 import { t } from '../../i18n/ko';
+import { dragKnobValue, steppedKnobValue } from './knobValue';
 
 type KnobControlProps = {
   label: string;
@@ -45,16 +46,15 @@ function KnobControl({
       return;
     }
 
-    const stepped = Math.round(nextValue / step) * step;
-    onChange(Number(clamp(stepped, min, max).toFixed(getPrecision(step))));
+    onChange(steppedKnobValue(nextValue, min, max, step));
   };
 
   // Relative vertical dragging avoids the discontinuity at the bottom of a dial.
   // Touch users can scroll normally and use the accessible +/- controls below.
   const updateFromPointer = (event: PointerEvent<HTMLDivElement>) => {
     const origin = dragOrigin.current;
-    if (!origin) return;
-    commit(origin.value + ((origin.y - event.clientY) / 160) * (max - min));
+    if (!origin || disabled) return;
+    onChange(dragKnobValue(origin.value, event.clientY - origin.y, min, max, step));
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -129,11 +129,6 @@ function KnobControl({
     </div>
   );
 }
-
-const getPrecision = (step: number) => {
-  const decimals = step.toString().split('.')[1];
-  return decimals ? decimals.length : 0;
-};
 
 const formatNumberValue = (value: number, step: number) => {
   if (step < 0.01) {
