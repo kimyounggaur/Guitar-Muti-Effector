@@ -77,7 +77,6 @@
 
 .drive-rack-input-strip,
 .drive-rack-panel-section,
-.drive-rack-vu-meter,
 .drive-rack-bottom-rail {
   position: relative;
   z-index: 2
@@ -184,8 +183,7 @@
     inset 0 -16px 22px rgba(91, 72, 18, 0.12)
 }
 
-.drive-rack-pre-section,
-.drive-rack-reverb-section {
+.drive-rack-pre-section {
   display: grid;
   grid-template-rows: minmax(82px, 1fr) auto;
   gap: 8px;
@@ -200,20 +198,12 @@
   padding: 12px 10px 10px
 }
 
-.drive-rack-eq-section .drive-rack-model-slot {
-  grid-column: 1 / -1
-}
-
 .drive-rack-output-section {
   display: grid;
   grid-template-columns: minmax(76px, 0.72fr) minmax(60px, auto);
   grid-template-rows: minmax(82px, 1fr) auto;
   gap: 8px;
   padding: 12px 10px 10px
-}
-
-.drive-rack-output-section .drive-rack-model-slot {
-  grid-column: 1 / -1
 }
 
 .drive-rack-knob {
@@ -445,9 +435,7 @@
     justify-content: center
   }
 
-  .drive-rack-eq-section .drive-rack-model-slot,
-.drive-rack-output-section .drive-rack-model-slot,
-.drive-rack-bottom-rail {
+  .drive-rack-bottom-rail {
     grid-column: auto
   }
 
