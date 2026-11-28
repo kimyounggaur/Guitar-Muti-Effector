@@ -31,7 +31,7 @@
 | ampEQ.level | 72 | 0~100 | 0~100 | 같음 | 같음 |
 | cabinetIR.lowCut | 80 | 40~200 | 40~200 | 같음 / 1 | 같음 |
 | cabinetIR.highCut | 6500 | 3000~12000 | 3000~12000, step 100 | 같음 / 1 (ui 100) | |
-| cabinetIR.mix·level | 100·72 | 0~100 (mix ≤ 1이면 비율로 해석) | 0~100 | 같음 / 1 | |
+| cabinetIR.mix·level | 100·72 | 0~100 (기존 엔진은 mix ≤ 1을 비율로 해석) | 0~100 | 같음 / 1 | |
 | modulation.rate | 0.85 | 0.05~20 | 0.05~20, step 0.05 | 같음 / 0.01 (ui 0.05) | 프리셋 값 0.01 단위 |
 | modulation.depth·tone·stereoWidth·mix | 44·68·52·42 | 0~100 | 0~100 | 같음 / 1 | |
 | modulation.feedback | 0.18 | **0~0.95** | **0~100** | 0.18 / **0~0.95** / 0.01, safetyMax 0.95 | **화면이 0~100으로 표시하던 불일치(S2와 같은 종류)를 엔진 범위로 맞춤** |
@@ -66,6 +66,8 @@
 | modulation.sync, delay.sync, looper.reverse, looper.halfSpeed, rhythm.playing | true / false | false |
 
 엔진이 받는 옛 별칭(`thresholdDb`(컴프레서), `gain`(드라이브), `bassDb` 등, `cabinet`, `size`, `damping`, `referenceHz`)은 저장 데이터 호환을 위해 엔진에 그대로 남겨 두었고 스키마에는 넣지 않았습니다. 스키마에 없는 키는 정규화 때 지금처럼 그대로 통과합니다.
+
+현재 캐비닛·모듈레이션·딜레이·리버브의 Mix 노브는 전 구간에서 퍼센트를 사용합니다. 예를 들어 2%에서 1%로 줄이면 이펙트 신호 비율도 0.02에서 0.01로 줄어듭니다. 예전 페달 데이터의 소수 비율(예: 딜레이 0.22)은 불러올 때 22%로 변환합니다. 숫자 1은 옛 파라미터 구성이 확인될 때만 100%로 변환하며, 현재 형식에서 저장한 1은 1%로 유지합니다.
 
 ## 템포 기준선 차이 (P3 확인 사항)
 

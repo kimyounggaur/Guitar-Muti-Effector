@@ -1,6 +1,6 @@
 import { PedalParamValue } from '../types';
 import { BaseEffect } from './BaseEffect';
-import { PEDAL_SCHEMAS, TEMPO, clampTempo } from '../params/schema';
+import { clampNumberParam, PEDAL_SCHEMAS, TEMPO, clampTempo } from '../params/schema';
 
 const S = PEDAL_SCHEMAS.delay;
 
@@ -67,7 +67,7 @@ export class DelayEffect extends BaseEffect {
 
     this.configureFilters();
     this.connectDelayLines();
-    this.setMix(0.28);
+    this.setMix(S.mix.default / 100);
     this.applyAll(false);
     this.lfo.frequency.value = 4.8;
     this.lfo.connect(this.lfoDepth);
@@ -111,10 +111,7 @@ export class DelayEffect extends BaseEffect {
       this.feedback = clamp(asNumber(value, S.feedback.default), S.feedback.min, S.feedback.max);
       this.applyFeedback();
     });
-    this.paramHandlers.set('mix', (value) => {
-      const numberValue = asNumber(value, 28);
-      this.setMix(numberValue <= 1 ? numberValue : percentToUnit(numberValue, 28));
-    });
+    this.paramHandlers.set('mix', (value) => this.setMix(clampNumberParam(S.mix, value) / 100));
     this.paramHandlers.set('tone', (value) => {
       this.tone = clamp(asNumber(value, S.tone.default), S.tone.min, S.tone.max);
       this.applyTone();

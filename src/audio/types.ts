@@ -57,6 +57,19 @@ export const isPedalType = (value: unknown): value is PedalType =>
 export const isPedalParamValue = (value: unknown): value is PedalParamValue =>
   typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean';
 
+// Early boards stored wet mix as a 0–1 ratio (e.g. delay 0.22, reverb 0.18).
+// Modern knobs and stored percentages use whole numbers. For the ambiguous value
+// 1, convert only when the old pedal shape positively identifies a ratio.
+function migrateMixPercent(type: PedalType | undefined, params: Record<string, unknown>) {
+  const mix = params.mix;
+  if (typeof mix !== 'number' || mix <= 0 || mix > 1) return params;
+  if (type !== 'delay' && type !== 'reverb' && type !== 'cabinetIR' && type !== 'modulation') return params;
+  const legacyShape = (type === 'cabinetIR' && 'cabinet' in params && !('cabinetType' in params))
+    || (type === 'reverb' && 'size' in params && !('mode' in params))
+    || (type === 'delay' && 'timeMs' in params && 'feedback' in params && !('mode' in params));
+  return mix < 1 || legacyShape ? { ...params, mix: mix * 100 } : params;
+}
+
 /**
  * Normalises stored or imported parameters. Known parameters go through the schema (range, safetyMax,
  * enum options); unknown keys keep the previous behaviour (any primitive value), internal '__' keys are kept.
@@ -68,7 +81,7 @@ export const normalizePedalParams = (params: unknown, type?: PedalType): Record<
   }
 
   return Object.fromEntries(
-    Object.entries(params)
+    Object.entries(migrateMixPercent(type, params as Record<string, unknown>))
       .filter((entry): entry is [string, PedalParamValue] => isPedalParamValue(entry[1]))
       .filter(([name]) => name !== 'bpm')
       .map(([name, value]) => [name, type && !name.startsWith('__') && getParamSpec(type, name) ? clampParam(type, name, value) : value]),
