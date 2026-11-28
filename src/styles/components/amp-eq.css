@@ -384,3 +384,12 @@
   }
 
 }
+
+.detail-section :is(.classic-eq-title, .classic-eq-preset) > span {
+  color: #231b0e;
+  background-color: #ead49b;
+}
+.detail-section .classic-eq-graph-labels span {
+  color: #f0efd9;
+  background-color: #292e2c;
+}

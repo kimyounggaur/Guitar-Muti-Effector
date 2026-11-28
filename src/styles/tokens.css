@@ -20,6 +20,8 @@
   --panel-fg: #f2ebe6;      /* 12.5:1 */
   --panel-fg-muted: #b5a8ab; /* 6.4:1 */
 
+  --control-legend: #c4cdc6; /* 9.0:1 on --panel-bg; dark signal controls. */
+
   /* Rack face: #898a88 */
   --rack-bg: #898a88;
   --rack-fg: #0f1011;       /* 5.5:1 */

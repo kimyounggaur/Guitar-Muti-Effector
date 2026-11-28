@@ -659,3 +659,7 @@
   }
 
 }
+
+.detail-section .noise-rack-meter-scale span {
+  color: #d2d6dc;
+}

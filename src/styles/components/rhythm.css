@@ -103,3 +103,9 @@
   min-width: 0;
   width: 100%
 }
+
+/* Keep the connection hint readable over the rhythm panel's metallic highlights. */
+.detail-section .rhythm-pedal > p[role="status"] {
+  background-color: var(--panel-bg);
+  color: var(--panel-fg)
+}
