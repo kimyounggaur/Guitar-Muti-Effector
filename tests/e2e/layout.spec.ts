@@ -24,6 +24,18 @@ test('layout metrics', async ({ page }, testInfo) => {
   if (!isDesktop) {
     expect(metrics.pageScreens, 'page length in screens').toBeLessThanOrEqual(4);
     expect(await smallTouchTargets(page), 'touch targets under 44px').toEqual([]);
+    const bar = page.locator('.mobile-control-bar');
+    const safety = page.locator('details.mobile-safety');
+    const settings = page.locator('details.mobile-settings');
+    const player = page.locator('details.audio-file-player');
+    for (const details of [safety, settings, player]) {
+      await expect(details).toHaveJSProperty('open', false);
+      await details.locator('summary').click();
+      await expect(details).toHaveJSProperty('open', true);
+    }
+    await expect(settings.getByRole('combobox')).toHaveCount(3);
+    await expect(player.locator('input[type=file]')).toBeVisible();
+    expect((await bar.boundingBox())!.height, 'only the transport bar sticks').toBeLessThanOrEqual(56);
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(100);
     for (const selector of ['.connect-button', '.panic-button']) {

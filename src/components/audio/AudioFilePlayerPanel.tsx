@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
+import { usePhoneLayout } from '../../hooks/usePhoneLayout';
 import { playPreparedAudio } from './playPreparedAudio';
 import '../../styles/components/file-player.css';
 import { t } from '../../i18n/ko';
@@ -19,8 +20,7 @@ const seekStepSeconds = 10;
 function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFilePlayerPanelProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
-  // Phone layout only: the player folds to its heading until opened.
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const isPhone = usePhoneLayout();
   const [audioElementKey, setAudioElementKey] = useState(0);
   const [track, setTrack] = useState<UploadedTrack | null>(null);
   const [duration, setDuration] = useState(0);
@@ -114,25 +114,15 @@ function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFi
     setDuration(Number.isFinite(nextDuration) ? nextDuration : 0);
   };
 
+  const Panel = isPhone ? 'details' : 'section';
+  const Heading = isPhone ? 'summary' : 'div';
+
   return (
-    <section className={`audio-file-player ${mobileOpen ? 'is-open' : ''}`} aria-label={t('panel.player.region')}>
-      <div className="panel-heading">
-        <span>{t('panel.player.title')}</span>
-        <strong>{track ? track.name : t('panel.player.noTrack')}</strong>
-        <button className="mobile-only mobile-panel-toggle" type="button" aria-expanded={mobileOpen} onClick={() => setMobileOpen((open) => !open)}>
-          {mobileOpen ? t('panel.common.collapse') : t('panel.common.expand')}
-        </button>
-      </div>
-
-      <label className="audio-upload-control">
-        <span>{t('panel.player.upload')}</span>
-        <input type="file" accept="audio/*" onChange={handleFileChange} />
-      </label>
-
+    <>
       <audio
         key={audioElementKey}
         ref={audioRef}
-        src={track?.url ?? ''}
+        src={track?.url}
         preload="metadata"
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime ?? 0)}
@@ -140,48 +130,62 @@ function AudioFilePlayerPanel({ isEffectChainReady, onPreparePlayback }: AudioFi
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
       />
+      <Panel className="audio-file-player" aria-label={t('panel.player.region')}>
+        <Heading className="panel-heading">
+          <span>{t('panel.player.title')}</span>
+          <strong>{track ? track.name : t('panel.player.noTrack')}</strong>
+          {isPhone && <span className="mobile-panel-toggle">
+            <span className="when-closed">{t('panel.common.expand')}</span>
+            <span className="when-open">{t('panel.common.collapse')}</span>
+          </span>}
+        </Heading>
+        <label className="audio-upload-control">
+          <span>{t('panel.player.upload')}</span>
+          <input type="file" accept="audio/*" onChange={handleFileChange} />
+        </label>
 
-      <div className="audio-track-display">
-        <div className="audio-time-row">
-          <span>{formatTime(currentTime)}</span>
-          <strong>{isPlaying ? t('panel.player.statusPlaying') : track ? (isEffectChainReady ? t('panel.player.statusReady') : t('panel.player.statusLoaded')) : t('panel.common.empty')}</strong>
-          <span>{formatTime(duration)}</span>
+        <div className="audio-track-display">
+          <div className="audio-time-row">
+            <span>{formatTime(currentTime)}</span>
+            <strong>{isPlaying ? t('panel.player.statusPlaying') : track ? (isEffectChainReady ? t('panel.player.statusReady') : t('panel.player.statusLoaded')) : t('panel.common.empty')}</strong>
+            <span>{formatTime(duration)}</span>
+          </div>
+          <div className="audio-progress-track" aria-hidden="true">
+            <i style={{ width: `${progress}%` }} />
+          </div>
         </div>
-        <div className="audio-progress-track" aria-hidden="true">
-          <i style={{ width: `${progress}%` }} />
-        </div>
-      </div>
 
-      <p className="audio-player-hint">
+        <p className="audio-player-hint">
         
-        {t('panel.player.chainNote')}
-      </p>
+          {t('panel.player.chainNote')}
+        </p>
 
-      <div className="audio-transport-buttons">
-        <button type="button" onClick={() => handleSeek(-seekStepSeconds)} disabled={!track}>
+        <div className="audio-transport-buttons">
+          <button type="button" onClick={() => handleSeek(-seekStepSeconds)} disabled={!track}>
           
-          {t('panel.player.back10')}
-        </button>
-        <button type="button" onClick={handlePlay} disabled={!track || isPlaying}>
+            {t('panel.player.back10')}
+          </button>
+          <button type="button" onClick={handlePlay} disabled={!track || isPlaying}>
           
-          {t('panel.common.play')}
-        </button>
-        <button type="button" onClick={handlePause} disabled={!track || !isPlaying}>
+            {t('panel.common.play')}
+          </button>
+          <button type="button" onClick={handlePause} disabled={!track || !isPlaying}>
           
-          {t('panel.common.pause')}
-        </button>
-        <button type="button" onClick={handleStop} disabled={!track}>
+            {t('panel.common.pause')}
+          </button>
+          <button type="button" onClick={handleStop} disabled={!track}>
           
-          {t('panel.common.stop')}
-        </button>
-        <button type="button" onClick={() => handleSeek(seekStepSeconds)} disabled={!track}>
+            {t('panel.common.stop')}
+          </button>
+          <button type="button" onClick={() => handleSeek(seekStepSeconds)} disabled={!track}>
           
-          {t('panel.player.forward10')}
-        </button>
-      </div>
+            {t('panel.player.forward10')}
+          </button>
+        </div>
 
-      {errorMessage ? <p className="audio-player-error">{errorMessage}</p> : null}
-    </section>
+        {errorMessage ? <p className="audio-player-error">{errorMessage}</p> : null}
+      </Panel>
+    </>
   );
 }
 
