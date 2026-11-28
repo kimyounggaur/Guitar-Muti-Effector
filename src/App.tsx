@@ -52,7 +52,7 @@ function App() {
   );
   const selectedInputName = useMemo(() => {
     const selectedDevice = inputDevices.find((device) => device.deviceId === selectedDeviceId);
-    return selectedDevice?.label || (selectedDeviceId ? '선택한 입력' : '기본 입력');
+    return selectedDevice?.label || (selectedDeviceId ? t('input.selected') : t('input.default'));
   }, [inputDevices, selectedDeviceId]);
   const { patchAddress, presetCategoryCounts, lcdCategoryPresets, footSwitchEffectPedals } = useStompView(activePresetCategory);
   useMeterLoop(controller);

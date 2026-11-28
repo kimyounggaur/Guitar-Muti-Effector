@@ -30,13 +30,13 @@ function RightUtilityPanel({
       <div className="tempo-readout">
         <span>{t('panel.utility.tempo')}</span>
         <strong>{Math.round(bpm)}</strong>
-        <small>{tapCount > 1 ? `${tapCount}회 탭` : 'BPM'}</small>
+        <small>{tapCount > 1 ? t('panel.utility.tapCount', { count: tapCount }) : 'BPM'}</small>
       </div>
       <div className="master-volume-readout">
         <span>{t('panel.utility.master')}</span>
         <KnobControl
           className="master-utility-knob"
-          label="음량"
+          label={t('panel.common.volume')}
           value={Math.round(masterVolume * 100)}
           min={0}
           max={100}

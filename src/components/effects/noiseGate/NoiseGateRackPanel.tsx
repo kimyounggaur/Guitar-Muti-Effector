@@ -94,7 +94,7 @@ export default function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamC
           onChange={(value) => onParamChange('holdMs', value)}
         />
         <RackDial
-          label="릴리스"
+          label={t('param.noiseGate.releaseMs')}
           value={release}
           min={20}
           max={500}
@@ -109,7 +109,7 @@ export default function NoiseGateRackPanel({ pedal, onToggle, onBypass, onParamC
         <span className="noise-easy-pin is-right" aria-hidden="true" />
         <div className="noise-easy-title">{t('panel.noiseGate.lettering3')}</div>
         <RackDial
-          label="Sensitivity"
+          label={t('panel.noiseGate.sensitivityLettering')}
           value={sensitivity}
           min={0}
           max={100}

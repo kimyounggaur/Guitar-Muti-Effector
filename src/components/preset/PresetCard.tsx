@@ -56,7 +56,7 @@ function PresetCard({ preset, active, onLoad, onRename, onDelete, onDuplicate }:
             </span>
           </button>
         )}
-        <small>{preset.description || `${preset.pedals.length}개 페달 · ${preset.tempoBpm} BPM`}</small>
+        <small>{preset.description || t('panel.preset.signalChain', { count: preset.pedals.length, bpm: preset.tempoBpm })}</small>
       </div>
 
       <div className="preset-actions">
@@ -70,7 +70,7 @@ function PresetCard({ preset, active, onLoad, onRename, onDelete, onDuplicate }:
             {t('panel.preset.save')}
           </button>
         ) : (
-          <button type="button" disabled={isFactory} title={isFactory ? '공장 프리셋은 복사 후 이름을 변경할 수 있습니다.' : undefined} onClick={() => setIsEditing(true)}>
+          <button type="button" disabled={isFactory} title={isFactory ? t('panel.preset.copyToRename') : undefined} onClick={() => setIsEditing(true)}>
             
             {t('panel.preset.rename')}
           </button>

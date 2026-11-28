@@ -37,7 +37,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
   const renamePreset = usePresetStore((state) => state.renamePreset);
   const deletePreset = usePresetStore((state) => state.deletePreset);
   const duplicatePreset = usePresetStore((state) => state.duplicatePreset);
-  const [presetName, setPresetName] = useState('새 프리셋');
+  const [presetName, setPresetName] = useState(t('panel.preset.newName'));
   // On phones (max-width: 600px) the list starts folded: no category is open until one is tapped.
   const [selectedCategory, setSelectedCategory] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia?.(PHONE_QUERY).matches ? NO_CATEGORY : ALL_PRESETS,
@@ -107,7 +107,7 @@ function PresetPanel({ onLoadPreset }: PresetPanelProps) {
 
   const handleSavePreset = () => {
     const preset = savePreset(presetName, createSnapshot());
-    setPresetName(`${preset.name} 복사`);
+    setPresetName(t('panel.preset.copyName', { name: preset.name }));
     setSelectedCategory(USER_PRESETS);
     setSaveStatus(t('toast.presetSaved'));
     showToast('toast.presetSaved');

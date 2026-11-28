@@ -140,16 +140,16 @@ function LooperPanel({
       </div>
 
       <div className="looper-controls">
-        <LooperSlider label="재생 음량" value={params.level} min={0} max={100} onChange={(value) => setParam('level', value)} />
+        <LooperSlider label={t('panel.looper.volume')} value={params.level} min={0} max={100} onChange={(value) => setParam('level', value)} />
         <LooperSlider
-          label="겹침 음량"
+          label={t('panel.looper.overdubVolume')}
           value={params.overdubLevel}
           min={0}
           max={100}
           onChange={(value) => setParam('overdubLevel', value)}
         />
         <LooperSlider
-          label="기존 루프 유지량"
+          label={t('panel.looper.feedback')}
           value={params.feedback}
           min={0}
           max={100}
@@ -232,30 +232,30 @@ const readQuantize = (value: PedalParamValue | undefined): LooperParams['quantiz
 
 const formatLooperState = (state: LooperReading['state']) => {
   if (state === 'overdubbing') {
-    return '겹쳐 녹음 중';
+    return t('panel.looper.overdubbing');
   }
 
   if (state === 'recording') {
-    return '녹음 중';
+    return t('panel.looper.recording');
   }
 
   if (state === 'playing') {
-    return '재생 중';
+    return t('panel.rhythm.playing');
   }
 
   if (state === 'stopped') {
-    return '정지';
+    return t('panel.common.stop');
   }
 
   if (state === 'loading') {
-    return '불러오는 중';
+    return t('panel.looper.loading');
   }
 
   if (state === 'error') {
-    return '오디오 처리 오류';
+    return t('panel.looper.error');
   }
 
-  return '대기';
+  return t('panel.looper.idle');
 };
 
 export default LooperPanel;

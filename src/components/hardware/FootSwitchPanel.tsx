@@ -78,11 +78,11 @@ function FootSwitchPanel({
           ? pedal
             ? pedal.enabled
               ? pedal.bypassed
-                ? '바이패스'
-                : '켜짐'
-              : '꺼짐'
-            : '할당 없음'
-          : `${categoryCounts[category] ?? 0}개 프리셋`;
+                ? t('panel.common.bypass')
+                : t('panel.common.on')
+              : t('panel.common.off')
+            : t('panel.footswitch.unassigned')
+          : t('panel.footswitch.presetCount', { count: categoryCounts[category] ?? 0 });
         const handleClick = () => {
           if (isEffectMode) {
             if (pedal) {

@@ -155,14 +155,14 @@ function TunerPanel({
             onChange={(value) => setParam('referenceA4', value)}
           />
           <TunerSlider
-            label="감도"
+            label={t('param.tuner.sensitivity')}
             value={params.sensitivity}
             min={0}
             max={100}
             onChange={(value) => setParam('sensitivity', value)}
           />
           <TunerSlider
-            label="표시 부드럽게"
+            label={t('param.tuner.smoothing')}
             value={params.smoothing}
             min={0}
             max={100}
@@ -252,14 +252,14 @@ const createStrobeBars = (cents: number, signalLow: boolean) => {
 
 const getTuningState = (reading: TunerReading) => {
   if (reading.signalLow) {
-    return '신호 약함';
+    return t('panel.tuner.weakSignal');
   }
 
   if (Math.abs(reading.cents) <= 3) {
-    return '정확함';
+    return t('panel.tuner.inTune');
   }
 
-  return reading.cents < 0 ? 'Low' : 'High';
+  return t(reading.cents < 0 ? 'panel.tuner.low' : 'panel.tuner.high');
 };
 
 export default TunerPanel;

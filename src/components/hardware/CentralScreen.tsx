@@ -88,7 +88,7 @@ const getPedalSummary = (pedal: Pedal) => {
 
 const formatParamValue = (value: PedalParamValue) => {
   if (typeof value === 'boolean') {
-    return value ? '켜짐' : '꺼짐';
+    return value ? t('panel.common.on') : t('panel.common.off');
   }
 
   if (typeof value === 'number') {

@@ -14,6 +14,12 @@ test('every schema label has a Korean entry', () => {
       assert.equal(spec.label, `param.${type}.${name}`);
       assert.ok(spec.label in ko, `${spec.label} missing from ko.ts`);
       assert.match(ko[spec.label as keyof typeof ko], hangul, `${spec.label} is not Korean`);
+      if (spec.kind === 'enum') {
+        for (const value of spec.options) {
+          const key = `${spec.label}.${value}`;
+          assert.ok(tDynamic(key, '').length > 0, `${key} is missing its display label`);
+        }
+      }
     }
   }
 });

@@ -3,7 +3,7 @@ import { getParamSpec } from '../../../audio/params/schema';
 import type { Pedal, PedalParamValue, PedalType } from '../../../audio/types';
 import KnobControl from '../../controls/KnobControl';
 import { formatParamName, formatPedalType } from './paramFormat';
-import { t } from '../../../i18n/ko';
+import { t, tDynamic } from '../../../i18n/ko';
 
 type NumberRange = {
   min: number;
@@ -11,102 +11,6 @@ type NumberRange = {
   step: number;
   suffix?: string;
 };
-
-const selectOptions: Partial<Record<PedalType, Record<string, Array<[string, string]>>>> = {
-  tuner: {
-    mode: [
-      ['chromatic', '크로매틱'],
-      ['guitar', '기타'],
-      ['bass', '베이스'],
-      ['ukulele', '우쿨렐레'],
-    ],
-  },
-  drive: {
-    mode: [
-      ['overdrive', '오버드라이브'],
-      ['crunch', '크런치'],
-      ['distortion', '디스토션'],
-      ['fuzz', '퍼즈'],
-    ],
-  },
-  cabinetIR: {
-    cabinetType: [
-      ['1x12', '1x12'],
-      ['2x12', '2x12'],
-      ['4x12', '4x12'],
-      ['openBack', '오픈 백'],
-      ['custom', '사용자 IR'],
-    ],
-    mic: [
-      ['dynamic', '다이내믹'],
-      ['ribbon', '리본'],
-      ['condenser', '콘덴서'],
-      ['mixed', '혼합'],
-    ],
-  },
-  modulation: {
-    mode: [
-      ['chorus', '코러스'],
-      ['flanger', '플랜저'],
-      ['phaser', '페이저'],
-      ['tremolo', '트레몰로'],
-      ['vibrato', '비브라토'],
-    ],
-    division: [
-      ['1/1', '1/1'],
-      ['1/2', '1/2'],
-      ['1/4', '1/4'],
-      ['1/8', '1/8'],
-      ['dotted1/8', '점8분 (1/8.)'],
-      ['1/16', '1/16'],
-    ],
-  },
-  delay: {
-    mode: [
-      ['digital', '디지털'],
-      ['analog', '아날로그'],
-      ['tape', '테이프'],
-      ['slapback', '슬랩백'],
-      ['pingpong', '핑퐁'],
-    ],
-    division: [
-      ['1/4', '1/4'],
-      ['1/8', '1/8'],
-      ['dotted1/8', '점8분 (1/8.)'],
-      ['1/16', '1/16'],
-    ],
-  },
-  reverb: {
-    mode: [
-      ['room', '룸 · 합성'],
-      ['hall', '홀 · 합성'],
-      ['plate', '플레이트 · 합성'],
-      ['spring', '스프링 · 합성'],
-      ['ambient', '앰비언트 · 합성'],
-    ],
-  },
-  looper: {
-    quantize: [
-      ['off', '끔'],
-      ['1bar', '1마디'],
-      ['2bar', '2마디'],
-      ['4bar', '4마디'],
-    ],
-  },
-  rhythm: {
-    pattern: [
-      ['metronome', '메트로놈 4/4'],
-      ['rock1', '록 1'],
-      ['rock2', '록 2'],
-      ['bluesShuffle', '블루스 셔플'],
-      ['funk', '펑크'],
-      ['ballad', '발라드'],
-      ['sixEight', '6/8'],
-      ['pop', '팝'],
-    ],
-  },
-};
-
 
 type DetailControlProps = {
   pedal: Pedal;
@@ -116,7 +20,7 @@ type DetailControlProps = {
 };
 
 export function DetailControl({ pedal, paramName, value, onChange }: DetailControlProps) {
-  const options = typeof value === 'string' ? selectOptions[pedal.type]?.[paramName] : null;
+  const spec = getParamSpec(pedal.type, paramName);
 
   if (typeof value === 'boolean') {
     return (
@@ -143,14 +47,14 @@ export function DetailControl({ pedal, paramName, value, onChange }: DetailContr
     );
   }
 
-  if (options) {
+  if (spec?.kind === 'enum') {
     return (
       <label className="detail-select">
         <span>{formatParamName(paramName, pedal.type)}</span>
         <select value={value} onChange={(event) => onChange(event.target.value)}>
-          {options.map(([optionValue, label]) => (
+          {spec.options.map((optionValue) => (
             <option key={optionValue} value={optionValue}>
-              {label}
+              {tDynamic(`${spec.label}.${optionValue}`, optionValue)}
             </option>
           ))}
         </select>

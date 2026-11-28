@@ -58,7 +58,7 @@ export default function DriveRackPanel({ pedal, onToggle, onBypass, onParamChang
 
       <div className="drive-rack-panel-section drive-rack-eq-section">
         <DriveRackKnob label="Tone" value={tone} min={0} max={100} step={1} onChange={(value) => onParamChange('tone', value)} />
-        <DriveRackKnob label="Bias" value={bias} min={-1} max={1} step={0.01} onChange={(value) => onParamChange('bias', value)} />
+        <DriveRackKnob label={t('panel.drive.biasLettering')} value={bias} min={-1} max={1} step={0.01} onChange={(value) => onParamChange('bias', value)} />
         <DriveRackKnob label="Mix" value={mix} min={0} max={100} step={1} onChange={(value) => onParamChange('mix', value)} />
       </div>
 

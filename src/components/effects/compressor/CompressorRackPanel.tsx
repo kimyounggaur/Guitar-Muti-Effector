@@ -71,7 +71,7 @@ export default function CompressorRackPanel({ pedal, onToggle, onBypass, onParam
       </div>
 
       <CompressorRackKnob
-        label="Peak Reduction"
+        label={t('panel.compressor.peakReductionLettering')}
         value={sustain}
         min={0}
         max={100}
