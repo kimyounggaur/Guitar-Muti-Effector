@@ -94,10 +94,10 @@ function App() {
           errorMessage={errorMessage}
           onConnect={controller.connect}
           onStop={controller.stop}
+          onPanic={controller.panic}
           onDeviceChange={controller.switchInput}
           onOutputDeviceChange={controller.setOutputDevice}
         />
-        <button type="button" className="panic-button" onClick={controller.panic}>{t('panel.app.panic')}</button>
       </div>
       <HardwareFrame
         leftPanel={<LeftModePanel onOpenBoard={() => setActivePresetCategory(null)} />}

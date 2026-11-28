@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { usePhoneLayout } from '../../hooks/usePhoneLayout';
 import DeviceSelector from './DeviceSelector';
 import { useAudioStore } from '../../store/audioStore';
 import type { InputChannel } from '../../audio/types';
@@ -14,6 +15,7 @@ type ConnectGuitarPanelProps = {
   errorMessage: string;
   onConnect: () => void;
   onStop: () => void;
+  onPanic: () => void;
   onDeviceChange: (deviceId: string) => void;
   onOutputDeviceChange: (deviceId: string) => Promise<void>;
 };
@@ -26,6 +28,7 @@ function ConnectGuitarPanel({
   errorMessage,
   onConnect,
   onStop,
+  onPanic,
   onDeviceChange,
   onOutputDeviceChange,
 }: ConnectGuitarPanelProps) {
@@ -40,9 +43,7 @@ function ConnectGuitarPanel({
   const [outputChanging, setOutputChanging] = useState(false);
   const outputSupported = typeof AudioContext !== 'undefined' && 'setSinkId' in AudioContext.prototype;
   const [deviceNotice, setDeviceNotice] = useState('');
-  // Phone layout only (max-width: 600px): input settings and the safety notes fold away. Desktop ignores these.
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [safetyOpen, setSafetyOpen] = useState(false);
+  const isPhone = usePhoneLayout();
   const stopRef = useRef(onStop);
   stopRef.current = onStop;
 
@@ -96,93 +97,110 @@ function ConnectGuitarPanel({
   };
 
   useEffect(() => { if (isConnecting) setDeviceNotice(''); }, [isConnecting]);
-  return (
-    <section
-      className={`connect-section ${settingsOpen ? 'is-settings-open' : ''} ${safetyOpen ? 'is-safety-open' : ''}`}
-      aria-label={t('panel.connect.region')}
-    >
-      <div className="panel-heading">
-        <span>{t('panel.connect.title')}</span>
-        <strong>{isAudioReady ? t('panel.connect.connected') : t('panel.connect.stopped')}</strong>
-      </div>
+  const connectButton = (
+    <button className="connect-button" type="button" onClick={onConnect} disabled={isConnecting}>
+      {isConnecting ? t('panel.connect.connecting') : t('panel.connect.connect')}
+    </button>
+  );
+  const stopButton = (
+    <button className="stop-button" type="button" onClick={onStop} disabled={!isAudioReady && !isConnecting}>
+      {t('panel.connect.stop')}
+    </button>
+  );
+  const panicButton = (
+    <button className="panic-button" type="button" onClick={onPanic}>{t('panel.app.panic')}</button>
+  );
+  const settings = (
+    <>
+      <DeviceSelector
+        inputDevices={inputDevices}
+        selectedDeviceId={selectedDeviceId}
+        disabled={isConnecting}
+        onChange={onDeviceChange}
+      />
 
-      <div className="connect-grid">
-        <div className="connection-card">
-          <button className="connect-button" type="button" onClick={onConnect} disabled={isConnecting}>
-            {isConnecting ? t('panel.connect.connecting') : t('panel.connect.connect')}
-          </button>
-          <button className="stop-button" type="button" onClick={onStop} disabled={!isAudioReady && !isConnecting}>
-            
-            {t('panel.connect.stop')}
-          </button>
-          <MobileInputMeter />
-          <button
-            className="mobile-only mobile-settings-toggle"
-            type="button"
-            aria-expanded={settingsOpen}
-            aria-controls="audio-input-settings"
-            onClick={() => setSettingsOpen((open) => !open)}
-          >
-            
-            {t('panel.connect.settings')}
-          </button>
-        </div>
-        {!isAudioReady ? (
-          <p className="mobile-only mobile-safety-line">
-            
-            {t('panel.connect.safetyLine')}
-            <button type="button" aria-expanded={safetyOpen} onClick={() => setSafetyOpen((open) => !open)}>
-              {safetyOpen ? t('panel.common.collapse') : t('panel.common.details')}
-            </button>
-          </p>
-        ) : null}
+      <label className="device-selector" htmlFor="audio-input-channel">
+        <span>{t('input.channel')}</span>
+        <select id="audio-input-channel" value={inputChannel} onChange={(event) => setInputChannel(event.target.value as InputChannel)}>
+          <option value="1">{t('input.channel1')}</option>
+          <option value="2">{t('input.channel2')}</option>
+          <option value="mix">{t('input.channelMix')}</option>
+        </select>
+      </label>
 
-        <div id="audio-input-settings" className="connect-settings">
-        <DeviceSelector
-          inputDevices={inputDevices}
-          selectedDeviceId={selectedDeviceId}
-          disabled={isConnecting}
-          onChange={onDeviceChange}
-        />
-
-        <label className="device-selector" htmlFor="audio-input-channel">
-          <span>{t('input.channel')}</span>
-          <select id="audio-input-channel" value={inputChannel} onChange={(event) => setInputChannel(event.target.value as InputChannel)}>
-            <option value="1">{t('input.channel1')}</option>
-            <option value="2">{t('input.channel2')}</option>
-            <option value="mix">{t('input.channelMix')}</option>
-          </select>
-        </label>
-
-        <label className="device-selector" htmlFor="audio-output-device">
-          <span>{t('output.device')}</span>
-          <select id="audio-output-device" value={selectedOutputDeviceId}
-            disabled={!isAudioReady || isConnecting || outputChanging || !outputSupported}
-            onChange={(event) => void changeOutput(event.target.value)}>
-            <option value="">{t('output.defaultDevice')}</option>
-            {outputDevices.filter((device) => device.deviceId && device.deviceId !== 'default').map((device, index) => (
-              <option key={device.deviceId} value={device.deviceId}>{device.label || t('output.deviceN', { n: index + 1 })}</option>
-            ))}
-          </select>
-          {!outputSupported && <small>{t('output.notSupportedHint')}</small>}
-        </label>
-        </div>
-
-        <div className="safety-card">
-          <strong>{t('panel.connect.safetyTitle')}</strong>
-          <ul>
-            <li>{t('panel.connect.safety1')}</li>
-            <li>{t('panel.connect.safety2')}</li>
-            <li>{t('panel.connect.safety3')}</li>
-          </ul>
-        </div>
-      </div>
-
+      <label className="device-selector" htmlFor="audio-output-device">
+        <span>{t('output.device')}</span>
+        <select id="audio-output-device" value={selectedOutputDeviceId}
+          disabled={!isAudioReady || isConnecting || outputChanging || !outputSupported}
+          onChange={(event) => void changeOutput(event.target.value)}>
+          <option value="">{t('output.defaultDevice')}</option>
+          {outputDevices.filter((device) => device.deviceId && device.deviceId !== 'default').map((device, index) => (
+            <option key={device.deviceId} value={device.deviceId}>{device.label || t('output.deviceN', { n: index + 1 })}</option>
+          ))}
+        </select>
+        {!outputSupported && <small>{t('output.notSupportedHint')}</small>}
+      </label>
+    </>
+  );
+  const safety = (
+    <div className="safety-card">
+      <strong>{t('panel.connect.safetyTitle')}</strong>
+      <ul>
+        <li>{t('panel.connect.safety1')}</li>
+        <li>{t('panel.connect.safety2')}</li>
+        <li>{t('panel.connect.safety3')}</li>
+      </ul>
+    </div>
+  );
+  const notices = (
+    <>
       <InputSafetyNotice isAudioReady={isAudioReady} />
-      {deviceNotice ? <p role="status" className="error-message">{deviceNotice}</p> : null}
-      {outputNotice ? <p role="alert" className="error-message">{outputNotice}</p> : null}
-      {errorMessage ? <p role="alert" className="error-message">{errorMessage}</p> : null}
-    </section>
+      {deviceNotice && <p role="status" className="error-message">{deviceNotice}</p>}
+      {outputNotice && <p role="alert" className="error-message">{outputNotice}</p>}
+      {errorMessage && <p role="alert" className="error-message">{errorMessage}</p>}
+    </>
+  );
+
+  if (isPhone) {
+    return (
+      <>
+        <div className="mobile-control-bar" role="group" aria-label={t('panel.connect.region')}>
+          {isAudioReady || isConnecting ? stopButton : connectButton}
+          <MobileInputMeter />
+          {panicButton}
+        </div>
+        <div className="mobile-input-options">
+          {!isAudioReady && (
+            <details className="mobile-safety">
+              <summary>{t('panel.connect.safetyLine')} <span>{t('panel.common.details')}</span></summary>
+              {safety}
+            </details>
+          )}
+          <details className="mobile-settings">
+            <summary>{t('panel.connect.settings')}</summary>
+            {settings}
+          </details>
+          {notices}
+        </div>
+      </>
+    );
+  }
+  return (
+    <>
+      <section className="connect-section" aria-label={t('panel.connect.region')}>
+        <div className="panel-heading">
+          <span>{t('panel.connect.title')}</span>
+          <strong>{isAudioReady ? t('panel.connect.connected') : t('panel.connect.stopped')}</strong>
+        </div>
+        <div className="connect-grid">
+          <div className="connection-card">{connectButton}{stopButton}</div>
+          <div className="connect-settings">{settings}</div>
+          {safety}
+        </div>
+        {notices}
+      </section>
+      {panicButton}
+    </>
   );
 }
 

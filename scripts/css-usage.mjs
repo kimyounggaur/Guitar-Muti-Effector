@@ -43,26 +43,30 @@ export async function visitStates(page, record) {
   await record('lcd:preset-grid');
   await page.getByRole('button', { name: '이펙트 보드', exact: true }).click();
 
-  await page.evaluate(() => document.querySelectorAll('details').forEach((details) => { details.open = true; }));
+  await page.locator('details.preset-browser-frame').evaluate((details) => { details.open = true; });
   await record('presets-open');
   await page.locator('.preset-category-list button').first().click();
   const preset = page.locator('.preset-card:not(.is-active) .preset-title-button').first();
   await preset.click();
   await record('preset-selected');
 
-  const settings = page.locator('.mobile-settings-toggle');
+  const settings = page.locator('details.mobile-settings > summary');
   if (await settings.isVisible()) {
     await settings.click();
     await record('settings-open');
     await settings.click();
-    const safety = page.locator('.mobile-safety-line button');
+    const player = page.locator('details.audio-file-player > summary');
+    await player.click();
+    await record('player-open');
+    await player.click();
+    const safety = page.locator('details.mobile-safety > summary');
     await safety.click();
     await record('safety-open');
     await safety.click();
   }
 
   await page.locator('.connect-button').click();
-  await page.locator('.connect-section .panel-heading strong').filter({ hasText: '오디오 연결됨' }).waitFor({ state: 'attached' });
+  await page.locator('.stop-button:enabled').waitFor();
   await record('connected');
   for (const type of ['tuner', 'looper', 'rhythm']) {
     await selectPedal(type);

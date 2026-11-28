@@ -23,124 +23,75 @@
     display: contents
   }
 
-  /* 1. Top bar: connect / stop, input level, PANIC. Stays at the top while scrolling. */
+  /* Only the transport controls stick. Instructions, settings and warnings scroll with the page. */
   .hardware-app .hardware-primary-controls {
+    display: contents
+  }
+
+  .mobile-control-bar {
     order: 1;
     position: sticky;
     top: 0;
     z-index: 30;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 88px;
+    grid-template-columns: minmax(0, 1fr) minmax(24px, .5fr) minmax(88px, 1fr);
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     margin: 0 -8px;
-    padding: 4px 8px 2px;
-    border-radius: 0;
+    padding: 5px 8px;
     background: #17161a;
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35)
   }
 
-  .hardware-primary-controls .connect-section {
-    display: contents
-  }
-
-  .hardware-primary-controls .connect-section > .panel-heading,
-  .hardware-primary-controls .safety-card {
-    display: none
-  }
-
-  .hardware-primary-controls .connect-grid {
-    display: contents
-  }
-
-  .hardware-primary-controls .connection-card {
-    grid-column: 1;
-    grid-row: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: 44px 4px;
-    gap: 2px 4px;
-    min-height: 0;
-    padding: 0;
-    border: 0;
-    background: none;
-    box-shadow: none
-  }
-
-  .hardware-primary-controls .connection-card > button {
-    grid-row: 1;
+  .hardware-primary-controls .mobile-control-bar button {
     min-height: 44px;
     height: 44px;
-    padding: 0 4px;
-    font-size: var(--fs-xs);
-    white-space: nowrap
-  }
-
-  .hardware-primary-controls .mobile-input-meter {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    position: relative;
-    display: block;
-    height: 4px;
-    overflow: hidden;
-    border-radius: 2px;
-    background: #2e2c33
-  }
-
-  .hardware-primary-controls .mobile-input-meter i {
-    position: absolute;
-    inset: 0 auto 0 0;
-    background: linear-gradient(90deg, #36f0ce, #ff5d54)
-  }
-
-  .hardware-primary-controls > .panic-button {
-    grid-column: 2;
-    grid-row: 1;
-    min-height: 44px;
-    height: 44px;
+    align-self: center;
     margin: 0;
     padding: 0 4px;
     font-size: var(--fs-xs);
     line-height: 1.1
   }
 
-  /* Input settings fold into one toggle; the safety notes become one line before connecting. */
-  .hardware-primary-controls .connect-settings {
-    display: none
+  .mobile-input-meter {
+    position: relative;
+    display: block;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: #44424a
   }
 
-  .hardware-primary-controls .connect-section.is-settings-open .connect-settings {
-    grid-column: 1 / -1;
+  .mobile-input-meter i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: linear-gradient(90deg, #36f0ce, #ff5d54)
+  }
+
+  .mobile-input-options {
+    order: 1;
     display: grid;
-    gap: 8px;
-    padding: 4px 0
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: #25242a;
+    color: #f5f2ef
   }
 
-  .hardware-primary-controls .mobile-safety-line {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin: 0;
-    color: #f5f2ef;
-    font-size: var(--fs-xs)
-  }
-
-  .hardware-primary-controls .mobile-safety-line button {
+  .mobile-input-options summary {
     min-height: 44px;
-    padding: 0 10px;
-    font-size: var(--fs-xs)
+    align-content: center;
+    cursor: pointer;
+    font-size: var(--fs-sm)
   }
 
-  .hardware-primary-controls .connect-section.is-safety-open .safety-card {
-    grid-column: 1 / -1;
-    display: block
+  .mobile-safety summary span {
+    text-decoration: underline
   }
 
-  .hardware-primary-controls .error-message {
-    grid-column: 1 / -1;
-    margin: 0
+  .mobile-settings .device-selector {
+    min-height: 0;
+    margin-bottom: 6px
   }
 
   /* 2. LCD: patch name and the chain on one horizontally scrolling line. */
@@ -178,21 +129,26 @@
     order: 9
   }
 
-  .audio-file-player:not(.is-open) > :not(.panel-heading) {
-    display: none
-  }
-
-  .audio-file-player .panel-heading {
+  .audio-file-player summary.panel-heading {
     display: flex;
     align-items: center;
-    gap: 8px
+    gap: 8px;
+    min-height: 44px;
+    margin-bottom: 0;
+    cursor: pointer
   }
 
   .audio-file-player .mobile-panel-toggle {
-    margin-left: auto;
-    min-height: 44px;
-    padding: 0 12px;
-    font-size: var(--fs-xs)
+    margin-left: auto
+  }
+
+  .audio-file-player:not([open]) .when-open,
+  .audio-file-player[open] .when-closed {
+    display: none
+  }
+
+  .audio-file-player[open] > :not(summary) {
+    margin-top: 12px
   }
 
   /* Decoration and duplicate controls stay off the phone screen. */
