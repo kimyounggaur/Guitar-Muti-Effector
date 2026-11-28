@@ -597,3 +597,23 @@
   }
 
 }
+
+/* Dark engraving on brushed metal. */
+.detail-section .comp-rack-brand strong {
+  color: #991a1e;
+}
+.detail-section :is(.comp-rack-knob, .comp-rack-power, .comp-rack-trim) > span {
+  color: #45351e;
+}
+.detail-section .comp-rack-vu-meter :is(em, strong) {
+  color: #382b1a;
+  background-color: #ede2c4;
+}
+.detail-section .comp-rack-vu-meter :is(span, em, strong),
+.detail-section .comp-rack-vu-scale {
+  z-index: 1;
+}
+.detail-section .comp-rack-vu-scale b {
+  background-color: #ede2c4;
+  color: #382b1a;
+}

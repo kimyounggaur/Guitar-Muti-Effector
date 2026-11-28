@@ -445,3 +445,27 @@
 .hardware-support-panels .detail-section.tuner-detail-section {
   overflow-x: clip
 }
+
+/* Light legends on dark controls and data readouts. */
+.detail-section .detail-controls,
+.detail-section .cabinet-ir-pedal,
+.detail-section .looper-pedal,
+.detail-section .rhythm-pedal {
+  color: var(--panel-fg);
+  --dim: var(--control-legend);
+}
+.detail-section .detail-controls > label,
+.detail-section .knob-control:not(.amp-eq-control):not(.tuner-control) strong,
+.detail-section :is(.cabinet-ir-pedal, .looper-pedal, .rhythm-pedal) > p {
+  color: var(--panel-fg);
+}
+.detail-section :is(.cabinet-ir-pedal, .looper-pedal, .rhythm-pedal) .pedal-select span,
+.detail-section :is(.cabinet-control, .looper-control, .rhythm-control) > span {
+  color: var(--control-legend);
+}
+.detail-section .detail-header :is(.eyebrow, p) {
+  color: var(--skin-ink);
+}
+.detail-section .looper-actions button:disabled {
+  opacity: .8;
+}

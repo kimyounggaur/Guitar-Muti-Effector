@@ -474,3 +474,10 @@
   }
 
 }
+
+.detail-section .rack-tuner-scale span {
+  color: #d2d6dc;
+}
+.detail-section .rack-seven-seg strong {
+  text-shadow: 0 0 4px #795da6;
+}
