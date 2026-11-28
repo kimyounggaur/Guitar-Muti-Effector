@@ -435,7 +435,7 @@
 
 .noise-easy-title {
   grid-column: 1 / -1;
-  color: #171717;
+  color: #000;
   font-family: Impact, "Arial Black", system-ui, sans-serif;
   font-size: clamp(1.35rem, 2.15vw, 2.2rem);
   font-style: italic;
