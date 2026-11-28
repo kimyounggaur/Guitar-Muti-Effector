@@ -13,9 +13,11 @@ button.onclick = async () => {
     generator = new AudioContext();
     const dest = generator.createMediaStreamDestination();
     const merger = generator.createChannelMerger(2);
+    const channelGains: GainNode[] = [];
     const oscillators = [0.2, 0.05].map((amplitude, channel) => {
       const oscillator = generator!.createOscillator();
       const gain = generator!.createGain();
+      channelGains.push(gain);
       oscillator.frequency.value = 440;
       gain.gain.value = amplitude;
       oscillator.connect(gain).connect(merger, 0, channel);
@@ -51,6 +53,11 @@ button.onclick = async () => {
     const one = await read('1'), two = await read('2'), mix = await read('mix');
     const ok = one.every(x => x > 0.04) && two.every(x => x > 0.005) && one[0] > two[0] * 2 && Math.abs(one[0]-one[1]) < .02 && Math.abs(two[0]-two[1]) < .02 && mix[0] > two[0] && mix[0] < one[0];
     if (!ok) throw new Error(`선택 결과 ${JSON.stringify({one,two,mix})}`);
+    // Keep a two-channel microphone stream, with a guitar tone only on its first input.
+    channelGains[1].gain.value = 0;
+    const leftInput = await read('1');
+    const silentInput = await read('2');
+    result.dataset.leftOnly = JSON.stringify({ leftInput, silentInput });
     engine.panicDisconnect();
     const stopped = dest.stream.getTracks().every(track => track.readyState === 'ended');
     if (!stopped) throw new Error('PANIC 후 가상 입력 트랙이 종료되지 않음');

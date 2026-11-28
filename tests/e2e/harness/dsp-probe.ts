@@ -2,6 +2,7 @@
 import { usePresetStore } from '../../../src/store/presetStore';
 import { NoiseGateEffect, prepareNoiseGate } from '../../../src/audio/nodes/NoiseGateEffect';
 import { CompressorEffect, prepareCompressor } from '../../../src/audio/nodes/CompressorEffect';
+import { LooperNode, subscribeLooper } from '../../../src/audio/nodes/LooperNode';
 import { DriveEffect } from '../../../src/audio/nodes/DriveEffect';
 import { AmpEQEffect } from '../../../src/audio/nodes/AmpEQEffect';
 import { CabinetIREffect } from '../../../src/audio/nodes/CabinetIREffect';
@@ -115,5 +116,44 @@ async function measureQ2() {
   return rows;
 }
 
-Object.assign(window, { measureF3, measureQ1, measureQ2 });
+async function measureLooperLevel() {
+  const offline = new OfflineAudioContext(2, RATE, RATE);
+  const looper = new LooperNode(offline as unknown as AudioContext, 'level-probe');
+  let unsubscribe: (() => void) | undefined;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      unsubscribe = subscribeLooper(looper.id, ({ state }) => {
+        if (state === 'idle') resolve();
+        if (state === 'error') reject(new Error('Could not start the looper worklet'));
+      });
+    });
+    looper.setParam('level', 85);
+    const source = offline.createOscillator();
+    source.frequency.value = 220;
+    source.connect(looper.input);
+    looper.connect(offline.destination);
+    looper.setParam('__looperCommand', 'record');
+    source.start();
+    source.stop(0.5);
+    // Freeze at a render quantum between recording and playback, while the dry input becomes silent.
+    const halfway = offline.suspend(0.5);
+    const rendered = offline.startRendering();
+    await halfway;
+    looper.setParam('__looperCommand', 'play');
+    await offline.resume();
+    const samples = (await rendered).getChannelData(0);
+    const rms = (start: number) => {
+      const window = samples.subarray(Math.round(start * RATE), Math.round((start + 0.2) * RATE));
+      return Math.sqrt(window.reduce((sum, value) => sum + value ** 2, 0) / window.length);
+    };
+    const inputRms = rms(0.15);
+    const playbackRms = rms(0.65);
+    return { inputRms, playbackRms, gainDb: db(playbackRms / inputRms) };
+  } finally {
+    unsubscribe?.();
+    looper.dispose();
+  }
+}
+
+Object.assign(window, { measureF3, measureQ1, measureQ2, measureLooperLevel });
 document.querySelector('#status')!.textContent = 'loaded';
