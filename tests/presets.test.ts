@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { buildFactoryPresets } from '../src/presets/factory';
 import { exportUserPresets, importPresets } from '../src/presets/io';
+import { normalizeUserPresetList } from '../src/presets/migrate';
 import { clonePreset } from '../src/presets/build';
 import type { PedalboardPreset } from '../src/presets/types';
 
@@ -41,4 +42,18 @@ test('importing into an empty library adds the presets as imported', () => {
   assert.equal(result.imported, 3);
   assert.equal(result.skipped, 0);
   assert.ok(result.presets.every((preset) => preset.origin === 'imported'));
+});
+
+test('malformed names do not interrupt import or restoration of valid sibling presets', () => {
+  const [valid] = userPresets();
+  const records = [
+    { id: 'factory-invalid', name: 123, pedals: [] },
+    { id: 'user-invalid', name: { label: '잘못된 이름' }, pedals: [] },
+    valid,
+  ];
+
+  const result = importPresets(JSON.stringify(records), []);
+  assert.equal(result.skipped, 2);
+  assert.deepEqual(result.presets.map((preset) => preset.id), [valid.id]);
+  assert.deepEqual(normalizeUserPresetList({ presets: records }).map((preset) => preset.id), [valid.id]);
 });
