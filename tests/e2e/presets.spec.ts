@@ -16,6 +16,22 @@ test('factory preset output levels match the P0 baseline', async ({ page }, test
   const rows = await page.evaluate(() => (window as unknown as { measureFactoryPresets: () => Promise<Row[]> }).measureFactoryPresets());
   await testInfo.attach('presets.json', { body: JSON.stringify(rows, null, 2), contentType: 'application/json' });
 
+  expect(rows).toHaveLength(108);
+  const peaks = rows.map((row) => row.peakDb);
+  const levels = rows.map((row) => row.rmsDb);
+  const peakMinDb = Math.min(...peaks), peakMaxDb = Math.max(...peaks);
+  const rmsMinDb = Math.min(...levels), rmsMaxDb = Math.max(...levels);
+  const rmsSpreadDb = Number((rmsMaxDb - rmsMinDb).toFixed(2));
+  await testInfo.attach('preset-summary.json', {
+    body: JSON.stringify({ count: rows.length, peakMinDb, peakMaxDb, rmsMinDb, rmsMaxDb, rmsSpreadDb,
+      targetPeakDb: -6, targetRmsSpreadDb: 6, rmsTargetMet: rmsSpreadDb <= 6 }),
+    contentType: 'application/json',
+  });
+  expect(peakMaxDb, 'factory presets must peak at or below −6 dBFS before the master').toBeLessThanOrEqual(-6);
+  if (rmsSpreadDb > 6) {
+    testInfo.annotations.push({ type: 'acoustic target', description: `RMS spread ${rmsSpreadDb} dB exceeds the 6 dB design target.` });
+  }
+
   const baseline = JSON.parse(readFileSync(new URL('./baseline.json', import.meta.url), 'utf8')) as { presets: Row[] };
   expect(rows.length).toBe(baseline.presets.length);
   const byId = new Map(rows.map((row) => [row.id, row]));

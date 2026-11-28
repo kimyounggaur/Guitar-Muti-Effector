@@ -12,6 +12,13 @@ test.describe('dsp re-measurement', () => {
   const call = (page: import('@playwright/test').Page, name: string) =>
     page.evaluate((fn) => (window as unknown as Record<string, () => Promise<unknown>>)[fn](), name);
 
+  test('F2b: the recorded loop plays back at 85% through the actual output gain', async ({ page }, testInfo) => {
+    const row = (await call(page, 'measureLooperLevel')) as { inputRms: number; playbackRms: number; gainDb: number };
+    await testInfo.attach('f2b.json', { body: JSON.stringify(row), contentType: 'application/json' });
+    expect(row.inputRms).toBeGreaterThan(0);
+    expect(Math.abs(row.gainDb - 20 * Math.log10(0.85))).toBeLessThanOrEqual(0.5);
+  });
+
   test('F3: gate at maximum threshold silences -46 dBFS noise to ≤ -80 dBFS', async ({ page }, testInfo) => {
     const rows = (await call(page, 'measureF3')) as Array<{ preset: string; rmsDb: number }>;
     await testInfo.attach('f3.json', { body: JSON.stringify(rows, null, 2), contentType: 'application/json' });
